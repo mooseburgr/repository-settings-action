@@ -1,0 +1,19 @@
+name: Say Hello World
+"on":
+  issues:
+    types:
+      - opened
+jobs:
+  issuesOpened:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          cache: npm
+          node-version: 20
+      - run: npm ci
+      - run: npm run build
+      - uses: ./
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
