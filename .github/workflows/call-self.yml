@@ -1,6 +1,9 @@
 name: Call self
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 permissions: write-all
 
