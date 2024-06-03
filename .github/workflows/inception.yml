@@ -2,7 +2,7 @@ name: Run self
 on:
   workflow_dispatch:
 jobs:
-  issuesOpened:
+  sync-settings:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
