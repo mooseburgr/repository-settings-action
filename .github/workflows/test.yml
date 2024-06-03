@@ -1,5 +1,5 @@
 name: Test
-"on":
+on:
   push: {}
   pull_request:
     types:
@@ -10,9 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           cache: npm
-          node-version: 20
-      - run: npm ci
-      - run: npm test
+          node-version-file: .node-version
+
+      - run: |
+          npm ci
+          npm test

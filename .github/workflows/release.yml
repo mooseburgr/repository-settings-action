@@ -1,5 +1,5 @@
-name: release
-"on":
+name: Release
+on:
   push:
     branches:
       - main
@@ -9,16 +9,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: .node-version
           cache: npm
-      - run: npm ci
-      - run: npm run build
-      - run: rm .gitignore
+
+      - run: |
+          npm ci
+          npm run build
+          rm .gitignore
+
       - run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - run: >-
           git push
           https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
