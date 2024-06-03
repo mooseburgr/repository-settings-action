@@ -1645,9 +1645,9 @@ var require_auth = __commonJS({
   }
 });
 
-// node_modules/pino-std-serializers/lib/err-helpers.js
+// node_modules/probot/node_modules/pino-std-serializers/lib/err-helpers.js
 var require_err_helpers = __commonJS({
-  "node_modules/pino-std-serializers/lib/err-helpers.js"(exports2, module2) {
+  "node_modules/probot/node_modules/pino-std-serializers/lib/err-helpers.js"(exports2, module2) {
     "use strict";
     var isErrorLike = (err) => {
       return err && typeof err.message === "string";
@@ -1705,9 +1705,9 @@ var require_err_helpers = __commonJS({
   }
 });
 
-// node_modules/pino-std-serializers/lib/err-proto.js
+// node_modules/probot/node_modules/pino-std-serializers/lib/err-proto.js
 var require_err_proto = __commonJS({
-  "node_modules/pino-std-serializers/lib/err-proto.js"(exports2, module2) {
+  "node_modules/probot/node_modules/pino-std-serializers/lib/err-proto.js"(exports2, module2) {
     "use strict";
     var seen = Symbol("circular-ref-tag");
     var rawSymbol = Symbol("pino-raw-err-ref");
@@ -1756,9 +1756,9 @@ var require_err_proto = __commonJS({
   }
 });
 
-// node_modules/pino-std-serializers/lib/err.js
+// node_modules/probot/node_modules/pino-std-serializers/lib/err.js
 var require_err = __commonJS({
-  "node_modules/pino-std-serializers/lib/err.js"(exports2, module2) {
+  "node_modules/probot/node_modules/pino-std-serializers/lib/err.js"(exports2, module2) {
     "use strict";
     module2.exports = errSerializer;
     var { messageWithCauses, stackWithCauses, isErrorLike } = require_err_helpers();
@@ -1796,9 +1796,9 @@ var require_err = __commonJS({
   }
 });
 
-// node_modules/pino-std-serializers/lib/err-with-cause.js
+// node_modules/probot/node_modules/pino-std-serializers/lib/err-with-cause.js
 var require_err_with_cause = __commonJS({
-  "node_modules/pino-std-serializers/lib/err-with-cause.js"(exports2, module2) {
+  "node_modules/probot/node_modules/pino-std-serializers/lib/err-with-cause.js"(exports2, module2) {
     "use strict";
     module2.exports = errWithCauseSerializer;
     var { isErrorLike } = require_err_helpers();
@@ -1839,9 +1839,9 @@ var require_err_with_cause = __commonJS({
   }
 });
 
-// node_modules/pino-std-serializers/lib/req.js
+// node_modules/probot/node_modules/pino-std-serializers/lib/req.js
 var require_req = __commonJS({
-  "node_modules/pino-std-serializers/lib/req.js"(exports2, module2) {
+  "node_modules/probot/node_modules/pino-std-serializers/lib/req.js"(exports2, module2) {
     "use strict";
     module2.exports = {
       mapHttpRequest,
@@ -1934,9 +1934,9 @@ var require_req = __commonJS({
   }
 });
 
-// node_modules/pino-std-serializers/lib/res.js
+// node_modules/probot/node_modules/pino-std-serializers/lib/res.js
 var require_res = __commonJS({
-  "node_modules/pino-std-serializers/lib/res.js"(exports2, module2) {
+  "node_modules/probot/node_modules/pino-std-serializers/lib/res.js"(exports2, module2) {
     "use strict";
     module2.exports = {
       mapHttpResponse,
@@ -1983,9 +1983,9 @@ var require_res = __commonJS({
   }
 });
 
-// node_modules/pino-std-serializers/index.js
+// node_modules/probot/node_modules/pino-std-serializers/index.js
 var require_pino_std_serializers = __commonJS({
-  "node_modules/pino-std-serializers/index.js"(exports2, module2) {
+  "node_modules/probot/node_modules/pino-std-serializers/index.js"(exports2, module2) {
     "use strict";
     var errSerializer = require_err();
     var errWithCauseSerializer = require_err_with_cause();
@@ -2023,9 +2023,9 @@ var require_pino_std_serializers = __commonJS({
   }
 });
 
-// node_modules/pino/lib/caller.js
+// node_modules/probot/node_modules/pino/lib/caller.js
 var require_caller = __commonJS({
-  "node_modules/pino/lib/caller.js"(exports2, module2) {
+  "node_modules/probot/node_modules/pino/lib/caller.js"(exports2, module2) {
     "use strict";
     function noOpPrepareStackTrace(_, stack) {
       return stack;
@@ -2169,7 +2169,7 @@ var require_redactor = __commonJS({
     this.secret = originalSecret
     ${resultTmpl(serialize)}
   `).bind(state);
-      redact.secret = secret;
+      redact.state = state;
       if (serialize === false) {
         redact.restore = (o) => state.restore(o);
       }
@@ -2255,7 +2255,7 @@ var require_modifiers = __commonJS({
       nestedRestore
     };
     function groupRestore({ keys, values, target }) {
-      if (target == null)
+      if (target == null || typeof target === "string")
         return;
       const length = keys.length;
       for (var i = 0; i < length; i++) {
@@ -2265,8 +2265,8 @@ var require_modifiers = __commonJS({
     }
     function groupRedact(o, path, censor, isCensorFct, censorFctTakesPath) {
       const target = get(o, path);
-      if (target == null)
-        return { keys: null, values: null, target: null, flat: true };
+      if (target == null || typeof target === "string")
+        return { keys: null, values: null, target, flat: true };
       const keys = Object.keys(target);
       const keysLength = keys.length;
       const pathLength = path.length;
@@ -2475,10 +2475,13 @@ var require_restorer = __commonJS({
     "use strict";
     var { groupRestore, nestedRestore } = require_modifiers();
     module2.exports = restorer;
-    function restorer({ secret, wcLen }) {
+    function restorer() {
       return function compileRestore() {
-        if (this.restore)
+        if (this.restore) {
+          this.restore.state.secret = this.secret;
           return;
+        }
+        const { secret, wcLen } = this;
         const paths = Object.keys(secret);
         const resetters = resetTmpl(secret, paths);
         const hasWildcards = wcLen > 0;
@@ -2487,6 +2490,7 @@ var require_restorer = __commonJS({
           "o",
           restoreTmpl(resetters, paths, hasWildcards)
         ).bind(state);
+        this.restore.state = state;
       };
     }
     function resetTmpl(secret, paths) {
@@ -2585,7 +2589,7 @@ var require_fast_redact = __commonJS({
         return serialize || noop;
       validate2({ paths, serialize, censor });
       const { wildcards, wcLen, secret } = parse2({ paths, censor });
-      const compileRestore = restorer({ secret, wcLen });
+      const compileRestore = restorer();
       const strict = "strict" in opts ? opts.strict : true;
       return redactor({ secret, wcLen, serialize, strict, isCensorFct, censorFctTakesPath }, state({
         secret,
@@ -2601,9 +2605,9 @@ var require_fast_redact = __commonJS({
   }
 });
 
-// node_modules/pino/lib/symbols.js
+// node_modules/probot/node_modules/pino/lib/symbols.js
 var require_symbols = __commonJS({
-  "node_modules/pino/lib/symbols.js"(exports2, module2) {
+  "node_modules/probot/node_modules/pino/lib/symbols.js"(exports2, module2) {
     "use strict";
     var setLevelSym = Symbol("pino.setLevel");
     var getLevelSym = Symbol("pino.getLevel");
@@ -2672,9 +2676,9 @@ var require_symbols = __commonJS({
   }
 });
 
-// node_modules/pino/lib/redaction.js
+// node_modules/probot/node_modules/pino/lib/redaction.js
 var require_redaction = __commonJS({
-  "node_modules/pino/lib/redaction.js"(exports2, module2) {
+  "node_modules/probot/node_modules/pino/lib/redaction.js"(exports2, module2) {
     "use strict";
     var fastRedact = require_fast_redact();
     var { redactFmtSym, wildcardFirstSym } = require_symbols();
@@ -2760,9 +2764,9 @@ var require_redaction = __commonJS({
   }
 });
 
-// node_modules/pino/lib/time.js
+// node_modules/probot/node_modules/pino/lib/time.js
 var require_time = __commonJS({
-  "node_modules/pino/lib/time.js"(exports2, module2) {
+  "node_modules/probot/node_modules/pino/lib/time.js"(exports2, module2) {
     "use strict";
     var nullTime = () => "";
     var epochTime = () => `,"time":${Date.now()}`;
@@ -2928,9 +2932,9 @@ var require_atomic_sleep = __commonJS({
   }
 });
 
-// node_modules/sonic-boom/index.js
+// node_modules/probot/node_modules/sonic-boom/index.js
 var require_sonic_boom = __commonJS({
-  "node_modules/sonic-boom/index.js"(exports2, module2) {
+  "node_modules/probot/node_modules/sonic-boom/index.js"(exports2, module2) {
     "use strict";
     var fs = __require("fs");
     var EventEmitter = __require("events");
@@ -2962,6 +2966,7 @@ var require_sonic_boom = __commonJS({
           }
           return;
         }
+        const reopening = sonic._reopening;
         sonic.fd = fd;
         sonic.file = file;
         sonic._reopening = false;
@@ -2972,11 +2977,13 @@ var require_sonic_boom = __commonJS({
         } else {
           sonic.emit("ready");
         }
-        if (sonic._reopening || sonic.destroyed) {
+        if (sonic.destroyed) {
           return;
         }
         if (!sonic._writing && sonic._len > sonic.minLength || sonic._flushPending) {
           sonic._actualWrite();
+        } else if (reopening) {
+          process.nextTick(() => sonic.emit("drain"));
         }
       }
       const flags = sonic.append ? "a" : "w";
@@ -3299,6 +3306,9 @@ var require_sonic_boom = __commonJS({
       if (!this.file) {
         throw new Error("Unable to reopen a file descriptor, you must pass a file to SonicBoom");
       }
+      if (file) {
+        this.file = file;
+      }
       this._reopening = true;
       if (this._writing) {
         return;
@@ -3313,7 +3323,7 @@ var require_sonic_boom = __commonJS({
           });
         }
       });
-      openFile(file || this.file, this);
+      openFile(this.file, this);
     };
     SonicBoom.prototype.end = function() {
       if (this.destroyed) {
@@ -3571,12 +3581,12 @@ var require_on_exit_leak_free = __commonJS({
   }
 });
 
-// node_modules/thread-stream/package.json
+// node_modules/probot/node_modules/thread-stream/package.json
 var require_package = __commonJS({
-  "node_modules/thread-stream/package.json"(exports2, module2) {
+  "node_modules/probot/node_modules/thread-stream/package.json"(exports2, module2) {
     module2.exports = {
       name: "thread-stream",
-      version: "2.4.1",
+      version: "3.0.1",
       description: "A streaming way to send data to a Node.js Worker Thread",
       main: "index.js",
       types: "index.d.ts",
@@ -3586,21 +3596,23 @@ var require_package = __commonJS({
       devDependencies: {
         "@types/node": "^20.1.0",
         "@types/tap": "^15.0.0",
+        "@yao-pkg/pkg": "^5.11.5",
         desm: "^1.3.0",
         fastbench: "^1.0.1",
-        husky: "^8.0.1",
-        "pino-elasticsearch": "^6.0.0",
-        "sonic-boom": "^3.0.0",
+        husky: "^9.0.6",
+        "pino-elasticsearch": "^8.0.0",
+        "sonic-boom": "^4.0.1",
         standard: "^17.0.0",
         tap: "^16.2.0",
         "ts-node": "^10.8.0",
-        typescript: "^4.7.2",
+        typescript: "^5.3.2",
         "why-is-node-running": "^2.2.2"
       },
       scripts: {
-        test: "standard && npm run transpile && tap test/*.test.*js && tap --ts test/*.test.*ts",
+        build: "tsc --noEmit",
+        test: 'standard && npm run build && npm run transpile && tap "test/**/*.test.*js" && tap --ts test/*.test.*ts',
         "test:ci": "standard && npm run transpile && npm run test:ci:js && npm run test:ci:ts",
-        "test:ci:js": 'tap --no-check-coverage --coverage-report=lcovonly "test/**/*.test.*js"',
+        "test:ci:js": 'tap --no-check-coverage --timeout=120 --coverage-report=lcovonly "test/**/*.test.*js"',
         "test:ci:ts": 'tap --ts --no-check-coverage --coverage-report=lcovonly "test/**/*.test.*ts"',
         "test:yarn": 'npm run transpile && tap "test/**/*.test.js" --no-check-coverage',
         transpile: "sh ./test/ts/transpile.sh",
@@ -3631,9 +3643,9 @@ var require_package = __commonJS({
   }
 });
 
-// node_modules/thread-stream/lib/wait.js
+// node_modules/probot/node_modules/thread-stream/lib/wait.js
 var require_wait = __commonJS({
-  "node_modules/thread-stream/lib/wait.js"(exports2, module2) {
+  "node_modules/probot/node_modules/thread-stream/lib/wait.js"(exports2, module2) {
     "use strict";
     var MAX_TIMEOUT = 1e3;
     function wait(state, index, expected, timeout, done) {
@@ -3691,9 +3703,9 @@ var require_wait = __commonJS({
   }
 });
 
-// node_modules/thread-stream/lib/indexes.js
+// node_modules/probot/node_modules/thread-stream/lib/indexes.js
 var require_indexes = __commonJS({
-  "node_modules/thread-stream/lib/indexes.js"(exports2, module2) {
+  "node_modules/probot/node_modules/thread-stream/lib/indexes.js"(exports2, module2) {
     "use strict";
     var WRITE_INDEX = 4;
     var READ_INDEX = 8;
@@ -3704,9 +3716,9 @@ var require_indexes = __commonJS({
   }
 });
 
-// node_modules/thread-stream/index.js
+// node_modules/probot/node_modules/thread-stream/index.js
 var require_thread_stream = __commonJS({
-  "node_modules/thread-stream/index.js"(exports2, module2) {
+  "node_modules/probot/node_modules/thread-stream/index.js"(exports2, module2) {
     "use strict";
     var { version: version2 } = require_package();
     var { EventEmitter } = __require("events");
@@ -3888,6 +3900,9 @@ var require_thread_stream = __commonJS({
         this[kImpl].closed = false;
         this[kImpl].buf = "";
         this.worker = createWorker(this, opts);
+        this.on("message", (message, transferList) => {
+          this.worker.postMessage(message, transferList);
+        });
       }
       write(data) {
         if (this[kImpl].destroyed) {
@@ -4124,9 +4139,9 @@ var require_thread_stream = __commonJS({
   }
 });
 
-// node_modules/pino/lib/transport.js
+// node_modules/probot/node_modules/pino/lib/transport.js
 var require_transport = __commonJS({
-  "node_modules/pino/lib/transport.js"(exports2, module2) {
+  "node_modules/probot/node_modules/pino/lib/transport.js"(exports2, module2) {
     "use strict";
     var { createRequire } = __require("module");
     var getCallers = require_caller();
@@ -4190,20 +4205,30 @@ var require_transport = __commonJS({
       }
       if (targets) {
         target = bundlerOverrides["pino-worker"] || join(__dirname, "worker.js");
-        options2.targets = targets.map((dest) => {
+        options2.targets = targets.filter((dest) => dest.target).map((dest) => {
           return {
             ...dest,
             target: fixTarget(dest.target)
           };
+        });
+        options2.pipelines = targets.filter((dest) => dest.pipeline).map((dest) => {
+          return dest.pipeline.map((t) => {
+            return {
+              ...t,
+              level: dest.level,
+              // duplicate the pipeline `level` property defined in the upper level
+              target: fixTarget(t.target)
+            };
+          });
         });
       } else if (pipeline) {
-        target = bundlerOverrides["pino-pipeline-worker"] || join(__dirname, "worker-pipeline.js");
-        options2.targets = pipeline.map((dest) => {
+        target = bundlerOverrides["pino-worker"] || join(__dirname, "worker.js");
+        options2.pipelines = [pipeline.map((dest) => {
           return {
             ...dest,
             target: fixTarget(dest.target)
           };
-        });
+        })];
       }
       if (levels) {
         options2.levels = levels;
@@ -4211,6 +4236,7 @@ var require_transport = __commonJS({
       if (dedupe) {
         options2.dedupe = dedupe;
       }
+      options2.pinoWillSendConfig = true;
       return buildStream(fixTarget(target), options2, worker);
       function fixTarget(origin) {
         origin = bundlerOverrides[origin] || origin;
@@ -4240,9 +4266,9 @@ var require_transport = __commonJS({
   }
 });
 
-// node_modules/pino/lib/tools.js
+// node_modules/probot/node_modules/pino/lib/tools.js
 var require_tools = __commonJS({
-  "node_modules/pino/lib/tools.js"(exports2, module2) {
+  "node_modules/probot/node_modules/pino/lib/tools.js"(exports2, module2) {
     "use strict";
     var format = require_quick_format_unescaped();
     var { mapHttpRequest, mapHttpResponse } = require_pino_std_serializers();
@@ -4564,9 +4590,9 @@ var require_tools = __commonJS({
   }
 });
 
-// node_modules/pino/lib/constants.js
+// node_modules/probot/node_modules/pino/lib/constants.js
 var require_constants = __commonJS({
-  "node_modules/pino/lib/constants.js"(exports2, module2) {
+  "node_modules/probot/node_modules/pino/lib/constants.js"(exports2, module2) {
     var DEFAULT_LEVELS = {
       trace: 10,
       debug: 20,
@@ -4586,9 +4612,9 @@ var require_constants = __commonJS({
   }
 });
 
-// node_modules/pino/lib/levels.js
+// node_modules/probot/node_modules/pino/lib/levels.js
 var require_levels = __commonJS({
-  "node_modules/pino/lib/levels.js"(exports2, module2) {
+  "node_modules/probot/node_modules/pino/lib/levels.js"(exports2, module2) {
     "use strict";
     var {
       lsCacheSym,
@@ -4781,17 +4807,17 @@ var require_levels = __commonJS({
   }
 });
 
-// node_modules/pino/lib/meta.js
+// node_modules/probot/node_modules/pino/lib/meta.js
 var require_meta = __commonJS({
-  "node_modules/pino/lib/meta.js"(exports2, module2) {
+  "node_modules/probot/node_modules/pino/lib/meta.js"(exports2, module2) {
     "use strict";
-    module2.exports = { version: "8.19.0" };
+    module2.exports = { version: "9.1.0" };
   }
 });
 
-// node_modules/pino/lib/proto.js
+// node_modules/probot/node_modules/pino/lib/proto.js
 var require_proto = __commonJS({
-  "node_modules/pino/lib/proto.js"(exports2, module2) {
+  "node_modules/probot/node_modules/pino/lib/proto.js"(exports2, module2) {
     "use strict";
     var { EventEmitter } = __require("events");
     var {
@@ -5582,9 +5608,9 @@ ${originalIndentation}`;
   }
 });
 
-// node_modules/pino/lib/multistream.js
+// node_modules/probot/node_modules/pino/lib/multistream.js
 var require_multistream = __commonJS({
-  "node_modules/pino/lib/multistream.js"(exports2, module2) {
+  "node_modules/probot/node_modules/pino/lib/multistream.js"(exports2, module2) {
     "use strict";
     var metadata = Symbol.for("pino.metadata");
     var { DEFAULT_LEVELS } = require_constants();
@@ -5603,6 +5629,7 @@ var require_multistream = __commonJS({
       const res = {
         write,
         add,
+        emit,
         flushSync,
         end,
         minLevel: 0,
@@ -5645,6 +5672,13 @@ var require_multistream = __commonJS({
             }
           } else if (!opts.dedupe) {
             break;
+          }
+        }
+      }
+      function emit(...args) {
+        for (const { stream } of this.streams) {
+          if (typeof stream.emit === "function") {
+            stream.emit(...args);
           }
         }
       }
@@ -5708,6 +5742,7 @@ var require_multistream = __commonJS({
           minLevel: level,
           streams,
           clone,
+          emit,
           flushSync,
           [metadata]: true
         };
@@ -5729,9 +5764,9 @@ var require_multistream = __commonJS({
   }
 });
 
-// node_modules/pino/pino.js
+// node_modules/probot/node_modules/pino/pino.js
 var require_pino = __commonJS({
-  "node_modules/pino/pino.js"(exports2, module2) {
+  "node_modules/probot/node_modules/pino/pino.js"(exports2, module2) {
     "use strict";
     var os = __require("os");
     var stdSerializers = require_pino_std_serializers();
@@ -5882,6 +5917,9 @@ var require_pino = __commonJS({
         throw Error(`Unknown msgPrefix type "${typeof msgPrefix}" - expected "string"`);
       assertDefaultLevelFound(level, customLevels, useOnlyCustomLevels);
       const levels = mappings(customLevels, useOnlyCustomLevels);
+      if (typeof stream.emit === "function") {
+        stream.emit("message", { code: "PINO_CONFIG", config: { levels, messageKey, errorKey } });
+      }
       assertLevelComparison(levelComparison);
       const levelCompFunc = genLevelComparison(levelComparison);
       Object.assign(instance, {
@@ -20228,7 +20266,7 @@ var require_dist_node2 = __commonJS({
     });
     module2.exports = __toCommonJS2(dist_src_exports);
     var import_universal_user_agent = require_dist_node();
-    var VERSION = "9.0.4";
+    var VERSION = "9.0.5";
     var userAgent = `octokit-endpoint.js/${VERSION} ${(0, import_universal_user_agent.getUserAgent)()}`;
     var DEFAULTS = {
       method: "GET",
@@ -20761,7 +20799,7 @@ var require_dist_node5 = __commonJS({
     module2.exports = __toCommonJS2(dist_src_exports);
     var import_endpoint = require_dist_node2();
     var import_universal_user_agent = require_dist_node();
-    var VERSION = "8.2.0";
+    var VERSION = "8.4.0";
     function isPlainObject(value) {
       if (typeof value !== "object" || value === null)
         return false;
@@ -20778,7 +20816,7 @@ var require_dist_node5 = __commonJS({
       return response.arrayBuffer();
     }
     function fetchWrapper(requestOptions) {
-      var _a, _b, _c;
+      var _a, _b, _c, _d;
       const log = requestOptions.request && requestOptions.request.log ? requestOptions.request.log : console;
       const parseSuccessResponseBody = ((_a = requestOptions.request) == null ? void 0 : _a.parseSuccessResponseBody) !== false;
       if (isPlainObject(requestOptions.body) || Array.isArray(requestOptions.body)) {
@@ -20799,8 +20837,9 @@ var require_dist_node5 = __commonJS({
       return fetch(requestOptions.url, {
         method: requestOptions.method,
         body: requestOptions.body,
+        redirect: (_c = requestOptions.request) == null ? void 0 : _c.redirect,
         headers: requestOptions.headers,
-        signal: (_c = requestOptions.request) == null ? void 0 : _c.signal,
+        signal: (_d = requestOptions.request) == null ? void 0 : _d.signal,
         // duplex must be set if request.body is ReadableStream or Async Iterables.
         // See https://fetch.spec.whatwg.org/#dom-requestinit-duplex.
         ...requestOptions.body && { duplex: "half" }
@@ -29621,6 +29660,7 @@ var require_cluster = __commonJS({
         this.delayQueue = new DelayQueue_1.default();
         this.offlineQueue = new Deque();
         this.isRefreshing = false;
+        this._refreshSlotsCacheCallbacks = [];
         this._autoPipelines = /* @__PURE__ */ new Map();
         this._runningAutoPipelines = /* @__PURE__ */ new Set();
         this._readyDelayedCallbacks = [];
@@ -29836,19 +29876,20 @@ var require_cluster = __commonJS({
        * @ignore
        */
       refreshSlotsCache(callback) {
+        if (callback) {
+          this._refreshSlotsCacheCallbacks.push(callback);
+        }
         if (this.isRefreshing) {
-          if (callback) {
-            process.nextTick(callback);
-          }
           return;
         }
         this.isRefreshing = true;
         const _this = this;
         const wrapper = (error) => {
           this.isRefreshing = false;
-          if (callback) {
-            callback(error);
+          for (const callback2 of this._refreshSlotsCacheCallbacks) {
+            callback2(error);
           }
+          this._refreshSlotsCacheCallbacks = [];
         };
         const nodes = (0, utils_1.shuffle)(this.connectionPool.getNodes());
         let lastNodeError = null;
@@ -32139,6 +32180,9 @@ var require_Redis = __commonJS({
           if (Command_1.default.checkFlag("WILL_DISCONNECT", command.name)) {
             this.manuallyClosing = true;
           }
+          if (this.options.socketTimeout !== void 0 && this.socketTimeoutTimer === void 0) {
+            this.setSocketTimeout();
+          }
         }
         if (command.name === "select" && (0, utils_1.isInt)(command.args[0])) {
           const db = parseInt(command.args[0], 10);
@@ -32149,6 +32193,19 @@ var require_Redis = __commonJS({
           }
         }
         return command.promise;
+      }
+      setSocketTimeout() {
+        this.socketTimeoutTimer = setTimeout(() => {
+          this.stream.destroy(new Error(`Socket timeout. Expecting data, but didn't receive any in ${this.options.socketTimeout}ms.`));
+          this.socketTimeoutTimer = void 0;
+        }, this.options.socketTimeout);
+        this.stream.once("data", () => {
+          clearTimeout(this.socketTimeoutTimer);
+          this.socketTimeoutTimer = void 0;
+          if (this.commandQueue.length === 0)
+            return;
+          this.setSocketTimeout();
+        });
       }
       scanStream(options2) {
         return this.createScanStream("scan", { options: options2 });
@@ -32809,6 +32866,9 @@ var require_dist_node7 = __commonJS({
       ...logger
     });
     var emitterEventNames = [
+      "branch_protection_configuration",
+      "branch_protection_rule.disabled",
+      "branch_protection_rule.enabled",
       "branch_protection_rule",
       "branch_protection_rule.created",
       "branch_protection_rule.deleted",
@@ -32832,6 +32892,11 @@ var require_dist_node7 = __commonJS({
       "commit_comment",
       "commit_comment.created",
       "create",
+      "custom_property",
+      "custom_property.created",
+      "custom_property.deleted",
+      "custom_property_values",
+      "custom_property_values.updated",
       "delete",
       "dependabot_alert",
       "dependabot_alert.created",
@@ -33466,6 +33531,7 @@ var require_get_webhooks = __commonJS({
     var octokit_webhooks_transform_js_1 = require_octokit_webhooks_transform();
     function getWebhooks(state) {
       const webhooks = new webhooks_1.Webhooks({
+        log: state.log,
         secret: state.webhooks.secret,
         transform: (hook) => (0, octokit_webhooks_transform_js_1.webhookTransform)(state, hook)
       });
@@ -33649,7 +33715,7 @@ var require_dist_node8 = __commonJS({
     module2.exports = __toCommonJS2(dist_src_exports);
     var import_request3 = require_dist_node5();
     var import_universal_user_agent = require_dist_node();
-    var VERSION = "7.0.2";
+    var VERSION = "7.1.0";
     var import_request2 = require_dist_node5();
     var import_request = require_dist_node5();
     function _buildMessageForResponseErrors(data) {
@@ -33859,7 +33925,7 @@ var require_dist_node10 = __commonJS({
     var import_request = require_dist_node5();
     var import_graphql = require_dist_node8();
     var import_auth_token = require_dist_node9();
-    var VERSION = "5.1.0";
+    var VERSION = "5.2.0";
     var noop = () => {
     };
     var consoleWarn = console.warn.bind(console);
@@ -34014,7 +34080,7 @@ var require_dist_node11 = __commonJS({
     });
     module2.exports = __toCommonJS2(dist_src_exports);
     var import_request_error = require_dist_node4();
-    var VERSION = "4.0.1";
+    var VERSION = "4.1.0";
     function enterpriseCompatibility(octokit) {
       octokit.hook.wrap("request", async (request, options2) => {
         if (/\/orgs\/[^/]+\/teams/.test(options2.url)) {
@@ -41552,7 +41618,7 @@ var require_dist_node19 = __commonJS({
       scopeToken: () => scopeToken
     });
     module2.exports = __toCommonJS2(dist_src_exports);
-    var VERSION = "4.0.1";
+    var VERSION = "4.1.0";
     var import_oauth_authorization_url = require_dist_node18();
     var import_request = require_dist_node5();
     var import_request_error = require_dist_node4();
@@ -41971,7 +42037,7 @@ var require_dist_node20 = __commonJS({
       endpoint.headers.authorization = `token ${token}`;
       return request(endpoint);
     }
-    var VERSION = "6.0.1";
+    var VERSION = "6.1.0";
     function createOAuthDeviceAuth(options2) {
       const requestWithDefaults = options2.request || import_request.request.defaults({
         headers: {
@@ -42045,7 +42111,7 @@ var require_dist_node21 = __commonJS({
     module2.exports = __toCommonJS2(dist_src_exports);
     var import_universal_user_agent = require_dist_node();
     var import_request = require_dist_node5();
-    var VERSION = "4.0.1";
+    var VERSION = "4.1.0";
     var import_auth_oauth_device = require_dist_node20();
     var import_oauth_methods = require_dist_node19();
     async function getAuthentication(state) {
@@ -42337,7 +42403,7 @@ var require_dist_node22 = __commonJS({
         throw error;
       }
     }
-    var VERSION = "7.0.1";
+    var VERSION = "7.1.0";
     var import_auth_oauth_user3 = require_dist_node21();
     function createOAuthAppAuth(options2) {
       const state = Object.assign(
@@ -43438,7 +43504,7 @@ var require_semver = __commonJS({
         do {
           const a = this.build[i];
           const b = other.build[i];
-          debug("prerelease compare", i, a, b);
+          debug("build compare", i, a, b);
           if (a === void 0 && b === void 0) {
             return 0;
           } else if (b === void 0) {
@@ -43909,654 +43975,38 @@ var require_coerce = __commonJS({
   }
 });
 
-// node_modules/yallist/iterator.js
-var require_iterator = __commonJS({
-  "node_modules/yallist/iterator.js"(exports2, module2) {
-    "use strict";
-    module2.exports = function(Yallist) {
-      Yallist.prototype[Symbol.iterator] = function* () {
-        for (let walker = this.head; walker; walker = walker.next) {
-          yield walker.value;
-        }
-      };
-    };
-  }
-});
-
-// node_modules/yallist/yallist.js
-var require_yallist = __commonJS({
-  "node_modules/yallist/yallist.js"(exports2, module2) {
-    "use strict";
-    module2.exports = Yallist;
-    Yallist.Node = Node;
-    Yallist.create = Yallist;
-    function Yallist(list) {
-      var self2 = this;
-      if (!(self2 instanceof Yallist)) {
-        self2 = new Yallist();
-      }
-      self2.tail = null;
-      self2.head = null;
-      self2.length = 0;
-      if (list && typeof list.forEach === "function") {
-        list.forEach(function(item) {
-          self2.push(item);
-        });
-      } else if (arguments.length > 0) {
-        for (var i = 0, l = arguments.length; i < l; i++) {
-          self2.push(arguments[i]);
-        }
-      }
-      return self2;
-    }
-    Yallist.prototype.removeNode = function(node) {
-      if (node.list !== this) {
-        throw new Error("removing node which does not belong to this list");
-      }
-      var next = node.next;
-      var prev = node.prev;
-      if (next) {
-        next.prev = prev;
-      }
-      if (prev) {
-        prev.next = next;
-      }
-      if (node === this.head) {
-        this.head = next;
-      }
-      if (node === this.tail) {
-        this.tail = prev;
-      }
-      node.list.length--;
-      node.next = null;
-      node.prev = null;
-      node.list = null;
-      return next;
-    };
-    Yallist.prototype.unshiftNode = function(node) {
-      if (node === this.head) {
-        return;
-      }
-      if (node.list) {
-        node.list.removeNode(node);
-      }
-      var head = this.head;
-      node.list = this;
-      node.next = head;
-      if (head) {
-        head.prev = node;
-      }
-      this.head = node;
-      if (!this.tail) {
-        this.tail = node;
-      }
-      this.length++;
-    };
-    Yallist.prototype.pushNode = function(node) {
-      if (node === this.tail) {
-        return;
-      }
-      if (node.list) {
-        node.list.removeNode(node);
-      }
-      var tail = this.tail;
-      node.list = this;
-      node.prev = tail;
-      if (tail) {
-        tail.next = node;
-      }
-      this.tail = node;
-      if (!this.head) {
-        this.head = node;
-      }
-      this.length++;
-    };
-    Yallist.prototype.push = function() {
-      for (var i = 0, l = arguments.length; i < l; i++) {
-        push(this, arguments[i]);
-      }
-      return this.length;
-    };
-    Yallist.prototype.unshift = function() {
-      for (var i = 0, l = arguments.length; i < l; i++) {
-        unshift(this, arguments[i]);
-      }
-      return this.length;
-    };
-    Yallist.prototype.pop = function() {
-      if (!this.tail) {
-        return void 0;
-      }
-      var res = this.tail.value;
-      this.tail = this.tail.prev;
-      if (this.tail) {
-        this.tail.next = null;
-      } else {
-        this.head = null;
-      }
-      this.length--;
-      return res;
-    };
-    Yallist.prototype.shift = function() {
-      if (!this.head) {
-        return void 0;
-      }
-      var res = this.head.value;
-      this.head = this.head.next;
-      if (this.head) {
-        this.head.prev = null;
-      } else {
-        this.tail = null;
-      }
-      this.length--;
-      return res;
-    };
-    Yallist.prototype.forEach = function(fn, thisp) {
-      thisp = thisp || this;
-      for (var walker = this.head, i = 0; walker !== null; i++) {
-        fn.call(thisp, walker.value, i, this);
-        walker = walker.next;
-      }
-    };
-    Yallist.prototype.forEachReverse = function(fn, thisp) {
-      thisp = thisp || this;
-      for (var walker = this.tail, i = this.length - 1; walker !== null; i--) {
-        fn.call(thisp, walker.value, i, this);
-        walker = walker.prev;
-      }
-    };
-    Yallist.prototype.get = function(n) {
-      for (var i = 0, walker = this.head; walker !== null && i < n; i++) {
-        walker = walker.next;
-      }
-      if (i === n && walker !== null) {
-        return walker.value;
-      }
-    };
-    Yallist.prototype.getReverse = function(n) {
-      for (var i = 0, walker = this.tail; walker !== null && i < n; i++) {
-        walker = walker.prev;
-      }
-      if (i === n && walker !== null) {
-        return walker.value;
-      }
-    };
-    Yallist.prototype.map = function(fn, thisp) {
-      thisp = thisp || this;
-      var res = new Yallist();
-      for (var walker = this.head; walker !== null; ) {
-        res.push(fn.call(thisp, walker.value, this));
-        walker = walker.next;
-      }
-      return res;
-    };
-    Yallist.prototype.mapReverse = function(fn, thisp) {
-      thisp = thisp || this;
-      var res = new Yallist();
-      for (var walker = this.tail; walker !== null; ) {
-        res.push(fn.call(thisp, walker.value, this));
-        walker = walker.prev;
-      }
-      return res;
-    };
-    Yallist.prototype.reduce = function(fn, initial) {
-      var acc;
-      var walker = this.head;
-      if (arguments.length > 1) {
-        acc = initial;
-      } else if (this.head) {
-        walker = this.head.next;
-        acc = this.head.value;
-      } else {
-        throw new TypeError("Reduce of empty list with no initial value");
-      }
-      for (var i = 0; walker !== null; i++) {
-        acc = fn(acc, walker.value, i);
-        walker = walker.next;
-      }
-      return acc;
-    };
-    Yallist.prototype.reduceReverse = function(fn, initial) {
-      var acc;
-      var walker = this.tail;
-      if (arguments.length > 1) {
-        acc = initial;
-      } else if (this.tail) {
-        walker = this.tail.prev;
-        acc = this.tail.value;
-      } else {
-        throw new TypeError("Reduce of empty list with no initial value");
-      }
-      for (var i = this.length - 1; walker !== null; i--) {
-        acc = fn(acc, walker.value, i);
-        walker = walker.prev;
-      }
-      return acc;
-    };
-    Yallist.prototype.toArray = function() {
-      var arr = new Array(this.length);
-      for (var i = 0, walker = this.head; walker !== null; i++) {
-        arr[i] = walker.value;
-        walker = walker.next;
-      }
-      return arr;
-    };
-    Yallist.prototype.toArrayReverse = function() {
-      var arr = new Array(this.length);
-      for (var i = 0, walker = this.tail; walker !== null; i++) {
-        arr[i] = walker.value;
-        walker = walker.prev;
-      }
-      return arr;
-    };
-    Yallist.prototype.slice = function(from, to) {
-      to = to || this.length;
-      if (to < 0) {
-        to += this.length;
-      }
-      from = from || 0;
-      if (from < 0) {
-        from += this.length;
-      }
-      var ret = new Yallist();
-      if (to < from || to < 0) {
-        return ret;
-      }
-      if (from < 0) {
-        from = 0;
-      }
-      if (to > this.length) {
-        to = this.length;
-      }
-      for (var i = 0, walker = this.head; walker !== null && i < from; i++) {
-        walker = walker.next;
-      }
-      for (; walker !== null && i < to; i++, walker = walker.next) {
-        ret.push(walker.value);
-      }
-      return ret;
-    };
-    Yallist.prototype.sliceReverse = function(from, to) {
-      to = to || this.length;
-      if (to < 0) {
-        to += this.length;
-      }
-      from = from || 0;
-      if (from < 0) {
-        from += this.length;
-      }
-      var ret = new Yallist();
-      if (to < from || to < 0) {
-        return ret;
-      }
-      if (from < 0) {
-        from = 0;
-      }
-      if (to > this.length) {
-        to = this.length;
-      }
-      for (var i = this.length, walker = this.tail; walker !== null && i > to; i--) {
-        walker = walker.prev;
-      }
-      for (; walker !== null && i > from; i--, walker = walker.prev) {
-        ret.push(walker.value);
-      }
-      return ret;
-    };
-    Yallist.prototype.splice = function(start, deleteCount, ...nodes) {
-      if (start > this.length) {
-        start = this.length - 1;
-      }
-      if (start < 0) {
-        start = this.length + start;
-      }
-      for (var i = 0, walker = this.head; walker !== null && i < start; i++) {
-        walker = walker.next;
-      }
-      var ret = [];
-      for (var i = 0; walker && i < deleteCount; i++) {
-        ret.push(walker.value);
-        walker = this.removeNode(walker);
-      }
-      if (walker === null) {
-        walker = this.tail;
-      }
-      if (walker !== this.head && walker !== this.tail) {
-        walker = walker.prev;
-      }
-      for (var i = 0; i < nodes.length; i++) {
-        walker = insert(this, walker, nodes[i]);
-      }
-      return ret;
-    };
-    Yallist.prototype.reverse = function() {
-      var head = this.head;
-      var tail = this.tail;
-      for (var walker = head; walker !== null; walker = walker.prev) {
-        var p = walker.prev;
-        walker.prev = walker.next;
-        walker.next = p;
-      }
-      this.head = tail;
-      this.tail = head;
-      return this;
-    };
-    function insert(self2, node, value) {
-      var inserted = node === self2.head ? new Node(value, null, node, self2) : new Node(value, node, node.next, self2);
-      if (inserted.next === null) {
-        self2.tail = inserted;
-      }
-      if (inserted.prev === null) {
-        self2.head = inserted;
-      }
-      self2.length++;
-      return inserted;
-    }
-    function push(self2, item) {
-      self2.tail = new Node(item, self2.tail, null, self2);
-      if (!self2.head) {
-        self2.head = self2.tail;
-      }
-      self2.length++;
-    }
-    function unshift(self2, item) {
-      self2.head = new Node(item, null, self2.head, self2);
-      if (!self2.tail) {
-        self2.tail = self2.head;
-      }
-      self2.length++;
-    }
-    function Node(value, prev, next, list) {
-      if (!(this instanceof Node)) {
-        return new Node(value, prev, next, list);
-      }
-      this.list = list;
-      this.value = value;
-      if (prev) {
-        prev.next = this;
-        this.prev = prev;
-      } else {
-        this.prev = null;
-      }
-      if (next) {
-        next.prev = this;
-        this.next = next;
-      } else {
-        this.next = null;
-      }
-    }
-    try {
-      require_iterator()(Yallist);
-    } catch (er) {
-    }
-  }
-});
-
-// node_modules/semver/node_modules/lru-cache/index.js
-var require_lru_cache = __commonJS({
-  "node_modules/semver/node_modules/lru-cache/index.js"(exports2, module2) {
-    "use strict";
-    var Yallist = require_yallist();
-    var MAX = Symbol("max");
-    var LENGTH = Symbol("length");
-    var LENGTH_CALCULATOR = Symbol("lengthCalculator");
-    var ALLOW_STALE = Symbol("allowStale");
-    var MAX_AGE = Symbol("maxAge");
-    var DISPOSE = Symbol("dispose");
-    var NO_DISPOSE_ON_SET = Symbol("noDisposeOnSet");
-    var LRU_LIST = Symbol("lruList");
-    var CACHE = Symbol("cache");
-    var UPDATE_AGE_ON_GET = Symbol("updateAgeOnGet");
-    var naiveLength = () => 1;
+// node_modules/semver/internal/lrucache.js
+var require_lrucache = __commonJS({
+  "node_modules/semver/internal/lrucache.js"(exports2, module2) {
     var LRUCache = class {
-      constructor(options2) {
-        if (typeof options2 === "number")
-          options2 = { max: options2 };
-        if (!options2)
-          options2 = {};
-        if (options2.max && (typeof options2.max !== "number" || options2.max < 0))
-          throw new TypeError("max must be a non-negative number");
-        const max = this[MAX] = options2.max || Infinity;
-        const lc = options2.length || naiveLength;
-        this[LENGTH_CALCULATOR] = typeof lc !== "function" ? naiveLength : lc;
-        this[ALLOW_STALE] = options2.stale || false;
-        if (options2.maxAge && typeof options2.maxAge !== "number")
-          throw new TypeError("maxAge must be a number");
-        this[MAX_AGE] = options2.maxAge || 0;
-        this[DISPOSE] = options2.dispose;
-        this[NO_DISPOSE_ON_SET] = options2.noDisposeOnSet || false;
-        this[UPDATE_AGE_ON_GET] = options2.updateAgeOnGet || false;
-        this.reset();
-      }
-      // resize the cache when the max changes.
-      set max(mL) {
-        if (typeof mL !== "number" || mL < 0)
-          throw new TypeError("max must be a non-negative number");
-        this[MAX] = mL || Infinity;
-        trim(this);
-      }
-      get max() {
-        return this[MAX];
-      }
-      set allowStale(allowStale) {
-        this[ALLOW_STALE] = !!allowStale;
-      }
-      get allowStale() {
-        return this[ALLOW_STALE];
-      }
-      set maxAge(mA) {
-        if (typeof mA !== "number")
-          throw new TypeError("maxAge must be a non-negative number");
-        this[MAX_AGE] = mA;
-        trim(this);
-      }
-      get maxAge() {
-        return this[MAX_AGE];
-      }
-      // resize the cache when the lengthCalculator changes.
-      set lengthCalculator(lC) {
-        if (typeof lC !== "function")
-          lC = naiveLength;
-        if (lC !== this[LENGTH_CALCULATOR]) {
-          this[LENGTH_CALCULATOR] = lC;
-          this[LENGTH] = 0;
-          this[LRU_LIST].forEach((hit) => {
-            hit.length = this[LENGTH_CALCULATOR](hit.value, hit.key);
-            this[LENGTH] += hit.length;
-          });
-        }
-        trim(this);
-      }
-      get lengthCalculator() {
-        return this[LENGTH_CALCULATOR];
-      }
-      get length() {
-        return this[LENGTH];
-      }
-      get itemCount() {
-        return this[LRU_LIST].length;
-      }
-      rforEach(fn, thisp) {
-        thisp = thisp || this;
-        for (let walker = this[LRU_LIST].tail; walker !== null; ) {
-          const prev = walker.prev;
-          forEachStep(this, fn, walker, thisp);
-          walker = prev;
-        }
-      }
-      forEach(fn, thisp) {
-        thisp = thisp || this;
-        for (let walker = this[LRU_LIST].head; walker !== null; ) {
-          const next = walker.next;
-          forEachStep(this, fn, walker, thisp);
-          walker = next;
-        }
-      }
-      keys() {
-        return this[LRU_LIST].toArray().map((k) => k.key);
-      }
-      values() {
-        return this[LRU_LIST].toArray().map((k) => k.value);
-      }
-      reset() {
-        if (this[DISPOSE] && this[LRU_LIST] && this[LRU_LIST].length) {
-          this[LRU_LIST].forEach((hit) => this[DISPOSE](hit.key, hit.value));
-        }
-        this[CACHE] = /* @__PURE__ */ new Map();
-        this[LRU_LIST] = new Yallist();
-        this[LENGTH] = 0;
-      }
-      dump() {
-        return this[LRU_LIST].map((hit) => isStale(this, hit) ? false : {
-          k: hit.key,
-          v: hit.value,
-          e: hit.now + (hit.maxAge || 0)
-        }).toArray().filter((h) => h);
-      }
-      dumpLru() {
-        return this[LRU_LIST];
-      }
-      set(key, value, maxAge) {
-        maxAge = maxAge || this[MAX_AGE];
-        if (maxAge && typeof maxAge !== "number")
-          throw new TypeError("maxAge must be a number");
-        const now = maxAge ? Date.now() : 0;
-        const len = this[LENGTH_CALCULATOR](value, key);
-        if (this[CACHE].has(key)) {
-          if (len > this[MAX]) {
-            del(this, this[CACHE].get(key));
-            return false;
-          }
-          const node = this[CACHE].get(key);
-          const item = node.value;
-          if (this[DISPOSE]) {
-            if (!this[NO_DISPOSE_ON_SET])
-              this[DISPOSE](key, item.value);
-          }
-          item.now = now;
-          item.maxAge = maxAge;
-          item.value = value;
-          this[LENGTH] += len - item.length;
-          item.length = len;
-          this.get(key);
-          trim(this);
-          return true;
-        }
-        const hit = new Entry(key, value, len, now, maxAge);
-        if (hit.length > this[MAX]) {
-          if (this[DISPOSE])
-            this[DISPOSE](key, value);
-          return false;
-        }
-        this[LENGTH] += hit.length;
-        this[LRU_LIST].unshift(hit);
-        this[CACHE].set(key, this[LRU_LIST].head);
-        trim(this);
-        return true;
-      }
-      has(key) {
-        if (!this[CACHE].has(key))
-          return false;
-        const hit = this[CACHE].get(key).value;
-        return !isStale(this, hit);
+      constructor() {
+        this.max = 1e3;
+        this.map = /* @__PURE__ */ new Map();
       }
       get(key) {
-        return get(this, key, true);
-      }
-      peek(key) {
-        return get(this, key, false);
-      }
-      pop() {
-        const node = this[LRU_LIST].tail;
-        if (!node)
-          return null;
-        del(this, node);
-        return node.value;
-      }
-      del(key) {
-        del(this, this[CACHE].get(key));
-      }
-      load(arr) {
-        this.reset();
-        const now = Date.now();
-        for (let l = arr.length - 1; l >= 0; l--) {
-          const hit = arr[l];
-          const expiresAt = hit.e || 0;
-          if (expiresAt === 0)
-            this.set(hit.k, hit.v);
-          else {
-            const maxAge = expiresAt - now;
-            if (maxAge > 0) {
-              this.set(hit.k, hit.v, maxAge);
-            }
-          }
-        }
-      }
-      prune() {
-        this[CACHE].forEach((value, key) => get(this, key, false));
-      }
-    };
-    var get = (self2, key, doUse) => {
-      const node = self2[CACHE].get(key);
-      if (node) {
-        const hit = node.value;
-        if (isStale(self2, hit)) {
-          del(self2, node);
-          if (!self2[ALLOW_STALE])
-            return void 0;
+        const value = this.map.get(key);
+        if (value === void 0) {
+          return void 0;
         } else {
-          if (doUse) {
-            if (self2[UPDATE_AGE_ON_GET])
-              node.value.now = Date.now();
-            self2[LRU_LIST].unshiftNode(node);
+          this.map.delete(key);
+          this.map.set(key, value);
+          return value;
+        }
+      }
+      delete(key) {
+        return this.map.delete(key);
+      }
+      set(key, value) {
+        const deleted = this.delete(key);
+        if (!deleted && value !== void 0) {
+          if (this.map.size >= this.max) {
+            const firstKey = this.map.keys().next().value;
+            this.delete(firstKey);
           }
+          this.map.set(key, value);
         }
-        return hit.value;
+        return this;
       }
-    };
-    var isStale = (self2, hit) => {
-      if (!hit || !hit.maxAge && !self2[MAX_AGE])
-        return false;
-      const diff = Date.now() - hit.now;
-      return hit.maxAge ? diff > hit.maxAge : self2[MAX_AGE] && diff > self2[MAX_AGE];
-    };
-    var trim = (self2) => {
-      if (self2[LENGTH] > self2[MAX]) {
-        for (let walker = self2[LRU_LIST].tail; self2[LENGTH] > self2[MAX] && walker !== null; ) {
-          const prev = walker.prev;
-          del(self2, walker);
-          walker = prev;
-        }
-      }
-    };
-    var del = (self2, node) => {
-      if (node) {
-        const hit = node.value;
-        if (self2[DISPOSE])
-          self2[DISPOSE](hit.key, hit.value);
-        self2[LENGTH] -= hit.length;
-        self2[CACHE].delete(hit.key);
-        self2[LRU_LIST].removeNode(node);
-      }
-    };
-    var Entry = class {
-      constructor(key, value, length, now, maxAge) {
-        this.key = key;
-        this.value = value;
-        this.length = length;
-        this.now = now;
-        this.maxAge = maxAge || 0;
-      }
-    };
-    var forEachStep = (self2, fn, node, thisp) => {
-      let hit = node.value;
-      if (isStale(self2, hit)) {
-        del(self2, node);
-        if (!self2[ALLOW_STALE])
-          hit = void 0;
-      }
-      if (hit)
-        fn.call(thisp, hit.value, hit.key, self2);
     };
     module2.exports = LRUCache;
   }
@@ -44687,8 +44137,8 @@ var require_range = __commonJS({
       }
     };
     module2.exports = Range;
-    var LRU = require_lru_cache();
-    var cache = new LRU({ max: 1e3 });
+    var LRU = require_lrucache();
+    var cache = new LRU();
     var parseOptions = require_parse_options();
     var Comparator = require_comparator();
     var debug = require_debug2();
@@ -44866,7 +44316,7 @@ var require_range = __commonJS({
       debug("replaceGTE0", comp, options2);
       return comp.trim().replace(re[options2.includePrerelease ? t.GTE0PRE : t.GTE0], "");
     };
-    var hyphenReplace = (incPr) => ($0, from, fM, fm, fp, fpr, fb, to, tM, tm, tp, tpr, tb) => {
+    var hyphenReplace = (incPr) => ($0, from, fM, fm, fp, fpr, fb, to, tM, tm, tp, tpr) => {
       if (isX(fM)) {
         from = "";
       } else if (isX(fm)) {
@@ -46890,6 +46340,7 @@ var require_dist_node24 = __commonJS({
       "/app/installations/{installation_id}",
       "/app/installations/{installation_id}/access_tokens",
       "/app/installations/{installation_id}/suspended",
+      "/app/installation-requests",
       "/marketplace_listing/accounts/{account_id}",
       "/marketplace_listing/plan",
       "/marketplace_listing/plans",
@@ -46998,7 +46449,7 @@ var require_dist_node24 = __commonJS({
         return sendRequestWithRetries(state, request, options2, createdAt, retries);
       }
     }
-    var VERSION = "6.0.4";
+    var VERSION = "6.1.1";
     var import_auth_oauth_user2 = require_dist_node21();
     function createAppAuth(options2) {
       if (!options2.appId) {
@@ -47204,7 +46655,7 @@ var require_version4 = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.VERSION = void 0;
-    exports2.VERSION = "13.1.0";
+    exports2.VERSION = "13.2.2";
   }
 });
 
@@ -65988,15 +65439,15 @@ var require_init = __commonJS({
   "node_modules/express/lib/middleware/init.js"(exports2) {
     "use strict";
     var setPrototypeOf = require_setprototypeof();
-    exports2.init = function(app) {
+    exports2.init = function(app2) {
       return function expressInit(req, res, next) {
-        if (app.enabled("x-powered-by"))
+        if (app2.enabled("x-powered-by"))
           res.setHeader("X-Powered-By", "Express");
         req.res = res;
         res.req = req;
         req.next = next;
-        setPrototypeOf(req, app.request);
-        setPrototypeOf(res, app.response);
+        setPrototypeOf(req, app2.request);
+        setPrototypeOf(res, app2.response);
         res.locals = res.locals || /* @__PURE__ */ Object.create(null);
         next();
       };
@@ -68630,15 +68081,15 @@ var require_application = __commonJS({
     var setPrototypeOf = require_setprototypeof();
     var hasOwnProperty2 = Object.prototype.hasOwnProperty;
     var slice = Array.prototype.slice;
-    var app = exports2 = module2.exports = {};
+    var app2 = exports2 = module2.exports = {};
     var trustProxyDefaultSymbol = "@@symbol:trust_proxy_default";
-    app.init = function init() {
+    app2.init = function init() {
       this.cache = {};
       this.engines = {};
       this.settings = {};
       this.defaultConfiguration();
     };
-    app.defaultConfiguration = function defaultConfiguration() {
+    app2.defaultConfiguration = function defaultConfiguration() {
       var env = process.env.NODE_ENV || "development";
       this.enable("x-powered-by");
       this.set("etag", "weak");
@@ -68676,7 +68127,7 @@ var require_application = __commonJS({
         }
       });
     };
-    app.lazyrouter = function lazyrouter() {
+    app2.lazyrouter = function lazyrouter() {
       if (!this._router) {
         this._router = new Router({
           caseSensitive: this.enabled("case sensitive routing"),
@@ -68686,7 +68137,7 @@ var require_application = __commonJS({
         this._router.use(middleware.init(this));
       }
     };
-    app.handle = function handle(req, res, callback) {
+    app2.handle = function handle(req, res, callback) {
       var router = this._router;
       var done = callback || finalhandler(req, res, {
         env: this.get("env"),
@@ -68699,7 +68150,7 @@ var require_application = __commonJS({
       }
       router.handle(req, res, done);
     };
-    app.use = function use(fn) {
+    app2.use = function use(fn) {
       var offset = 0;
       var path = "/";
       if (typeof fn !== "function") {
@@ -68737,11 +68188,11 @@ var require_application = __commonJS({
       }, this);
       return this;
     };
-    app.route = function route(path) {
+    app2.route = function route(path) {
       this.lazyrouter();
       return this._router.route(path);
     };
-    app.engine = function engine(ext, fn) {
+    app2.engine = function engine(ext, fn) {
       if (typeof fn !== "function") {
         throw new Error("callback function required");
       }
@@ -68749,7 +68200,7 @@ var require_application = __commonJS({
       this.engines[extension] = fn;
       return this;
     };
-    app.param = function param(name, fn) {
+    app2.param = function param(name, fn) {
       this.lazyrouter();
       if (Array.isArray(name)) {
         for (var i = 0; i < name.length; i++) {
@@ -68760,7 +68211,7 @@ var require_application = __commonJS({
       this._router.param(name, fn);
       return this;
     };
-    app.set = function set(setting, val) {
+    app2.set = function set(setting, val) {
       if (arguments.length === 1) {
         var settings = this.settings;
         while (settings && settings !== Object.prototype) {
@@ -68790,23 +68241,23 @@ var require_application = __commonJS({
       }
       return this;
     };
-    app.path = function path() {
+    app2.path = function path() {
       return this.parent ? this.parent.path() + this.mountpath : "";
     };
-    app.enabled = function enabled(setting) {
+    app2.enabled = function enabled(setting) {
       return Boolean(this.set(setting));
     };
-    app.disabled = function disabled(setting) {
+    app2.disabled = function disabled(setting) {
       return !this.set(setting);
     };
-    app.enable = function enable(setting) {
+    app2.enable = function enable(setting) {
       return this.set(setting, true);
     };
-    app.disable = function disable(setting) {
+    app2.disable = function disable(setting) {
       return this.set(setting, false);
     };
     methods.forEach(function(method) {
-      app[method] = function(path) {
+      app2[method] = function(path) {
         if (method === "get" && arguments.length === 1) {
           return this.set(path);
         }
@@ -68816,7 +68267,7 @@ var require_application = __commonJS({
         return this;
       };
     });
-    app.all = function all(path) {
+    app2.all = function all(path) {
       this.lazyrouter();
       var route = this._router.route(path);
       var args = slice.call(arguments, 1);
@@ -68825,8 +68276,8 @@ var require_application = __commonJS({
       }
       return this;
     };
-    app.del = deprecate.function(app.delete, "app.del: Use app.delete instead");
-    app.render = function render(name, options2, callback) {
+    app2.del = deprecate.function(app2.delete, "app.del: Use app.delete instead");
+    app2.render = function render(name, options2, callback) {
       var cache = this.cache;
       var done = callback;
       var engines = this.engines;
@@ -68867,7 +68318,7 @@ var require_application = __commonJS({
       }
       tryRender(view, renderOptions, done);
     };
-    app.listen = function listen() {
+    app2.listen = function listen() {
       var server = http.createServer(this);
       return server.listen.apply(server, arguments);
     };
@@ -69752,6 +69203,9 @@ var require_cookie2 = __commonJS({
       if (opt.secure) {
         str += "; Secure";
       }
+      if (opt.partitioned) {
+        str += "; Partitioned";
+      }
       if (opt.priority) {
         var priority = typeof opt.priority === "string" ? opt.priority.toLowerCase() : opt.priority;
         switch (priority) {
@@ -69910,6 +69364,7 @@ var require_response = __commonJS({
     var res = Object.create(http.ServerResponse.prototype);
     module2.exports = res;
     var charsetRegExp = /;\s*charset\s*=/;
+    var schemaAndHostRegExp = /^(?:[a-zA-Z][a-zA-Z0-9+.-]*:)?\/\/[^\\\/\?]+/;
     res.status = function status(code) {
       if ((typeof code === "string" || Math.floor(code) !== code) && code > 99 && code < 1e3) {
         deprecate("res.status(" + JSON.stringify(code) + "): use res.status(" + Math.floor(code) + ") instead");
@@ -69930,7 +69385,7 @@ var require_response = __commonJS({
       var encoding;
       var req = this.req;
       var type;
-      var app = this.app;
+      var app2 = this.app;
       if (arguments.length === 2) {
         if (typeof arguments[0] !== "number" && typeof arguments[1] === "number") {
           deprecate("res.send(body, status): Use res.status(status).send(body) instead");
@@ -69976,7 +69431,7 @@ var require_response = __commonJS({
           this.set("Content-Type", setCharset(type, "utf-8"));
         }
       }
-      var etagFn = app.get("etag fn");
+      var etagFn = app2.get("etag fn");
       var generateETag = !this.get("ETag") && typeof etagFn === "function";
       var len;
       if (chunk !== void 0) {
@@ -70029,10 +69484,10 @@ var require_response = __commonJS({
           val = arguments[1];
         }
       }
-      var app = this.app;
-      var escape2 = app.get("json escape");
-      var replacer = app.get("json replacer");
-      var spaces = app.get("json spaces");
+      var app2 = this.app;
+      var escape2 = app2.get("json escape");
+      var replacer = app2.get("json replacer");
+      var spaces = app2.get("json spaces");
       var body = stringify2(val, replacer, spaces, escape2);
       if (!this.get("Content-Type")) {
         this.set("Content-Type", "application/json");
@@ -70051,12 +69506,12 @@ var require_response = __commonJS({
           val = arguments[1];
         }
       }
-      var app = this.app;
-      var escape2 = app.get("json escape");
-      var replacer = app.get("json replacer");
-      var spaces = app.get("json spaces");
+      var app2 = this.app;
+      var escape2 = app2.get("json escape");
+      var replacer = app2.get("json replacer");
+      var spaces = app2.get("json spaces");
       var body = stringify2(val, replacer, spaces, escape2);
-      var callback = this.req.query[app.get("jsonp callback name")];
+      var callback = this.req.query[app2.get("jsonp callback name")];
       if (!this.get("Content-Type")) {
         this.set("X-Content-Type-Options", "nosniff");
         this.set("Content-Type", "application/json");
@@ -70266,11 +69721,16 @@ var require_response = __commonJS({
       return this;
     };
     res.location = function location(url) {
-      var loc = url;
+      var loc;
       if (url === "back") {
         loc = this.req.get("Referrer") || "/";
+      } else {
+        loc = String(url);
       }
-      return this.set("Location", encodeUrl(loc));
+      var m = schemaAndHostRegExp.exec(loc);
+      var pos = m ? m[0].length + 1 : 0;
+      loc = loc.slice(0, pos) + encodeUrl(loc.slice(pos));
+      return this.set("Location", loc);
     };
     res.redirect = function redirect(url) {
       var address = url;
@@ -70315,7 +69775,7 @@ var require_response = __commonJS({
       return this;
     };
     res.render = function render(view, options2, callback) {
-      var app = this.req.app;
+      var app2 = this.req.app;
       var done = callback;
       var opts = options2 || {};
       var req = this.req;
@@ -70330,7 +69790,7 @@ var require_response = __commonJS({
           return req.next(err);
         self2.send(str);
       };
-      app.render(view, opts, done);
+      app2.render(view, opts, done);
     };
     function sendfile(res2, file, options2, callback) {
       var done = false;
@@ -70545,19 +70005,19 @@ var require_express = __commonJS({
     var res = require_response();
     exports2 = module2.exports = createApplication;
     function createApplication() {
-      var app = function(req2, res2, next) {
-        app.handle(req2, res2, next);
+      var app2 = function(req2, res2, next) {
+        app2.handle(req2, res2, next);
       };
-      mixin(app, EventEmitter.prototype, false);
-      mixin(app, proto, false);
-      app.request = Object.create(req, {
-        app: { configurable: true, enumerable: true, writable: true, value: app }
+      mixin(app2, EventEmitter.prototype, false);
+      mixin(app2, proto, false);
+      app2.request = Object.create(req, {
+        app: { configurable: true, enumerable: true, writable: true, value: app2 }
       });
-      app.response = Object.create(res, {
-        app: { configurable: true, enumerable: true, writable: true, value: app }
+      app2.response = Object.create(res, {
+        app: { configurable: true, enumerable: true, writable: true, value: app2 }
       });
-      app.init();
-      return app;
+      app2.init();
+      return app2;
     }
     exports2.application = proto;
     exports2.request = req;
@@ -70608,6 +70068,2951 @@ var require_express2 = __commonJS({
   }
 });
 
+// node_modules/pino-http/node_modules/pino-std-serializers/lib/err-helpers.js
+var require_err_helpers2 = __commonJS({
+  "node_modules/pino-http/node_modules/pino-std-serializers/lib/err-helpers.js"(exports2, module2) {
+    "use strict";
+    var isErrorLike = (err) => {
+      return err && typeof err.message === "string";
+    };
+    var getErrorCause = (err) => {
+      if (!err)
+        return;
+      const cause = err.cause;
+      if (typeof cause === "function") {
+        const causeResult = err.cause();
+        return isErrorLike(causeResult) ? causeResult : void 0;
+      } else {
+        return isErrorLike(cause) ? cause : void 0;
+      }
+    };
+    var _stackWithCauses = (err, seen) => {
+      if (!isErrorLike(err))
+        return "";
+      const stack = err.stack || "";
+      if (seen.has(err)) {
+        return stack + "\ncauses have become circular...";
+      }
+      const cause = getErrorCause(err);
+      if (cause) {
+        seen.add(err);
+        return stack + "\ncaused by: " + _stackWithCauses(cause, seen);
+      } else {
+        return stack;
+      }
+    };
+    var stackWithCauses = (err) => _stackWithCauses(err, /* @__PURE__ */ new Set());
+    var _messageWithCauses = (err, seen, skip) => {
+      if (!isErrorLike(err))
+        return "";
+      const message = skip ? "" : err.message || "";
+      if (seen.has(err)) {
+        return message + ": ...";
+      }
+      const cause = getErrorCause(err);
+      if (cause) {
+        seen.add(err);
+        const skipIfVErrorStyleCause = typeof err.cause === "function";
+        return message + (skipIfVErrorStyleCause ? "" : ": ") + _messageWithCauses(cause, seen, skipIfVErrorStyleCause);
+      } else {
+        return message;
+      }
+    };
+    var messageWithCauses = (err) => _messageWithCauses(err, /* @__PURE__ */ new Set());
+    module2.exports = {
+      isErrorLike,
+      getErrorCause,
+      stackWithCauses,
+      messageWithCauses
+    };
+  }
+});
+
+// node_modules/pino-http/node_modules/pino-std-serializers/lib/err-proto.js
+var require_err_proto2 = __commonJS({
+  "node_modules/pino-http/node_modules/pino-std-serializers/lib/err-proto.js"(exports2, module2) {
+    "use strict";
+    var seen = Symbol("circular-ref-tag");
+    var rawSymbol = Symbol("pino-raw-err-ref");
+    var pinoErrProto = Object.create({}, {
+      type: {
+        enumerable: true,
+        writable: true,
+        value: void 0
+      },
+      message: {
+        enumerable: true,
+        writable: true,
+        value: void 0
+      },
+      stack: {
+        enumerable: true,
+        writable: true,
+        value: void 0
+      },
+      aggregateErrors: {
+        enumerable: true,
+        writable: true,
+        value: void 0
+      },
+      raw: {
+        enumerable: false,
+        get: function() {
+          return this[rawSymbol];
+        },
+        set: function(val) {
+          this[rawSymbol] = val;
+        }
+      }
+    });
+    Object.defineProperty(pinoErrProto, rawSymbol, {
+      writable: true,
+      value: {}
+    });
+    module2.exports = {
+      pinoErrProto,
+      pinoErrorSymbols: {
+        seen,
+        rawSymbol
+      }
+    };
+  }
+});
+
+// node_modules/pino-http/node_modules/pino-std-serializers/lib/err.js
+var require_err2 = __commonJS({
+  "node_modules/pino-http/node_modules/pino-std-serializers/lib/err.js"(exports2, module2) {
+    "use strict";
+    module2.exports = errSerializer;
+    var { messageWithCauses, stackWithCauses, isErrorLike } = require_err_helpers2();
+    var { pinoErrProto, pinoErrorSymbols } = require_err_proto2();
+    var { seen } = pinoErrorSymbols;
+    var { toString } = Object.prototype;
+    function errSerializer(err) {
+      if (!isErrorLike(err)) {
+        return err;
+      }
+      err[seen] = void 0;
+      const _err = Object.create(pinoErrProto);
+      _err.type = toString.call(err.constructor) === "[object Function]" ? err.constructor.name : err.name;
+      _err.message = messageWithCauses(err);
+      _err.stack = stackWithCauses(err);
+      if (Array.isArray(err.errors)) {
+        _err.aggregateErrors = err.errors.map((err2) => errSerializer(err2));
+      }
+      for (const key in err) {
+        if (_err[key] === void 0) {
+          const val = err[key];
+          if (isErrorLike(val)) {
+            if (key !== "cause" && !Object.prototype.hasOwnProperty.call(val, seen)) {
+              _err[key] = errSerializer(val);
+            }
+          } else {
+            _err[key] = val;
+          }
+        }
+      }
+      delete err[seen];
+      _err.raw = err;
+      return _err;
+    }
+  }
+});
+
+// node_modules/pino-http/node_modules/pino-std-serializers/lib/err-with-cause.js
+var require_err_with_cause2 = __commonJS({
+  "node_modules/pino-http/node_modules/pino-std-serializers/lib/err-with-cause.js"(exports2, module2) {
+    "use strict";
+    module2.exports = errWithCauseSerializer;
+    var { isErrorLike } = require_err_helpers2();
+    var { pinoErrProto, pinoErrorSymbols } = require_err_proto2();
+    var { seen } = pinoErrorSymbols;
+    var { toString } = Object.prototype;
+    function errWithCauseSerializer(err) {
+      if (!isErrorLike(err)) {
+        return err;
+      }
+      err[seen] = void 0;
+      const _err = Object.create(pinoErrProto);
+      _err.type = toString.call(err.constructor) === "[object Function]" ? err.constructor.name : err.name;
+      _err.message = err.message;
+      _err.stack = err.stack;
+      if (Array.isArray(err.errors)) {
+        _err.aggregateErrors = err.errors.map((err2) => errWithCauseSerializer(err2));
+      }
+      if (isErrorLike(err.cause) && !Object.prototype.hasOwnProperty.call(err.cause, seen)) {
+        _err.cause = errWithCauseSerializer(err.cause);
+      }
+      for (const key in err) {
+        if (_err[key] === void 0) {
+          const val = err[key];
+          if (isErrorLike(val)) {
+            if (!Object.prototype.hasOwnProperty.call(val, seen)) {
+              _err[key] = errWithCauseSerializer(val);
+            }
+          } else {
+            _err[key] = val;
+          }
+        }
+      }
+      delete err[seen];
+      _err.raw = err;
+      return _err;
+    }
+  }
+});
+
+// node_modules/pino-http/node_modules/pino-std-serializers/lib/req.js
+var require_req2 = __commonJS({
+  "node_modules/pino-http/node_modules/pino-std-serializers/lib/req.js"(exports2, module2) {
+    "use strict";
+    module2.exports = {
+      mapHttpRequest,
+      reqSerializer
+    };
+    var rawSymbol = Symbol("pino-raw-req-ref");
+    var pinoReqProto = Object.create({}, {
+      id: {
+        enumerable: true,
+        writable: true,
+        value: ""
+      },
+      method: {
+        enumerable: true,
+        writable: true,
+        value: ""
+      },
+      url: {
+        enumerable: true,
+        writable: true,
+        value: ""
+      },
+      query: {
+        enumerable: true,
+        writable: true,
+        value: ""
+      },
+      params: {
+        enumerable: true,
+        writable: true,
+        value: ""
+      },
+      headers: {
+        enumerable: true,
+        writable: true,
+        value: {}
+      },
+      remoteAddress: {
+        enumerable: true,
+        writable: true,
+        value: ""
+      },
+      remotePort: {
+        enumerable: true,
+        writable: true,
+        value: ""
+      },
+      raw: {
+        enumerable: false,
+        get: function() {
+          return this[rawSymbol];
+        },
+        set: function(val) {
+          this[rawSymbol] = val;
+        }
+      }
+    });
+    Object.defineProperty(pinoReqProto, rawSymbol, {
+      writable: true,
+      value: {}
+    });
+    function reqSerializer(req) {
+      const connection = req.info || req.socket;
+      const _req = Object.create(pinoReqProto);
+      _req.id = typeof req.id === "function" ? req.id() : req.id || (req.info ? req.info.id : void 0);
+      _req.method = req.method;
+      if (req.originalUrl) {
+        _req.url = req.originalUrl;
+      } else {
+        const path = req.path;
+        _req.url = typeof path === "string" ? path : req.url ? req.url.path || req.url : void 0;
+      }
+      if (req.query) {
+        _req.query = req.query;
+      }
+      if (req.params) {
+        _req.params = req.params;
+      }
+      _req.headers = req.headers;
+      _req.remoteAddress = connection && connection.remoteAddress;
+      _req.remotePort = connection && connection.remotePort;
+      _req.raw = req.raw || req;
+      return _req;
+    }
+    function mapHttpRequest(req) {
+      return {
+        req: reqSerializer(req)
+      };
+    }
+  }
+});
+
+// node_modules/pino-http/node_modules/pino-std-serializers/lib/res.js
+var require_res2 = __commonJS({
+  "node_modules/pino-http/node_modules/pino-std-serializers/lib/res.js"(exports2, module2) {
+    "use strict";
+    module2.exports = {
+      mapHttpResponse,
+      resSerializer
+    };
+    var rawSymbol = Symbol("pino-raw-res-ref");
+    var pinoResProto = Object.create({}, {
+      statusCode: {
+        enumerable: true,
+        writable: true,
+        value: 0
+      },
+      headers: {
+        enumerable: true,
+        writable: true,
+        value: ""
+      },
+      raw: {
+        enumerable: false,
+        get: function() {
+          return this[rawSymbol];
+        },
+        set: function(val) {
+          this[rawSymbol] = val;
+        }
+      }
+    });
+    Object.defineProperty(pinoResProto, rawSymbol, {
+      writable: true,
+      value: {}
+    });
+    function resSerializer(res) {
+      const _res = Object.create(pinoResProto);
+      _res.statusCode = res.headersSent ? res.statusCode : null;
+      _res.headers = res.getHeaders ? res.getHeaders() : res._headers;
+      _res.raw = res;
+      return _res;
+    }
+    function mapHttpResponse(res) {
+      return {
+        res: resSerializer(res)
+      };
+    }
+  }
+});
+
+// node_modules/pino-http/node_modules/pino-std-serializers/index.js
+var require_pino_std_serializers2 = __commonJS({
+  "node_modules/pino-http/node_modules/pino-std-serializers/index.js"(exports2, module2) {
+    "use strict";
+    var errSerializer = require_err2();
+    var errWithCauseSerializer = require_err_with_cause2();
+    var reqSerializers = require_req2();
+    var resSerializers = require_res2();
+    module2.exports = {
+      err: errSerializer,
+      errWithCause: errWithCauseSerializer,
+      mapHttpRequest: reqSerializers.mapHttpRequest,
+      mapHttpResponse: resSerializers.mapHttpResponse,
+      req: reqSerializers.reqSerializer,
+      res: resSerializers.resSerializer,
+      wrapErrorSerializer: function wrapErrorSerializer(customSerializer) {
+        if (customSerializer === errSerializer)
+          return customSerializer;
+        return function wrapErrSerializer(err) {
+          return customSerializer(errSerializer(err));
+        };
+      },
+      wrapRequestSerializer: function wrapRequestSerializer(customSerializer) {
+        if (customSerializer === reqSerializers.reqSerializer)
+          return customSerializer;
+        return function wrappedReqSerializer(req) {
+          return customSerializer(reqSerializers.reqSerializer(req));
+        };
+      },
+      wrapResponseSerializer: function wrapResponseSerializer(customSerializer) {
+        if (customSerializer === resSerializers.resSerializer)
+          return customSerializer;
+        return function wrappedResSerializer(res) {
+          return customSerializer(resSerializers.resSerializer(res));
+        };
+      }
+    };
+  }
+});
+
+// node_modules/pino-http/node_modules/pino/lib/caller.js
+var require_caller2 = __commonJS({
+  "node_modules/pino-http/node_modules/pino/lib/caller.js"(exports2, module2) {
+    "use strict";
+    function noOpPrepareStackTrace(_, stack) {
+      return stack;
+    }
+    module2.exports = function getCallers() {
+      const originalPrepare = Error.prepareStackTrace;
+      Error.prepareStackTrace = noOpPrepareStackTrace;
+      const stack = new Error().stack;
+      Error.prepareStackTrace = originalPrepare;
+      if (!Array.isArray(stack)) {
+        return void 0;
+      }
+      const entries = stack.slice(2);
+      const fileNames = [];
+      for (const entry of entries) {
+        if (!entry) {
+          continue;
+        }
+        fileNames.push(entry.getFileName());
+      }
+      return fileNames;
+    };
+  }
+});
+
+// node_modules/pino-http/node_modules/pino/lib/symbols.js
+var require_symbols2 = __commonJS({
+  "node_modules/pino-http/node_modules/pino/lib/symbols.js"(exports2, module2) {
+    "use strict";
+    var setLevelSym = Symbol("pino.setLevel");
+    var getLevelSym = Symbol("pino.getLevel");
+    var levelValSym = Symbol("pino.levelVal");
+    var levelCompSym = Symbol("pino.levelComp");
+    var useLevelLabelsSym = Symbol("pino.useLevelLabels");
+    var useOnlyCustomLevelsSym = Symbol("pino.useOnlyCustomLevels");
+    var mixinSym = Symbol("pino.mixin");
+    var lsCacheSym = Symbol("pino.lsCache");
+    var chindingsSym = Symbol("pino.chindings");
+    var asJsonSym = Symbol("pino.asJson");
+    var writeSym = Symbol("pino.write");
+    var redactFmtSym = Symbol("pino.redactFmt");
+    var timeSym = Symbol("pino.time");
+    var timeSliceIndexSym = Symbol("pino.timeSliceIndex");
+    var streamSym = Symbol("pino.stream");
+    var stringifySym = Symbol("pino.stringify");
+    var stringifySafeSym = Symbol("pino.stringifySafe");
+    var stringifiersSym = Symbol("pino.stringifiers");
+    var endSym = Symbol("pino.end");
+    var formatOptsSym = Symbol("pino.formatOpts");
+    var messageKeySym = Symbol("pino.messageKey");
+    var errorKeySym = Symbol("pino.errorKey");
+    var nestedKeySym = Symbol("pino.nestedKey");
+    var nestedKeyStrSym = Symbol("pino.nestedKeyStr");
+    var mixinMergeStrategySym = Symbol("pino.mixinMergeStrategy");
+    var msgPrefixSym = Symbol("pino.msgPrefix");
+    var wildcardFirstSym = Symbol("pino.wildcardFirst");
+    var serializersSym = Symbol.for("pino.serializers");
+    var formattersSym = Symbol.for("pino.formatters");
+    var hooksSym = Symbol.for("pino.hooks");
+    var needsMetadataGsym = Symbol.for("pino.metadata");
+    module2.exports = {
+      setLevelSym,
+      getLevelSym,
+      levelValSym,
+      levelCompSym,
+      useLevelLabelsSym,
+      mixinSym,
+      lsCacheSym,
+      chindingsSym,
+      asJsonSym,
+      writeSym,
+      serializersSym,
+      redactFmtSym,
+      timeSym,
+      timeSliceIndexSym,
+      streamSym,
+      stringifySym,
+      stringifySafeSym,
+      stringifiersSym,
+      endSym,
+      formatOptsSym,
+      messageKeySym,
+      errorKeySym,
+      nestedKeySym,
+      wildcardFirstSym,
+      needsMetadataGsym,
+      useOnlyCustomLevelsSym,
+      formattersSym,
+      hooksSym,
+      nestedKeyStrSym,
+      mixinMergeStrategySym,
+      msgPrefixSym
+    };
+  }
+});
+
+// node_modules/pino-http/node_modules/pino/lib/redaction.js
+var require_redaction2 = __commonJS({
+  "node_modules/pino-http/node_modules/pino/lib/redaction.js"(exports2, module2) {
+    "use strict";
+    var fastRedact = require_fast_redact();
+    var { redactFmtSym, wildcardFirstSym } = require_symbols2();
+    var { rx, validator } = fastRedact;
+    var validate2 = validator({
+      ERR_PATHS_MUST_BE_STRINGS: () => "pino \u2013 redacted paths must be strings",
+      ERR_INVALID_PATH: (s) => `pino \u2013 redact paths array contains an invalid path (${s})`
+    });
+    var CENSOR = "[Redacted]";
+    var strict = false;
+    function redaction(opts, serialize) {
+      const { paths, censor } = handle(opts);
+      const shape = paths.reduce((o, str) => {
+        rx.lastIndex = 0;
+        const first = rx.exec(str);
+        const next = rx.exec(str);
+        let ns = first[1] !== void 0 ? first[1].replace(/^(?:"|'|`)(.*)(?:"|'|`)$/, "$1") : first[0];
+        if (ns === "*") {
+          ns = wildcardFirstSym;
+        }
+        if (next === null) {
+          o[ns] = null;
+          return o;
+        }
+        if (o[ns] === null) {
+          return o;
+        }
+        const { index } = next;
+        const nextPath = `${str.substr(index, str.length - 1)}`;
+        o[ns] = o[ns] || [];
+        if (ns !== wildcardFirstSym && o[ns].length === 0) {
+          o[ns].push(...o[wildcardFirstSym] || []);
+        }
+        if (ns === wildcardFirstSym) {
+          Object.keys(o).forEach(function(k) {
+            if (o[k]) {
+              o[k].push(nextPath);
+            }
+          });
+        }
+        o[ns].push(nextPath);
+        return o;
+      }, {});
+      const result = {
+        [redactFmtSym]: fastRedact({ paths, censor, serialize, strict })
+      };
+      const topCensor = (...args) => {
+        return typeof censor === "function" ? serialize(censor(...args)) : serialize(censor);
+      };
+      return [...Object.keys(shape), ...Object.getOwnPropertySymbols(shape)].reduce((o, k) => {
+        if (shape[k] === null) {
+          o[k] = (value) => topCensor(value, [k]);
+        } else {
+          const wrappedCensor = typeof censor === "function" ? (value, path) => {
+            return censor(value, [k, ...path]);
+          } : censor;
+          o[k] = fastRedact({
+            paths: shape[k],
+            censor: wrappedCensor,
+            serialize,
+            strict
+          });
+        }
+        return o;
+      }, result);
+    }
+    function handle(opts) {
+      if (Array.isArray(opts)) {
+        opts = { paths: opts, censor: CENSOR };
+        validate2(opts);
+        return opts;
+      }
+      let { paths, censor = CENSOR, remove } = opts;
+      if (Array.isArray(paths) === false) {
+        throw Error("pino \u2013 redact must contain an array of strings");
+      }
+      if (remove === true)
+        censor = void 0;
+      validate2({ paths, censor });
+      return { paths, censor };
+    }
+    module2.exports = redaction;
+  }
+});
+
+// node_modules/pino-http/node_modules/pino/lib/time.js
+var require_time3 = __commonJS({
+  "node_modules/pino-http/node_modules/pino/lib/time.js"(exports2, module2) {
+    "use strict";
+    var nullTime = () => "";
+    var epochTime = () => `,"time":${Date.now()}`;
+    var unixTime = () => `,"time":${Math.round(Date.now() / 1e3)}`;
+    var isoTime = () => `,"time":"${new Date(Date.now()).toISOString()}"`;
+    module2.exports = { nullTime, epochTime, unixTime, isoTime };
+  }
+});
+
+// node_modules/pino-http/node_modules/sonic-boom/index.js
+var require_sonic_boom2 = __commonJS({
+  "node_modules/pino-http/node_modules/sonic-boom/index.js"(exports2, module2) {
+    "use strict";
+    var fs = __require("fs");
+    var EventEmitter = __require("events");
+    var inherits = __require("util").inherits;
+    var path = __require("path");
+    var sleep = require_atomic_sleep();
+    var BUSY_WRITE_TIMEOUT = 100;
+    var kEmptyBuffer = Buffer.allocUnsafe(0);
+    var MAX_WRITE = 16 * 1024;
+    var kContentModeBuffer = "buffer";
+    var kContentModeUtf8 = "utf8";
+    function openFile(file, sonic) {
+      sonic._opening = true;
+      sonic._writing = true;
+      sonic._asyncDrainScheduled = false;
+      function fileOpened(err, fd) {
+        if (err) {
+          sonic._reopening = false;
+          sonic._writing = false;
+          sonic._opening = false;
+          if (sonic.sync) {
+            process.nextTick(() => {
+              if (sonic.listenerCount("error") > 0) {
+                sonic.emit("error", err);
+              }
+            });
+          } else {
+            sonic.emit("error", err);
+          }
+          return;
+        }
+        const reopening = sonic._reopening;
+        sonic.fd = fd;
+        sonic.file = file;
+        sonic._reopening = false;
+        sonic._opening = false;
+        sonic._writing = false;
+        if (sonic.sync) {
+          process.nextTick(() => sonic.emit("ready"));
+        } else {
+          sonic.emit("ready");
+        }
+        if (sonic.destroyed) {
+          return;
+        }
+        if (!sonic._writing && sonic._len > sonic.minLength || sonic._flushPending) {
+          sonic._actualWrite();
+        } else if (reopening) {
+          process.nextTick(() => sonic.emit("drain"));
+        }
+      }
+      const flags = sonic.append ? "a" : "w";
+      const mode = sonic.mode;
+      if (sonic.sync) {
+        try {
+          if (sonic.mkdir)
+            fs.mkdirSync(path.dirname(file), { recursive: true });
+          const fd = fs.openSync(file, flags, mode);
+          fileOpened(null, fd);
+        } catch (err) {
+          fileOpened(err);
+          throw err;
+        }
+      } else if (sonic.mkdir) {
+        fs.mkdir(path.dirname(file), { recursive: true }, (err) => {
+          if (err)
+            return fileOpened(err);
+          fs.open(file, flags, mode, fileOpened);
+        });
+      } else {
+        fs.open(file, flags, mode, fileOpened);
+      }
+    }
+    function SonicBoom(opts) {
+      if (!(this instanceof SonicBoom)) {
+        return new SonicBoom(opts);
+      }
+      let { fd, dest, minLength, maxLength, maxWrite, sync, append = true, mkdir, retryEAGAIN, fsync, contentMode, mode } = opts || {};
+      fd = fd || dest;
+      this._len = 0;
+      this.fd = -1;
+      this._bufs = [];
+      this._lens = [];
+      this._writing = false;
+      this._ending = false;
+      this._reopening = false;
+      this._asyncDrainScheduled = false;
+      this._flushPending = false;
+      this._hwm = Math.max(minLength || 0, 16387);
+      this.file = null;
+      this.destroyed = false;
+      this.minLength = minLength || 0;
+      this.maxLength = maxLength || 0;
+      this.maxWrite = maxWrite || MAX_WRITE;
+      this.sync = sync || false;
+      this.writable = true;
+      this._fsync = fsync || false;
+      this.append = append || false;
+      this.mode = mode;
+      this.retryEAGAIN = retryEAGAIN || (() => true);
+      this.mkdir = mkdir || false;
+      let fsWriteSync;
+      let fsWrite;
+      if (contentMode === kContentModeBuffer) {
+        this._writingBuf = kEmptyBuffer;
+        this.write = writeBuffer;
+        this.flush = flushBuffer;
+        this.flushSync = flushBufferSync;
+        this._actualWrite = actualWriteBuffer;
+        fsWriteSync = () => fs.writeSync(this.fd, this._writingBuf);
+        fsWrite = () => fs.write(this.fd, this._writingBuf, this.release);
+      } else if (contentMode === void 0 || contentMode === kContentModeUtf8) {
+        this._writingBuf = "";
+        this.write = write;
+        this.flush = flush;
+        this.flushSync = flushSync;
+        this._actualWrite = actualWrite;
+        fsWriteSync = () => fs.writeSync(this.fd, this._writingBuf, "utf8");
+        fsWrite = () => fs.write(this.fd, this._writingBuf, "utf8", this.release);
+      } else {
+        throw new Error(`SonicBoom supports "${kContentModeUtf8}" and "${kContentModeBuffer}", but passed ${contentMode}`);
+      }
+      if (typeof fd === "number") {
+        this.fd = fd;
+        process.nextTick(() => this.emit("ready"));
+      } else if (typeof fd === "string") {
+        openFile(fd, this);
+      } else {
+        throw new Error("SonicBoom supports only file descriptors and files");
+      }
+      if (this.minLength >= this.maxWrite) {
+        throw new Error(`minLength should be smaller than maxWrite (${this.maxWrite})`);
+      }
+      this.release = (err, n) => {
+        if (err) {
+          if ((err.code === "EAGAIN" || err.code === "EBUSY") && this.retryEAGAIN(err, this._writingBuf.length, this._len - this._writingBuf.length)) {
+            if (this.sync) {
+              try {
+                sleep(BUSY_WRITE_TIMEOUT);
+                this.release(void 0, 0);
+              } catch (err2) {
+                this.release(err2);
+              }
+            } else {
+              setTimeout(fsWrite, BUSY_WRITE_TIMEOUT);
+            }
+          } else {
+            this._writing = false;
+            this.emit("error", err);
+          }
+          return;
+        }
+        this.emit("write", n);
+        const releasedBufObj = releaseWritingBuf(this._writingBuf, this._len, n);
+        this._len = releasedBufObj.len;
+        this._writingBuf = releasedBufObj.writingBuf;
+        if (this._writingBuf.length) {
+          if (!this.sync) {
+            fsWrite();
+            return;
+          }
+          try {
+            do {
+              const n2 = fsWriteSync();
+              const releasedBufObj2 = releaseWritingBuf(this._writingBuf, this._len, n2);
+              this._len = releasedBufObj2.len;
+              this._writingBuf = releasedBufObj2.writingBuf;
+            } while (this._writingBuf.length);
+          } catch (err2) {
+            this.release(err2);
+            return;
+          }
+        }
+        if (this._fsync) {
+          fs.fsyncSync(this.fd);
+        }
+        const len = this._len;
+        if (this._reopening) {
+          this._writing = false;
+          this._reopening = false;
+          this.reopen();
+        } else if (len > this.minLength) {
+          this._actualWrite();
+        } else if (this._ending) {
+          if (len > 0) {
+            this._actualWrite();
+          } else {
+            this._writing = false;
+            actualClose(this);
+          }
+        } else {
+          this._writing = false;
+          if (this.sync) {
+            if (!this._asyncDrainScheduled) {
+              this._asyncDrainScheduled = true;
+              process.nextTick(emitDrain, this);
+            }
+          } else {
+            this.emit("drain");
+          }
+        }
+      };
+      this.on("newListener", function(name) {
+        if (name === "drain") {
+          this._asyncDrainScheduled = false;
+        }
+      });
+    }
+    function releaseWritingBuf(writingBuf, len, n) {
+      if (typeof writingBuf === "string" && Buffer.byteLength(writingBuf) !== n) {
+        n = Buffer.from(writingBuf).subarray(0, n).toString().length;
+      }
+      len = Math.max(len - n, 0);
+      writingBuf = writingBuf.slice(n);
+      return { writingBuf, len };
+    }
+    function emitDrain(sonic) {
+      const hasListeners = sonic.listenerCount("drain") > 0;
+      if (!hasListeners)
+        return;
+      sonic._asyncDrainScheduled = false;
+      sonic.emit("drain");
+    }
+    inherits(SonicBoom, EventEmitter);
+    function mergeBuf(bufs, len) {
+      if (bufs.length === 0) {
+        return kEmptyBuffer;
+      }
+      if (bufs.length === 1) {
+        return bufs[0];
+      }
+      return Buffer.concat(bufs, len);
+    }
+    function write(data) {
+      if (this.destroyed) {
+        throw new Error("SonicBoom destroyed");
+      }
+      const len = this._len + data.length;
+      const bufs = this._bufs;
+      if (this.maxLength && len > this.maxLength) {
+        this.emit("drop", data);
+        return this._len < this._hwm;
+      }
+      if (bufs.length === 0 || bufs[bufs.length - 1].length + data.length > this.maxWrite) {
+        bufs.push("" + data);
+      } else {
+        bufs[bufs.length - 1] += data;
+      }
+      this._len = len;
+      if (!this._writing && this._len >= this.minLength) {
+        this._actualWrite();
+      }
+      return this._len < this._hwm;
+    }
+    function writeBuffer(data) {
+      if (this.destroyed) {
+        throw new Error("SonicBoom destroyed");
+      }
+      const len = this._len + data.length;
+      const bufs = this._bufs;
+      const lens = this._lens;
+      if (this.maxLength && len > this.maxLength) {
+        this.emit("drop", data);
+        return this._len < this._hwm;
+      }
+      if (bufs.length === 0 || lens[lens.length - 1] + data.length > this.maxWrite) {
+        bufs.push([data]);
+        lens.push(data.length);
+      } else {
+        bufs[bufs.length - 1].push(data);
+        lens[lens.length - 1] += data.length;
+      }
+      this._len = len;
+      if (!this._writing && this._len >= this.minLength) {
+        this._actualWrite();
+      }
+      return this._len < this._hwm;
+    }
+    function callFlushCallbackOnDrain(cb) {
+      this._flushPending = true;
+      const onDrain = () => {
+        if (!this._fsync) {
+          fs.fsync(this.fd, (err) => {
+            this._flushPending = false;
+            cb(err);
+          });
+        } else {
+          this._flushPending = false;
+          cb();
+        }
+        this.off("error", onError);
+      };
+      const onError = (err) => {
+        this._flushPending = false;
+        cb(err);
+        this.off("drain", onDrain);
+      };
+      this.once("drain", onDrain);
+      this.once("error", onError);
+    }
+    function flush(cb) {
+      if (cb != null && typeof cb !== "function") {
+        throw new Error("flush cb must be a function");
+      }
+      if (this.destroyed) {
+        const error = new Error("SonicBoom destroyed");
+        if (cb) {
+          cb(error);
+          return;
+        }
+        throw error;
+      }
+      if (this.minLength <= 0) {
+        cb?.();
+        return;
+      }
+      if (cb) {
+        callFlushCallbackOnDrain.call(this, cb);
+      }
+      if (this._writing) {
+        return;
+      }
+      if (this._bufs.length === 0) {
+        this._bufs.push("");
+      }
+      this._actualWrite();
+    }
+    function flushBuffer(cb) {
+      if (cb != null && typeof cb !== "function") {
+        throw new Error("flush cb must be a function");
+      }
+      if (this.destroyed) {
+        const error = new Error("SonicBoom destroyed");
+        if (cb) {
+          cb(error);
+          return;
+        }
+        throw error;
+      }
+      if (this.minLength <= 0) {
+        cb?.();
+        return;
+      }
+      if (cb) {
+        callFlushCallbackOnDrain.call(this, cb);
+      }
+      if (this._writing) {
+        return;
+      }
+      if (this._bufs.length === 0) {
+        this._bufs.push([]);
+        this._lens.push(0);
+      }
+      this._actualWrite();
+    }
+    SonicBoom.prototype.reopen = function(file) {
+      if (this.destroyed) {
+        throw new Error("SonicBoom destroyed");
+      }
+      if (this._opening) {
+        this.once("ready", () => {
+          this.reopen(file);
+        });
+        return;
+      }
+      if (this._ending) {
+        return;
+      }
+      if (!this.file) {
+        throw new Error("Unable to reopen a file descriptor, you must pass a file to SonicBoom");
+      }
+      if (file) {
+        this.file = file;
+      }
+      this._reopening = true;
+      if (this._writing) {
+        return;
+      }
+      const fd = this.fd;
+      this.once("ready", () => {
+        if (fd !== this.fd) {
+          fs.close(fd, (err) => {
+            if (err) {
+              return this.emit("error", err);
+            }
+          });
+        }
+      });
+      openFile(this.file, this);
+    };
+    SonicBoom.prototype.end = function() {
+      if (this.destroyed) {
+        throw new Error("SonicBoom destroyed");
+      }
+      if (this._opening) {
+        this.once("ready", () => {
+          this.end();
+        });
+        return;
+      }
+      if (this._ending) {
+        return;
+      }
+      this._ending = true;
+      if (this._writing) {
+        return;
+      }
+      if (this._len > 0 && this.fd >= 0) {
+        this._actualWrite();
+      } else {
+        actualClose(this);
+      }
+    };
+    function flushSync() {
+      if (this.destroyed) {
+        throw new Error("SonicBoom destroyed");
+      }
+      if (this.fd < 0) {
+        throw new Error("sonic boom is not ready yet");
+      }
+      if (!this._writing && this._writingBuf.length > 0) {
+        this._bufs.unshift(this._writingBuf);
+        this._writingBuf = "";
+      }
+      let buf = "";
+      while (this._bufs.length || buf) {
+        if (buf.length <= 0) {
+          buf = this._bufs[0];
+        }
+        try {
+          const n = fs.writeSync(this.fd, buf, "utf8");
+          const releasedBufObj = releaseWritingBuf(buf, this._len, n);
+          buf = releasedBufObj.writingBuf;
+          this._len = releasedBufObj.len;
+          if (buf.length <= 0) {
+            this._bufs.shift();
+          }
+        } catch (err) {
+          const shouldRetry = err.code === "EAGAIN" || err.code === "EBUSY";
+          if (shouldRetry && !this.retryEAGAIN(err, buf.length, this._len - buf.length)) {
+            throw err;
+          }
+          sleep(BUSY_WRITE_TIMEOUT);
+        }
+      }
+      try {
+        fs.fsyncSync(this.fd);
+      } catch {
+      }
+    }
+    function flushBufferSync() {
+      if (this.destroyed) {
+        throw new Error("SonicBoom destroyed");
+      }
+      if (this.fd < 0) {
+        throw new Error("sonic boom is not ready yet");
+      }
+      if (!this._writing && this._writingBuf.length > 0) {
+        this._bufs.unshift([this._writingBuf]);
+        this._writingBuf = kEmptyBuffer;
+      }
+      let buf = kEmptyBuffer;
+      while (this._bufs.length || buf.length) {
+        if (buf.length <= 0) {
+          buf = mergeBuf(this._bufs[0], this._lens[0]);
+        }
+        try {
+          const n = fs.writeSync(this.fd, buf);
+          buf = buf.subarray(n);
+          this._len = Math.max(this._len - n, 0);
+          if (buf.length <= 0) {
+            this._bufs.shift();
+            this._lens.shift();
+          }
+        } catch (err) {
+          const shouldRetry = err.code === "EAGAIN" || err.code === "EBUSY";
+          if (shouldRetry && !this.retryEAGAIN(err, buf.length, this._len - buf.length)) {
+            throw err;
+          }
+          sleep(BUSY_WRITE_TIMEOUT);
+        }
+      }
+    }
+    SonicBoom.prototype.destroy = function() {
+      if (this.destroyed) {
+        return;
+      }
+      actualClose(this);
+    };
+    function actualWrite() {
+      const release = this.release;
+      this._writing = true;
+      this._writingBuf = this._writingBuf || this._bufs.shift() || "";
+      if (this.sync) {
+        try {
+          const written = fs.writeSync(this.fd, this._writingBuf, "utf8");
+          release(null, written);
+        } catch (err) {
+          release(err);
+        }
+      } else {
+        fs.write(this.fd, this._writingBuf, "utf8", release);
+      }
+    }
+    function actualWriteBuffer() {
+      const release = this.release;
+      this._writing = true;
+      this._writingBuf = this._writingBuf.length ? this._writingBuf : mergeBuf(this._bufs.shift(), this._lens.shift());
+      if (this.sync) {
+        try {
+          const written = fs.writeSync(this.fd, this._writingBuf);
+          release(null, written);
+        } catch (err) {
+          release(err);
+        }
+      } else {
+        fs.write(this.fd, this._writingBuf, release);
+      }
+    }
+    function actualClose(sonic) {
+      if (sonic.fd === -1) {
+        sonic.once("ready", actualClose.bind(null, sonic));
+        return;
+      }
+      sonic.destroyed = true;
+      sonic._bufs = [];
+      sonic._lens = [];
+      fs.fsync(sonic.fd, closeWrapped);
+      function closeWrapped() {
+        if (sonic.fd !== 1 && sonic.fd !== 2) {
+          fs.close(sonic.fd, done);
+        } else {
+          done();
+        }
+      }
+      function done(err) {
+        if (err) {
+          sonic.emit("error", err);
+          return;
+        }
+        if (sonic._ending && !sonic._writing) {
+          sonic.emit("finish");
+        }
+        sonic.emit("close");
+      }
+    }
+    SonicBoom.SonicBoom = SonicBoom;
+    SonicBoom.default = SonicBoom;
+    module2.exports = SonicBoom;
+  }
+});
+
+// node_modules/pino-http/node_modules/thread-stream/package.json
+var require_package2 = __commonJS({
+  "node_modules/pino-http/node_modules/thread-stream/package.json"(exports2, module2) {
+    module2.exports = {
+      name: "thread-stream",
+      version: "3.0.1",
+      description: "A streaming way to send data to a Node.js Worker Thread",
+      main: "index.js",
+      types: "index.d.ts",
+      dependencies: {
+        "real-require": "^0.2.0"
+      },
+      devDependencies: {
+        "@types/node": "^20.1.0",
+        "@types/tap": "^15.0.0",
+        "@yao-pkg/pkg": "^5.11.5",
+        desm: "^1.3.0",
+        fastbench: "^1.0.1",
+        husky: "^9.0.6",
+        "pino-elasticsearch": "^8.0.0",
+        "sonic-boom": "^4.0.1",
+        standard: "^17.0.0",
+        tap: "^16.2.0",
+        "ts-node": "^10.8.0",
+        typescript: "^5.3.2",
+        "why-is-node-running": "^2.2.2"
+      },
+      scripts: {
+        build: "tsc --noEmit",
+        test: 'standard && npm run build && npm run transpile && tap "test/**/*.test.*js" && tap --ts test/*.test.*ts',
+        "test:ci": "standard && npm run transpile && npm run test:ci:js && npm run test:ci:ts",
+        "test:ci:js": 'tap --no-check-coverage --timeout=120 --coverage-report=lcovonly "test/**/*.test.*js"',
+        "test:ci:ts": 'tap --ts --no-check-coverage --coverage-report=lcovonly "test/**/*.test.*ts"',
+        "test:yarn": 'npm run transpile && tap "test/**/*.test.js" --no-check-coverage',
+        transpile: "sh ./test/ts/transpile.sh",
+        prepare: "husky install"
+      },
+      standard: {
+        ignore: [
+          "test/ts/**/*"
+        ]
+      },
+      repository: {
+        type: "git",
+        url: "git+https://github.com/mcollina/thread-stream.git"
+      },
+      keywords: [
+        "worker",
+        "thread",
+        "threads",
+        "stream"
+      ],
+      author: "Matteo Collina <hello@matteocollina.com>",
+      license: "MIT",
+      bugs: {
+        url: "https://github.com/mcollina/thread-stream/issues"
+      },
+      homepage: "https://github.com/mcollina/thread-stream#readme"
+    };
+  }
+});
+
+// node_modules/pino-http/node_modules/thread-stream/lib/wait.js
+var require_wait2 = __commonJS({
+  "node_modules/pino-http/node_modules/thread-stream/lib/wait.js"(exports2, module2) {
+    "use strict";
+    var MAX_TIMEOUT = 1e3;
+    function wait(state, index, expected, timeout, done) {
+      const max = Date.now() + timeout;
+      let current = Atomics.load(state, index);
+      if (current === expected) {
+        done(null, "ok");
+        return;
+      }
+      let prior = current;
+      const check = (backoff) => {
+        if (Date.now() > max) {
+          done(null, "timed-out");
+        } else {
+          setTimeout(() => {
+            prior = current;
+            current = Atomics.load(state, index);
+            if (current === prior) {
+              check(backoff >= MAX_TIMEOUT ? MAX_TIMEOUT : backoff * 2);
+            } else {
+              if (current === expected)
+                done(null, "ok");
+              else
+                done(null, "not-equal");
+            }
+          }, backoff);
+        }
+      };
+      check(1);
+    }
+    function waitDiff(state, index, expected, timeout, done) {
+      const max = Date.now() + timeout;
+      let current = Atomics.load(state, index);
+      if (current !== expected) {
+        done(null, "ok");
+        return;
+      }
+      const check = (backoff) => {
+        if (Date.now() > max) {
+          done(null, "timed-out");
+        } else {
+          setTimeout(() => {
+            current = Atomics.load(state, index);
+            if (current !== expected) {
+              done(null, "ok");
+            } else {
+              check(backoff >= MAX_TIMEOUT ? MAX_TIMEOUT : backoff * 2);
+            }
+          }, backoff);
+        }
+      };
+      check(1);
+    }
+    module2.exports = { wait, waitDiff };
+  }
+});
+
+// node_modules/pino-http/node_modules/thread-stream/lib/indexes.js
+var require_indexes2 = __commonJS({
+  "node_modules/pino-http/node_modules/thread-stream/lib/indexes.js"(exports2, module2) {
+    "use strict";
+    var WRITE_INDEX = 4;
+    var READ_INDEX = 8;
+    module2.exports = {
+      WRITE_INDEX,
+      READ_INDEX
+    };
+  }
+});
+
+// node_modules/pino-http/node_modules/thread-stream/index.js
+var require_thread_stream2 = __commonJS({
+  "node_modules/pino-http/node_modules/thread-stream/index.js"(exports2, module2) {
+    "use strict";
+    var { version: version2 } = require_package2();
+    var { EventEmitter } = __require("events");
+    var { Worker } = __require("worker_threads");
+    var { join } = __require("path");
+    var { pathToFileURL } = __require("url");
+    var { wait } = require_wait2();
+    var {
+      WRITE_INDEX,
+      READ_INDEX
+    } = require_indexes2();
+    var buffer = __require("buffer");
+    var assert = __require("assert");
+    var kImpl = Symbol("kImpl");
+    var MAX_STRING = buffer.constants.MAX_STRING_LENGTH;
+    var FakeWeakRef = class {
+      constructor(value) {
+        this._value = value;
+      }
+      deref() {
+        return this._value;
+      }
+    };
+    var FakeFinalizationRegistry = class {
+      register() {
+      }
+      unregister() {
+      }
+    };
+    var FinalizationRegistry2 = process.env.NODE_V8_COVERAGE ? FakeFinalizationRegistry : global.FinalizationRegistry || FakeFinalizationRegistry;
+    var WeakRef2 = process.env.NODE_V8_COVERAGE ? FakeWeakRef : global.WeakRef || FakeWeakRef;
+    var registry = new FinalizationRegistry2((worker) => {
+      if (worker.exited) {
+        return;
+      }
+      worker.terminate();
+    });
+    function createWorker(stream, opts) {
+      const { filename, workerData } = opts;
+      const bundlerOverrides = "__bundlerPathsOverrides" in globalThis ? globalThis.__bundlerPathsOverrides : {};
+      const toExecute = bundlerOverrides["thread-stream-worker"] || join(__dirname, "lib", "worker.js");
+      const worker = new Worker(toExecute, {
+        ...opts.workerOpts,
+        trackUnmanagedFds: false,
+        workerData: {
+          filename: filename.indexOf("file://") === 0 ? filename : pathToFileURL(filename).href,
+          dataBuf: stream[kImpl].dataBuf,
+          stateBuf: stream[kImpl].stateBuf,
+          workerData: {
+            $context: {
+              threadStreamVersion: version2
+            },
+            ...workerData
+          }
+        }
+      });
+      worker.stream = new FakeWeakRef(stream);
+      worker.on("message", onWorkerMessage);
+      worker.on("exit", onWorkerExit);
+      registry.register(stream, worker);
+      return worker;
+    }
+    function drain(stream) {
+      assert(!stream[kImpl].sync);
+      if (stream[kImpl].needDrain) {
+        stream[kImpl].needDrain = false;
+        stream.emit("drain");
+      }
+    }
+    function nextFlush(stream) {
+      const writeIndex = Atomics.load(stream[kImpl].state, WRITE_INDEX);
+      let leftover = stream[kImpl].data.length - writeIndex;
+      if (leftover > 0) {
+        if (stream[kImpl].buf.length === 0) {
+          stream[kImpl].flushing = false;
+          if (stream[kImpl].ending) {
+            end(stream);
+          } else if (stream[kImpl].needDrain) {
+            process.nextTick(drain, stream);
+          }
+          return;
+        }
+        let toWrite = stream[kImpl].buf.slice(0, leftover);
+        let toWriteBytes = Buffer.byteLength(toWrite);
+        if (toWriteBytes <= leftover) {
+          stream[kImpl].buf = stream[kImpl].buf.slice(leftover);
+          write(stream, toWrite, nextFlush.bind(null, stream));
+        } else {
+          stream.flush(() => {
+            if (stream.destroyed) {
+              return;
+            }
+            Atomics.store(stream[kImpl].state, READ_INDEX, 0);
+            Atomics.store(stream[kImpl].state, WRITE_INDEX, 0);
+            while (toWriteBytes > stream[kImpl].data.length) {
+              leftover = leftover / 2;
+              toWrite = stream[kImpl].buf.slice(0, leftover);
+              toWriteBytes = Buffer.byteLength(toWrite);
+            }
+            stream[kImpl].buf = stream[kImpl].buf.slice(leftover);
+            write(stream, toWrite, nextFlush.bind(null, stream));
+          });
+        }
+      } else if (leftover === 0) {
+        if (writeIndex === 0 && stream[kImpl].buf.length === 0) {
+          return;
+        }
+        stream.flush(() => {
+          Atomics.store(stream[kImpl].state, READ_INDEX, 0);
+          Atomics.store(stream[kImpl].state, WRITE_INDEX, 0);
+          nextFlush(stream);
+        });
+      } else {
+        destroy(stream, new Error("overwritten"));
+      }
+    }
+    function onWorkerMessage(msg) {
+      const stream = this.stream.deref();
+      if (stream === void 0) {
+        this.exited = true;
+        this.terminate();
+        return;
+      }
+      switch (msg.code) {
+        case "READY":
+          this.stream = new WeakRef2(stream);
+          stream.flush(() => {
+            stream[kImpl].ready = true;
+            stream.emit("ready");
+          });
+          break;
+        case "ERROR":
+          destroy(stream, msg.err);
+          break;
+        case "EVENT":
+          if (Array.isArray(msg.args)) {
+            stream.emit(msg.name, ...msg.args);
+          } else {
+            stream.emit(msg.name, msg.args);
+          }
+          break;
+        case "WARNING":
+          process.emitWarning(msg.err);
+          break;
+        default:
+          destroy(stream, new Error("this should not happen: " + msg.code));
+      }
+    }
+    function onWorkerExit(code) {
+      const stream = this.stream.deref();
+      if (stream === void 0) {
+        return;
+      }
+      registry.unregister(stream);
+      stream.worker.exited = true;
+      stream.worker.off("exit", onWorkerExit);
+      destroy(stream, code !== 0 ? new Error("the worker thread exited") : null);
+    }
+    var ThreadStream = class extends EventEmitter {
+      constructor(opts = {}) {
+        super();
+        if (opts.bufferSize < 4) {
+          throw new Error("bufferSize must at least fit a 4-byte utf-8 char");
+        }
+        this[kImpl] = {};
+        this[kImpl].stateBuf = new SharedArrayBuffer(128);
+        this[kImpl].state = new Int32Array(this[kImpl].stateBuf);
+        this[kImpl].dataBuf = new SharedArrayBuffer(opts.bufferSize || 4 * 1024 * 1024);
+        this[kImpl].data = Buffer.from(this[kImpl].dataBuf);
+        this[kImpl].sync = opts.sync || false;
+        this[kImpl].ending = false;
+        this[kImpl].ended = false;
+        this[kImpl].needDrain = false;
+        this[kImpl].destroyed = false;
+        this[kImpl].flushing = false;
+        this[kImpl].ready = false;
+        this[kImpl].finished = false;
+        this[kImpl].errored = null;
+        this[kImpl].closed = false;
+        this[kImpl].buf = "";
+        this.worker = createWorker(this, opts);
+        this.on("message", (message, transferList) => {
+          this.worker.postMessage(message, transferList);
+        });
+      }
+      write(data) {
+        if (this[kImpl].destroyed) {
+          error(this, new Error("the worker has exited"));
+          return false;
+        }
+        if (this[kImpl].ending) {
+          error(this, new Error("the worker is ending"));
+          return false;
+        }
+        if (this[kImpl].flushing && this[kImpl].buf.length + data.length >= MAX_STRING) {
+          try {
+            writeSync(this);
+            this[kImpl].flushing = true;
+          } catch (err) {
+            destroy(this, err);
+            return false;
+          }
+        }
+        this[kImpl].buf += data;
+        if (this[kImpl].sync) {
+          try {
+            writeSync(this);
+            return true;
+          } catch (err) {
+            destroy(this, err);
+            return false;
+          }
+        }
+        if (!this[kImpl].flushing) {
+          this[kImpl].flushing = true;
+          setImmediate(nextFlush, this);
+        }
+        this[kImpl].needDrain = this[kImpl].data.length - this[kImpl].buf.length - Atomics.load(this[kImpl].state, WRITE_INDEX) <= 0;
+        return !this[kImpl].needDrain;
+      }
+      end() {
+        if (this[kImpl].destroyed) {
+          return;
+        }
+        this[kImpl].ending = true;
+        end(this);
+      }
+      flush(cb) {
+        if (this[kImpl].destroyed) {
+          if (typeof cb === "function") {
+            process.nextTick(cb, new Error("the worker has exited"));
+          }
+          return;
+        }
+        const writeIndex = Atomics.load(this[kImpl].state, WRITE_INDEX);
+        wait(this[kImpl].state, READ_INDEX, writeIndex, Infinity, (err, res) => {
+          if (err) {
+            destroy(this, err);
+            process.nextTick(cb, err);
+            return;
+          }
+          if (res === "not-equal") {
+            this.flush(cb);
+            return;
+          }
+          process.nextTick(cb);
+        });
+      }
+      flushSync() {
+        if (this[kImpl].destroyed) {
+          return;
+        }
+        writeSync(this);
+        flushSync(this);
+      }
+      unref() {
+        this.worker.unref();
+      }
+      ref() {
+        this.worker.ref();
+      }
+      get ready() {
+        return this[kImpl].ready;
+      }
+      get destroyed() {
+        return this[kImpl].destroyed;
+      }
+      get closed() {
+        return this[kImpl].closed;
+      }
+      get writable() {
+        return !this[kImpl].destroyed && !this[kImpl].ending;
+      }
+      get writableEnded() {
+        return this[kImpl].ending;
+      }
+      get writableFinished() {
+        return this[kImpl].finished;
+      }
+      get writableNeedDrain() {
+        return this[kImpl].needDrain;
+      }
+      get writableObjectMode() {
+        return false;
+      }
+      get writableErrored() {
+        return this[kImpl].errored;
+      }
+    };
+    function error(stream, err) {
+      setImmediate(() => {
+        stream.emit("error", err);
+      });
+    }
+    function destroy(stream, err) {
+      if (stream[kImpl].destroyed) {
+        return;
+      }
+      stream[kImpl].destroyed = true;
+      if (err) {
+        stream[kImpl].errored = err;
+        error(stream, err);
+      }
+      if (!stream.worker.exited) {
+        stream.worker.terminate().catch(() => {
+        }).then(() => {
+          stream[kImpl].closed = true;
+          stream.emit("close");
+        });
+      } else {
+        setImmediate(() => {
+          stream[kImpl].closed = true;
+          stream.emit("close");
+        });
+      }
+    }
+    function write(stream, data, cb) {
+      const current = Atomics.load(stream[kImpl].state, WRITE_INDEX);
+      const length = Buffer.byteLength(data);
+      stream[kImpl].data.write(data, current);
+      Atomics.store(stream[kImpl].state, WRITE_INDEX, current + length);
+      Atomics.notify(stream[kImpl].state, WRITE_INDEX);
+      cb();
+      return true;
+    }
+    function end(stream) {
+      if (stream[kImpl].ended || !stream[kImpl].ending || stream[kImpl].flushing) {
+        return;
+      }
+      stream[kImpl].ended = true;
+      try {
+        stream.flushSync();
+        let readIndex = Atomics.load(stream[kImpl].state, READ_INDEX);
+        Atomics.store(stream[kImpl].state, WRITE_INDEX, -1);
+        Atomics.notify(stream[kImpl].state, WRITE_INDEX);
+        let spins = 0;
+        while (readIndex !== -1) {
+          Atomics.wait(stream[kImpl].state, READ_INDEX, readIndex, 1e3);
+          readIndex = Atomics.load(stream[kImpl].state, READ_INDEX);
+          if (readIndex === -2) {
+            destroy(stream, new Error("end() failed"));
+            return;
+          }
+          if (++spins === 10) {
+            destroy(stream, new Error("end() took too long (10s)"));
+            return;
+          }
+        }
+        process.nextTick(() => {
+          stream[kImpl].finished = true;
+          stream.emit("finish");
+        });
+      } catch (err) {
+        destroy(stream, err);
+      }
+    }
+    function writeSync(stream) {
+      const cb = () => {
+        if (stream[kImpl].ending) {
+          end(stream);
+        } else if (stream[kImpl].needDrain) {
+          process.nextTick(drain, stream);
+        }
+      };
+      stream[kImpl].flushing = false;
+      while (stream[kImpl].buf.length !== 0) {
+        const writeIndex = Atomics.load(stream[kImpl].state, WRITE_INDEX);
+        let leftover = stream[kImpl].data.length - writeIndex;
+        if (leftover === 0) {
+          flushSync(stream);
+          Atomics.store(stream[kImpl].state, READ_INDEX, 0);
+          Atomics.store(stream[kImpl].state, WRITE_INDEX, 0);
+          continue;
+        } else if (leftover < 0) {
+          throw new Error("overwritten");
+        }
+        let toWrite = stream[kImpl].buf.slice(0, leftover);
+        let toWriteBytes = Buffer.byteLength(toWrite);
+        if (toWriteBytes <= leftover) {
+          stream[kImpl].buf = stream[kImpl].buf.slice(leftover);
+          write(stream, toWrite, cb);
+        } else {
+          flushSync(stream);
+          Atomics.store(stream[kImpl].state, READ_INDEX, 0);
+          Atomics.store(stream[kImpl].state, WRITE_INDEX, 0);
+          while (toWriteBytes > stream[kImpl].buf.length) {
+            leftover = leftover / 2;
+            toWrite = stream[kImpl].buf.slice(0, leftover);
+            toWriteBytes = Buffer.byteLength(toWrite);
+          }
+          stream[kImpl].buf = stream[kImpl].buf.slice(leftover);
+          write(stream, toWrite, cb);
+        }
+      }
+    }
+    function flushSync(stream) {
+      if (stream[kImpl].flushing) {
+        throw new Error("unable to flush while flushing");
+      }
+      const writeIndex = Atomics.load(stream[kImpl].state, WRITE_INDEX);
+      let spins = 0;
+      while (true) {
+        const readIndex = Atomics.load(stream[kImpl].state, READ_INDEX);
+        if (readIndex === -2) {
+          throw Error("_flushSync failed");
+        }
+        if (readIndex !== writeIndex) {
+          Atomics.wait(stream[kImpl].state, READ_INDEX, readIndex, 1e3);
+        } else {
+          break;
+        }
+        if (++spins === 10) {
+          throw new Error("_flushSync took too long (10s)");
+        }
+      }
+    }
+    module2.exports = ThreadStream;
+  }
+});
+
+// node_modules/pino-http/node_modules/pino/lib/transport.js
+var require_transport2 = __commonJS({
+  "node_modules/pino-http/node_modules/pino/lib/transport.js"(exports2, module2) {
+    "use strict";
+    var { createRequire } = __require("module");
+    var getCallers = require_caller2();
+    var { join, isAbsolute, sep } = __require("path");
+    var sleep = require_atomic_sleep();
+    var onExit = require_on_exit_leak_free();
+    var ThreadStream = require_thread_stream2();
+    function setupOnExit(stream) {
+      onExit.register(stream, autoEnd);
+      onExit.registerBeforeExit(stream, flush);
+      stream.on("close", function() {
+        onExit.unregister(stream);
+      });
+    }
+    function buildStream(filename, workerData, workerOpts) {
+      const stream = new ThreadStream({
+        filename,
+        workerData,
+        workerOpts
+      });
+      stream.on("ready", onReady);
+      stream.on("close", function() {
+        process.removeListener("exit", onExit2);
+      });
+      process.on("exit", onExit2);
+      function onReady() {
+        process.removeListener("exit", onExit2);
+        stream.unref();
+        if (workerOpts.autoEnd !== false) {
+          setupOnExit(stream);
+        }
+      }
+      function onExit2() {
+        if (stream.closed) {
+          return;
+        }
+        stream.flushSync();
+        sleep(100);
+        stream.end();
+      }
+      return stream;
+    }
+    function autoEnd(stream) {
+      stream.ref();
+      stream.flushSync();
+      stream.end();
+      stream.once("close", function() {
+        stream.unref();
+      });
+    }
+    function flush(stream) {
+      stream.flushSync();
+    }
+    function transport2(fullOptions) {
+      const { pipeline, targets, levels, dedupe, options: options2 = {}, worker = {}, caller = getCallers() } = fullOptions;
+      const callers = typeof caller === "string" ? [caller] : caller;
+      const bundlerOverrides = "__bundlerPathsOverrides" in globalThis ? globalThis.__bundlerPathsOverrides : {};
+      let target = fullOptions.target;
+      if (target && targets) {
+        throw new Error("only one of target or targets can be specified");
+      }
+      if (targets) {
+        target = bundlerOverrides["pino-worker"] || join(__dirname, "worker.js");
+        options2.targets = targets.filter((dest) => dest.target).map((dest) => {
+          return {
+            ...dest,
+            target: fixTarget(dest.target)
+          };
+        });
+        options2.pipelines = targets.filter((dest) => dest.pipeline).map((dest) => {
+          return dest.pipeline.map((t) => {
+            return {
+              ...t,
+              level: dest.level,
+              // duplicate the pipeline `level` property defined in the upper level
+              target: fixTarget(t.target)
+            };
+          });
+        });
+      } else if (pipeline) {
+        target = bundlerOverrides["pino-worker"] || join(__dirname, "worker.js");
+        options2.pipelines = [pipeline.map((dest) => {
+          return {
+            ...dest,
+            target: fixTarget(dest.target)
+          };
+        })];
+      }
+      if (levels) {
+        options2.levels = levels;
+      }
+      if (dedupe) {
+        options2.dedupe = dedupe;
+      }
+      options2.pinoWillSendConfig = true;
+      return buildStream(fixTarget(target), options2, worker);
+      function fixTarget(origin) {
+        origin = bundlerOverrides[origin] || origin;
+        if (isAbsolute(origin) || origin.indexOf("file://") === 0) {
+          return origin;
+        }
+        if (origin === "pino/file") {
+          return join(__dirname, "..", "file.js");
+        }
+        let fixTarget2;
+        for (const filePath of callers) {
+          try {
+            const context = filePath === "node:repl" ? process.cwd() + sep : filePath;
+            fixTarget2 = createRequire(context).resolve(origin);
+            break;
+          } catch (err) {
+            continue;
+          }
+        }
+        if (!fixTarget2) {
+          throw new Error(`unable to determine transport target for "${origin}"`);
+        }
+        return fixTarget2;
+      }
+    }
+    module2.exports = transport2;
+  }
+});
+
+// node_modules/pino-http/node_modules/pino/lib/tools.js
+var require_tools2 = __commonJS({
+  "node_modules/pino-http/node_modules/pino/lib/tools.js"(exports2, module2) {
+    "use strict";
+    var format = require_quick_format_unescaped();
+    var { mapHttpRequest, mapHttpResponse } = require_pino_std_serializers2();
+    var SonicBoom = require_sonic_boom2();
+    var onExit = require_on_exit_leak_free();
+    var {
+      lsCacheSym,
+      chindingsSym,
+      writeSym,
+      serializersSym,
+      formatOptsSym,
+      endSym,
+      stringifiersSym,
+      stringifySym,
+      stringifySafeSym,
+      wildcardFirstSym,
+      nestedKeySym,
+      formattersSym,
+      messageKeySym,
+      errorKeySym,
+      nestedKeyStrSym,
+      msgPrefixSym
+    } = require_symbols2();
+    var { isMainThread } = __require("worker_threads");
+    var transport2 = require_transport2();
+    function noop() {
+    }
+    function genLog(level, hook) {
+      if (!hook)
+        return LOG;
+      return function hookWrappedLog(...args) {
+        hook.call(this, args, LOG, level);
+      };
+      function LOG(o, ...n) {
+        if (typeof o === "object") {
+          let msg = o;
+          if (o !== null) {
+            if (o.method && o.headers && o.socket) {
+              o = mapHttpRequest(o);
+            } else if (typeof o.setHeader === "function") {
+              o = mapHttpResponse(o);
+            }
+          }
+          let formatParams;
+          if (msg === null && n.length === 0) {
+            formatParams = [null];
+          } else {
+            msg = n.shift();
+            formatParams = n;
+          }
+          if (typeof this[msgPrefixSym] === "string" && msg !== void 0 && msg !== null) {
+            msg = this[msgPrefixSym] + msg;
+          }
+          this[writeSym](o, format(msg, formatParams, this[formatOptsSym]), level);
+        } else {
+          let msg = o === void 0 ? n.shift() : o;
+          if (typeof this[msgPrefixSym] === "string" && msg !== void 0 && msg !== null) {
+            msg = this[msgPrefixSym] + msg;
+          }
+          this[writeSym](null, format(msg, n, this[formatOptsSym]), level);
+        }
+      }
+    }
+    function asString(str) {
+      let result = "";
+      let last = 0;
+      let found = false;
+      let point = 255;
+      const l = str.length;
+      if (l > 100) {
+        return JSON.stringify(str);
+      }
+      for (var i = 0; i < l && point >= 32; i++) {
+        point = str.charCodeAt(i);
+        if (point === 34 || point === 92) {
+          result += str.slice(last, i) + "\\";
+          last = i;
+          found = true;
+        }
+      }
+      if (!found) {
+        result = str;
+      } else {
+        result += str.slice(last);
+      }
+      return point < 32 ? JSON.stringify(str) : '"' + result + '"';
+    }
+    function asJson(obj, msg, num, time) {
+      const stringify3 = this[stringifySym];
+      const stringifySafe = this[stringifySafeSym];
+      const stringifiers = this[stringifiersSym];
+      const end = this[endSym];
+      const chindings = this[chindingsSym];
+      const serializers = this[serializersSym];
+      const formatters = this[formattersSym];
+      const messageKey = this[messageKeySym];
+      const errorKey = this[errorKeySym];
+      let data = this[lsCacheSym][num] + time;
+      data = data + chindings;
+      let value;
+      if (formatters.log) {
+        obj = formatters.log(obj);
+      }
+      const wildcardStringifier = stringifiers[wildcardFirstSym];
+      let propStr = "";
+      for (const key in obj) {
+        value = obj[key];
+        if (Object.prototype.hasOwnProperty.call(obj, key) && value !== void 0) {
+          if (serializers[key]) {
+            value = serializers[key](value);
+          } else if (key === errorKey && serializers.err) {
+            value = serializers.err(value);
+          }
+          const stringifier = stringifiers[key] || wildcardStringifier;
+          switch (typeof value) {
+            case "undefined":
+            case "function":
+              continue;
+            case "number":
+              if (Number.isFinite(value) === false) {
+                value = null;
+              }
+            case "boolean":
+              if (stringifier)
+                value = stringifier(value);
+              break;
+            case "string":
+              value = (stringifier || asString)(value);
+              break;
+            default:
+              value = (stringifier || stringify3)(value, stringifySafe);
+          }
+          if (value === void 0)
+            continue;
+          const strKey = asString(key);
+          propStr += "," + strKey + ":" + value;
+        }
+      }
+      let msgStr = "";
+      if (msg !== void 0) {
+        value = serializers[messageKey] ? serializers[messageKey](msg) : msg;
+        const stringifier = stringifiers[messageKey] || wildcardStringifier;
+        switch (typeof value) {
+          case "function":
+            break;
+          case "number":
+            if (Number.isFinite(value) === false) {
+              value = null;
+            }
+          case "boolean":
+            if (stringifier)
+              value = stringifier(value);
+            msgStr = ',"' + messageKey + '":' + value;
+            break;
+          case "string":
+            value = (stringifier || asString)(value);
+            msgStr = ',"' + messageKey + '":' + value;
+            break;
+          default:
+            value = (stringifier || stringify3)(value, stringifySafe);
+            msgStr = ',"' + messageKey + '":' + value;
+        }
+      }
+      if (this[nestedKeySym] && propStr) {
+        return data + this[nestedKeyStrSym] + propStr.slice(1) + "}" + msgStr + end;
+      } else {
+        return data + propStr + msgStr + end;
+      }
+    }
+    function asChindings(instance, bindings) {
+      let value;
+      let data = instance[chindingsSym];
+      const stringify3 = instance[stringifySym];
+      const stringifySafe = instance[stringifySafeSym];
+      const stringifiers = instance[stringifiersSym];
+      const wildcardStringifier = stringifiers[wildcardFirstSym];
+      const serializers = instance[serializersSym];
+      const formatter = instance[formattersSym].bindings;
+      bindings = formatter(bindings);
+      for (const key in bindings) {
+        value = bindings[key];
+        const valid = key !== "level" && key !== "serializers" && key !== "formatters" && key !== "customLevels" && bindings.hasOwnProperty(key) && value !== void 0;
+        if (valid === true) {
+          value = serializers[key] ? serializers[key](value) : value;
+          value = (stringifiers[key] || wildcardStringifier || stringify3)(value, stringifySafe);
+          if (value === void 0)
+            continue;
+          data += ',"' + key + '":' + value;
+        }
+      }
+      return data;
+    }
+    function hasBeenTampered(stream) {
+      return stream.write !== stream.constructor.prototype.write;
+    }
+    var hasNodeCodeCoverage = process.env.NODE_V8_COVERAGE || process.env.V8_COVERAGE;
+    function buildSafeSonicBoom(opts) {
+      const stream = new SonicBoom(opts);
+      stream.on("error", filterBrokenPipe);
+      if (!hasNodeCodeCoverage && !opts.sync && isMainThread) {
+        onExit.register(stream, autoEnd);
+        stream.on("close", function() {
+          onExit.unregister(stream);
+        });
+      }
+      return stream;
+      function filterBrokenPipe(err) {
+        if (err.code === "EPIPE") {
+          stream.write = noop;
+          stream.end = noop;
+          stream.flushSync = noop;
+          stream.destroy = noop;
+          return;
+        }
+        stream.removeListener("error", filterBrokenPipe);
+        stream.emit("error", err);
+      }
+    }
+    function autoEnd(stream, eventName) {
+      if (stream.destroyed) {
+        return;
+      }
+      if (eventName === "beforeExit") {
+        stream.flush();
+        stream.on("drain", function() {
+          stream.end();
+        });
+      } else {
+        stream.flushSync();
+      }
+    }
+    function createArgsNormalizer(defaultOptions) {
+      return function normalizeArgs(instance, caller, opts = {}, stream) {
+        if (typeof opts === "string") {
+          stream = buildSafeSonicBoom({ dest: opts });
+          opts = {};
+        } else if (typeof stream === "string") {
+          if (opts && opts.transport) {
+            throw Error("only one of option.transport or stream can be specified");
+          }
+          stream = buildSafeSonicBoom({ dest: stream });
+        } else if (opts instanceof SonicBoom || opts.writable || opts._writableState) {
+          stream = opts;
+          opts = {};
+        } else if (opts.transport) {
+          if (opts.transport instanceof SonicBoom || opts.transport.writable || opts.transport._writableState) {
+            throw Error("option.transport do not allow stream, please pass to option directly. e.g. pino(transport)");
+          }
+          if (opts.transport.targets && opts.transport.targets.length && opts.formatters && typeof opts.formatters.level === "function") {
+            throw Error("option.transport.targets do not allow custom level formatters");
+          }
+          let customLevels;
+          if (opts.customLevels) {
+            customLevels = opts.useOnlyCustomLevels ? opts.customLevels : Object.assign({}, opts.levels, opts.customLevels);
+          }
+          stream = transport2({ caller, ...opts.transport, levels: customLevels });
+        }
+        opts = Object.assign({}, defaultOptions, opts);
+        opts.serializers = Object.assign({}, defaultOptions.serializers, opts.serializers);
+        opts.formatters = Object.assign({}, defaultOptions.formatters, opts.formatters);
+        if (opts.prettyPrint) {
+          throw new Error("prettyPrint option is no longer supported, see the pino-pretty package (https://github.com/pinojs/pino-pretty)");
+        }
+        const { enabled, onChild } = opts;
+        if (enabled === false)
+          opts.level = "silent";
+        if (!onChild)
+          opts.onChild = noop;
+        if (!stream) {
+          if (!hasBeenTampered(process.stdout)) {
+            stream = buildSafeSonicBoom({ fd: process.stdout.fd || 1 });
+          } else {
+            stream = process.stdout;
+          }
+        }
+        return { opts, stream };
+      };
+    }
+    function stringify2(obj, stringifySafeFn) {
+      try {
+        return JSON.stringify(obj);
+      } catch (_) {
+        try {
+          const stringify3 = stringifySafeFn || this[stringifySafeSym];
+          return stringify3(obj);
+        } catch (_2) {
+          return '"[unable to serialize, circular reference is too complex to analyze]"';
+        }
+      }
+    }
+    function buildFormatters(level, bindings, log) {
+      return {
+        level,
+        bindings,
+        log
+      };
+    }
+    function normalizeDestFileDescriptor(destination) {
+      const fd = Number(destination);
+      if (typeof destination === "string" && Number.isFinite(fd)) {
+        return fd;
+      }
+      if (destination === void 0) {
+        return 1;
+      }
+      return destination;
+    }
+    module2.exports = {
+      noop,
+      buildSafeSonicBoom,
+      asChindings,
+      asJson,
+      genLog,
+      createArgsNormalizer,
+      stringify: stringify2,
+      buildFormatters,
+      normalizeDestFileDescriptor
+    };
+  }
+});
+
+// node_modules/pino-http/node_modules/pino/lib/constants.js
+var require_constants4 = __commonJS({
+  "node_modules/pino-http/node_modules/pino/lib/constants.js"(exports2, module2) {
+    var DEFAULT_LEVELS = {
+      trace: 10,
+      debug: 20,
+      info: 30,
+      warn: 40,
+      error: 50,
+      fatal: 60
+    };
+    var SORTING_ORDER = {
+      ASC: "ASC",
+      DESC: "DESC"
+    };
+    module2.exports = {
+      DEFAULT_LEVELS,
+      SORTING_ORDER
+    };
+  }
+});
+
+// node_modules/pino-http/node_modules/pino/lib/levels.js
+var require_levels2 = __commonJS({
+  "node_modules/pino-http/node_modules/pino/lib/levels.js"(exports2, module2) {
+    "use strict";
+    var {
+      lsCacheSym,
+      levelValSym,
+      useOnlyCustomLevelsSym,
+      streamSym,
+      formattersSym,
+      hooksSym,
+      levelCompSym
+    } = require_symbols2();
+    var { noop, genLog } = require_tools2();
+    var { DEFAULT_LEVELS, SORTING_ORDER } = require_constants4();
+    var levelMethods = {
+      fatal: (hook) => {
+        const logFatal = genLog(DEFAULT_LEVELS.fatal, hook);
+        return function(...args) {
+          const stream = this[streamSym];
+          logFatal.call(this, ...args);
+          if (typeof stream.flushSync === "function") {
+            try {
+              stream.flushSync();
+            } catch (e) {
+            }
+          }
+        };
+      },
+      error: (hook) => genLog(DEFAULT_LEVELS.error, hook),
+      warn: (hook) => genLog(DEFAULT_LEVELS.warn, hook),
+      info: (hook) => genLog(DEFAULT_LEVELS.info, hook),
+      debug: (hook) => genLog(DEFAULT_LEVELS.debug, hook),
+      trace: (hook) => genLog(DEFAULT_LEVELS.trace, hook)
+    };
+    var nums = Object.keys(DEFAULT_LEVELS).reduce((o, k) => {
+      o[DEFAULT_LEVELS[k]] = k;
+      return o;
+    }, {});
+    var initialLsCache = Object.keys(nums).reduce((o, k) => {
+      o[k] = '{"level":' + Number(k);
+      return o;
+    }, {});
+    function genLsCache(instance) {
+      const formatter = instance[formattersSym].level;
+      const { labels } = instance.levels;
+      const cache = {};
+      for (const label in labels) {
+        const level = formatter(labels[label], Number(label));
+        cache[label] = JSON.stringify(level).slice(0, -1);
+      }
+      instance[lsCacheSym] = cache;
+      return instance;
+    }
+    function isStandardLevel(level, useOnlyCustomLevels) {
+      if (useOnlyCustomLevels) {
+        return false;
+      }
+      switch (level) {
+        case "fatal":
+        case "error":
+        case "warn":
+        case "info":
+        case "debug":
+        case "trace":
+          return true;
+        default:
+          return false;
+      }
+    }
+    function setLevel(level) {
+      const { labels, values } = this.levels;
+      if (typeof level === "number") {
+        if (labels[level] === void 0)
+          throw Error("unknown level value" + level);
+        level = labels[level];
+      }
+      if (values[level] === void 0)
+        throw Error("unknown level " + level);
+      const preLevelVal = this[levelValSym];
+      const levelVal = this[levelValSym] = values[level];
+      const useOnlyCustomLevelsVal = this[useOnlyCustomLevelsSym];
+      const levelComparison = this[levelCompSym];
+      const hook = this[hooksSym].logMethod;
+      for (const key in values) {
+        if (levelComparison(values[key], levelVal) === false) {
+          this[key] = noop;
+          continue;
+        }
+        this[key] = isStandardLevel(key, useOnlyCustomLevelsVal) ? levelMethods[key](hook) : genLog(values[key], hook);
+      }
+      this.emit(
+        "level-change",
+        level,
+        levelVal,
+        labels[preLevelVal],
+        preLevelVal,
+        this
+      );
+    }
+    function getLevel(level) {
+      const { levels, levelVal } = this;
+      return levels && levels.labels ? levels.labels[levelVal] : "";
+    }
+    function isLevelEnabled(logLevel) {
+      const { values } = this.levels;
+      const logLevelVal = values[logLevel];
+      return logLevelVal !== void 0 && this[levelCompSym](logLevelVal, this[levelValSym]);
+    }
+    function compareLevel(direction, current, expected) {
+      if (direction === SORTING_ORDER.DESC) {
+        return current <= expected;
+      }
+      return current >= expected;
+    }
+    function genLevelComparison(levelComparison) {
+      if (typeof levelComparison === "string") {
+        return compareLevel.bind(null, levelComparison);
+      }
+      return levelComparison;
+    }
+    function mappings(customLevels = null, useOnlyCustomLevels = false) {
+      const customNums = customLevels ? Object.keys(customLevels).reduce((o, k) => {
+        o[customLevels[k]] = k;
+        return o;
+      }, {}) : null;
+      const labels = Object.assign(
+        Object.create(Object.prototype, { Infinity: { value: "silent" } }),
+        useOnlyCustomLevels ? null : nums,
+        customNums
+      );
+      const values = Object.assign(
+        Object.create(Object.prototype, { silent: { value: Infinity } }),
+        useOnlyCustomLevels ? null : DEFAULT_LEVELS,
+        customLevels
+      );
+      return { labels, values };
+    }
+    function assertDefaultLevelFound(defaultLevel, customLevels, useOnlyCustomLevels) {
+      if (typeof defaultLevel === "number") {
+        const values = [].concat(
+          Object.keys(customLevels || {}).map((key) => customLevels[key]),
+          useOnlyCustomLevels ? [] : Object.keys(nums).map((level) => +level),
+          Infinity
+        );
+        if (!values.includes(defaultLevel)) {
+          throw Error(`default level:${defaultLevel} must be included in custom levels`);
+        }
+        return;
+      }
+      const labels = Object.assign(
+        Object.create(Object.prototype, { silent: { value: Infinity } }),
+        useOnlyCustomLevels ? null : DEFAULT_LEVELS,
+        customLevels
+      );
+      if (!(defaultLevel in labels)) {
+        throw Error(`default level:${defaultLevel} must be included in custom levels`);
+      }
+    }
+    function assertNoLevelCollisions(levels, customLevels) {
+      const { labels, values } = levels;
+      for (const k in customLevels) {
+        if (k in values) {
+          throw Error("levels cannot be overridden");
+        }
+        if (customLevels[k] in labels) {
+          throw Error("pre-existing level values cannot be used for new levels");
+        }
+      }
+    }
+    function assertLevelComparison(levelComparison) {
+      if (typeof levelComparison === "function") {
+        return;
+      }
+      if (typeof levelComparison === "string" && Object.values(SORTING_ORDER).includes(levelComparison)) {
+        return;
+      }
+      throw new Error('Levels comparison should be one of "ASC", "DESC" or "function" type');
+    }
+    module2.exports = {
+      initialLsCache,
+      genLsCache,
+      levelMethods,
+      getLevel,
+      setLevel,
+      isLevelEnabled,
+      mappings,
+      assertNoLevelCollisions,
+      assertDefaultLevelFound,
+      genLevelComparison,
+      assertLevelComparison
+    };
+  }
+});
+
+// node_modules/pino-http/node_modules/pino/lib/meta.js
+var require_meta2 = __commonJS({
+  "node_modules/pino-http/node_modules/pino/lib/meta.js"(exports2, module2) {
+    "use strict";
+    module2.exports = { version: "9.1.0" };
+  }
+});
+
+// node_modules/pino-http/node_modules/pino/lib/proto.js
+var require_proto2 = __commonJS({
+  "node_modules/pino-http/node_modules/pino/lib/proto.js"(exports2, module2) {
+    "use strict";
+    var { EventEmitter } = __require("events");
+    var {
+      lsCacheSym,
+      levelValSym,
+      setLevelSym,
+      getLevelSym,
+      chindingsSym,
+      parsedChindingsSym,
+      mixinSym,
+      asJsonSym,
+      writeSym,
+      mixinMergeStrategySym,
+      timeSym,
+      timeSliceIndexSym,
+      streamSym,
+      serializersSym,
+      formattersSym,
+      errorKeySym,
+      messageKeySym,
+      useOnlyCustomLevelsSym,
+      needsMetadataGsym,
+      redactFmtSym,
+      stringifySym,
+      formatOptsSym,
+      stringifiersSym,
+      msgPrefixSym
+    } = require_symbols2();
+    var {
+      getLevel,
+      setLevel,
+      isLevelEnabled,
+      mappings,
+      initialLsCache,
+      genLsCache,
+      assertNoLevelCollisions
+    } = require_levels2();
+    var {
+      asChindings,
+      asJson,
+      buildFormatters,
+      stringify: stringify2
+    } = require_tools2();
+    var {
+      version: version2
+    } = require_meta2();
+    var redaction = require_redaction2();
+    var constructor = class Pino {
+    };
+    var prototype = {
+      constructor,
+      child,
+      bindings,
+      setBindings,
+      flush,
+      isLevelEnabled,
+      version: version2,
+      get level() {
+        return this[getLevelSym]();
+      },
+      set level(lvl) {
+        this[setLevelSym](lvl);
+      },
+      get levelVal() {
+        return this[levelValSym];
+      },
+      set levelVal(n) {
+        throw Error("levelVal is read-only");
+      },
+      [lsCacheSym]: initialLsCache,
+      [writeSym]: write,
+      [asJsonSym]: asJson,
+      [getLevelSym]: getLevel,
+      [setLevelSym]: setLevel
+    };
+    Object.setPrototypeOf(prototype, EventEmitter.prototype);
+    module2.exports = function() {
+      return Object.create(prototype);
+    };
+    var resetChildingsFormatter = (bindings2) => bindings2;
+    function child(bindings2, options2) {
+      if (!bindings2) {
+        throw Error("missing bindings for child Pino");
+      }
+      options2 = options2 || {};
+      const serializers = this[serializersSym];
+      const formatters = this[formattersSym];
+      const instance = Object.create(this);
+      if (options2.hasOwnProperty("serializers") === true) {
+        instance[serializersSym] = /* @__PURE__ */ Object.create(null);
+        for (const k in serializers) {
+          instance[serializersSym][k] = serializers[k];
+        }
+        const parentSymbols = Object.getOwnPropertySymbols(serializers);
+        for (var i = 0; i < parentSymbols.length; i++) {
+          const ks = parentSymbols[i];
+          instance[serializersSym][ks] = serializers[ks];
+        }
+        for (const bk in options2.serializers) {
+          instance[serializersSym][bk] = options2.serializers[bk];
+        }
+        const bindingsSymbols = Object.getOwnPropertySymbols(options2.serializers);
+        for (var bi = 0; bi < bindingsSymbols.length; bi++) {
+          const bks = bindingsSymbols[bi];
+          instance[serializersSym][bks] = options2.serializers[bks];
+        }
+      } else
+        instance[serializersSym] = serializers;
+      if (options2.hasOwnProperty("formatters")) {
+        const { level, bindings: chindings, log } = options2.formatters;
+        instance[formattersSym] = buildFormatters(
+          level || formatters.level,
+          chindings || resetChildingsFormatter,
+          log || formatters.log
+        );
+      } else {
+        instance[formattersSym] = buildFormatters(
+          formatters.level,
+          resetChildingsFormatter,
+          formatters.log
+        );
+      }
+      if (options2.hasOwnProperty("customLevels") === true) {
+        assertNoLevelCollisions(this.levels, options2.customLevels);
+        instance.levels = mappings(options2.customLevels, instance[useOnlyCustomLevelsSym]);
+        genLsCache(instance);
+      }
+      if (typeof options2.redact === "object" && options2.redact !== null || Array.isArray(options2.redact)) {
+        instance.redact = options2.redact;
+        const stringifiers = redaction(instance.redact, stringify2);
+        const formatOpts = { stringify: stringifiers[redactFmtSym] };
+        instance[stringifySym] = stringify2;
+        instance[stringifiersSym] = stringifiers;
+        instance[formatOptsSym] = formatOpts;
+      }
+      if (typeof options2.msgPrefix === "string") {
+        instance[msgPrefixSym] = (this[msgPrefixSym] || "") + options2.msgPrefix;
+      }
+      instance[chindingsSym] = asChindings(instance, bindings2);
+      const childLevel = options2.level || this.level;
+      instance[setLevelSym](childLevel);
+      this.onChild(instance);
+      return instance;
+    }
+    function bindings() {
+      const chindings = this[chindingsSym];
+      const chindingsJson = `{${chindings.substr(1)}}`;
+      const bindingsFromJson = JSON.parse(chindingsJson);
+      delete bindingsFromJson.pid;
+      delete bindingsFromJson.hostname;
+      return bindingsFromJson;
+    }
+    function setBindings(newBindings) {
+      const chindings = asChindings(this, newBindings);
+      this[chindingsSym] = chindings;
+      delete this[parsedChindingsSym];
+    }
+    function defaultMixinMergeStrategy(mergeObject, mixinObject) {
+      return Object.assign(mixinObject, mergeObject);
+    }
+    function write(_obj, msg, num) {
+      const t = this[timeSym]();
+      const mixin = this[mixinSym];
+      const errorKey = this[errorKeySym];
+      const messageKey = this[messageKeySym];
+      const mixinMergeStrategy = this[mixinMergeStrategySym] || defaultMixinMergeStrategy;
+      let obj;
+      if (_obj === void 0 || _obj === null) {
+        obj = {};
+      } else if (_obj instanceof Error) {
+        obj = { [errorKey]: _obj };
+        if (msg === void 0) {
+          msg = _obj.message;
+        }
+      } else {
+        obj = _obj;
+        if (msg === void 0 && _obj[messageKey] === void 0 && _obj[errorKey]) {
+          msg = _obj[errorKey].message;
+        }
+      }
+      if (mixin) {
+        obj = mixinMergeStrategy(obj, mixin(obj, num, this));
+      }
+      const s = this[asJsonSym](obj, msg, num, t);
+      const stream = this[streamSym];
+      if (stream[needsMetadataGsym] === true) {
+        stream.lastLevel = num;
+        stream.lastObj = obj;
+        stream.lastMsg = msg;
+        stream.lastTime = t.slice(this[timeSliceIndexSym]);
+        stream.lastLogger = this;
+      }
+      stream.write(s);
+    }
+    function noop() {
+    }
+    function flush(cb) {
+      if (cb != null && typeof cb !== "function") {
+        throw Error("callback must be a function");
+      }
+      const stream = this[streamSym];
+      if (typeof stream.flush === "function") {
+        stream.flush(cb || noop);
+      } else if (cb)
+        cb();
+    }
+  }
+});
+
+// node_modules/pino-http/node_modules/pino/lib/multistream.js
+var require_multistream2 = __commonJS({
+  "node_modules/pino-http/node_modules/pino/lib/multistream.js"(exports2, module2) {
+    "use strict";
+    var metadata = Symbol.for("pino.metadata");
+    var { DEFAULT_LEVELS } = require_constants4();
+    var DEFAULT_INFO_LEVEL = DEFAULT_LEVELS.info;
+    function multistream(streamsArray, opts) {
+      let counter = 0;
+      streamsArray = streamsArray || [];
+      opts = opts || { dedupe: false };
+      const streamLevels = Object.create(DEFAULT_LEVELS);
+      streamLevels.silent = Infinity;
+      if (opts.levels && typeof opts.levels === "object") {
+        Object.keys(opts.levels).forEach((i) => {
+          streamLevels[i] = opts.levels[i];
+        });
+      }
+      const res = {
+        write,
+        add,
+        emit,
+        flushSync,
+        end,
+        minLevel: 0,
+        streams: [],
+        clone,
+        [metadata]: true,
+        streamLevels
+      };
+      if (Array.isArray(streamsArray)) {
+        streamsArray.forEach(add, res);
+      } else {
+        add.call(res, streamsArray);
+      }
+      streamsArray = null;
+      return res;
+      function write(data) {
+        let dest;
+        const level = this.lastLevel;
+        const { streams } = this;
+        let recordedLevel = 0;
+        let stream;
+        for (let i = initLoopVar(streams.length, opts.dedupe); checkLoopVar(i, streams.length, opts.dedupe); i = adjustLoopVar(i, opts.dedupe)) {
+          dest = streams[i];
+          if (dest.level <= level) {
+            if (recordedLevel !== 0 && recordedLevel !== dest.level) {
+              break;
+            }
+            stream = dest.stream;
+            if (stream[metadata]) {
+              const { lastTime, lastMsg, lastObj, lastLogger } = this;
+              stream.lastLevel = level;
+              stream.lastTime = lastTime;
+              stream.lastMsg = lastMsg;
+              stream.lastObj = lastObj;
+              stream.lastLogger = lastLogger;
+            }
+            stream.write(data);
+            if (opts.dedupe) {
+              recordedLevel = dest.level;
+            }
+          } else if (!opts.dedupe) {
+            break;
+          }
+        }
+      }
+      function emit(...args) {
+        for (const { stream } of this.streams) {
+          if (typeof stream.emit === "function") {
+            stream.emit(...args);
+          }
+        }
+      }
+      function flushSync() {
+        for (const { stream } of this.streams) {
+          if (typeof stream.flushSync === "function") {
+            stream.flushSync();
+          }
+        }
+      }
+      function add(dest) {
+        if (!dest) {
+          return res;
+        }
+        const isStream = typeof dest.write === "function" || dest.stream;
+        const stream_ = dest.write ? dest : dest.stream;
+        if (!isStream) {
+          throw Error("stream object needs to implement either StreamEntry or DestinationStream interface");
+        }
+        const { streams, streamLevels: streamLevels2 } = this;
+        let level;
+        if (typeof dest.levelVal === "number") {
+          level = dest.levelVal;
+        } else if (typeof dest.level === "string") {
+          level = streamLevels2[dest.level];
+        } else if (typeof dest.level === "number") {
+          level = dest.level;
+        } else {
+          level = DEFAULT_INFO_LEVEL;
+        }
+        const dest_ = {
+          stream: stream_,
+          level,
+          levelVal: void 0,
+          id: counter++
+        };
+        streams.unshift(dest_);
+        streams.sort(compareByLevel);
+        this.minLevel = streams[0].level;
+        return res;
+      }
+      function end() {
+        for (const { stream } of this.streams) {
+          if (typeof stream.flushSync === "function") {
+            stream.flushSync();
+          }
+          stream.end();
+        }
+      }
+      function clone(level) {
+        const streams = new Array(this.streams.length);
+        for (let i = 0; i < streams.length; i++) {
+          streams[i] = {
+            level,
+            stream: this.streams[i].stream
+          };
+        }
+        return {
+          write,
+          add,
+          minLevel: level,
+          streams,
+          clone,
+          emit,
+          flushSync,
+          [metadata]: true
+        };
+      }
+    }
+    function compareByLevel(a, b) {
+      return a.level - b.level;
+    }
+    function initLoopVar(length, dedupe) {
+      return dedupe ? length - 1 : 0;
+    }
+    function adjustLoopVar(i, dedupe) {
+      return dedupe ? i - 1 : i + 1;
+    }
+    function checkLoopVar(i, length, dedupe) {
+      return dedupe ? i >= 0 : i < length;
+    }
+    module2.exports = multistream;
+  }
+});
+
+// node_modules/pino-http/node_modules/pino/pino.js
+var require_pino3 = __commonJS({
+  "node_modules/pino-http/node_modules/pino/pino.js"(exports2, module2) {
+    "use strict";
+    var os = __require("os");
+    var stdSerializers = require_pino_std_serializers2();
+    var caller = require_caller2();
+    var redaction = require_redaction2();
+    var time = require_time3();
+    var proto = require_proto2();
+    var symbols = require_symbols2();
+    var { configure } = require_safe_stable_stringify();
+    var { assertDefaultLevelFound, mappings, genLsCache, genLevelComparison, assertLevelComparison } = require_levels2();
+    var { DEFAULT_LEVELS, SORTING_ORDER } = require_constants4();
+    var {
+      createArgsNormalizer,
+      asChindings,
+      buildSafeSonicBoom,
+      buildFormatters,
+      stringify: stringify2,
+      normalizeDestFileDescriptor,
+      noop
+    } = require_tools2();
+    var { version: version2 } = require_meta2();
+    var {
+      chindingsSym,
+      redactFmtSym,
+      serializersSym,
+      timeSym,
+      timeSliceIndexSym,
+      streamSym,
+      stringifySym,
+      stringifySafeSym,
+      stringifiersSym,
+      setLevelSym,
+      endSym,
+      formatOptsSym,
+      messageKeySym,
+      errorKeySym,
+      nestedKeySym,
+      mixinSym,
+      levelCompSym,
+      useOnlyCustomLevelsSym,
+      formattersSym,
+      hooksSym,
+      nestedKeyStrSym,
+      mixinMergeStrategySym,
+      msgPrefixSym
+    } = symbols;
+    var { epochTime, nullTime } = time;
+    var { pid } = process;
+    var hostname = os.hostname();
+    var defaultErrorSerializer = stdSerializers.err;
+    var defaultOptions = {
+      level: "info",
+      levelComparison: SORTING_ORDER.ASC,
+      levels: DEFAULT_LEVELS,
+      messageKey: "msg",
+      errorKey: "err",
+      nestedKey: null,
+      enabled: true,
+      base: { pid, hostname },
+      serializers: Object.assign(/* @__PURE__ */ Object.create(null), {
+        err: defaultErrorSerializer
+      }),
+      formatters: Object.assign(/* @__PURE__ */ Object.create(null), {
+        bindings(bindings) {
+          return bindings;
+        },
+        level(label, number) {
+          return { level: number };
+        }
+      }),
+      hooks: {
+        logMethod: void 0
+      },
+      timestamp: epochTime,
+      name: void 0,
+      redact: null,
+      customLevels: null,
+      useOnlyCustomLevels: false,
+      depthLimit: 5,
+      edgeLimit: 100
+    };
+    var normalize = createArgsNormalizer(defaultOptions);
+    var serializers = Object.assign(/* @__PURE__ */ Object.create(null), stdSerializers);
+    function pino3(...args) {
+      const instance = {};
+      const { opts, stream } = normalize(instance, caller(), ...args);
+      const {
+        redact,
+        crlf,
+        serializers: serializers2,
+        timestamp,
+        messageKey,
+        errorKey,
+        nestedKey,
+        base,
+        name,
+        level,
+        customLevels,
+        levelComparison,
+        mixin,
+        mixinMergeStrategy,
+        useOnlyCustomLevels,
+        formatters,
+        hooks,
+        depthLimit,
+        edgeLimit,
+        onChild,
+        msgPrefix
+      } = opts;
+      const stringifySafe = configure({
+        maximumDepth: depthLimit,
+        maximumBreadth: edgeLimit
+      });
+      const allFormatters = buildFormatters(
+        formatters.level,
+        formatters.bindings,
+        formatters.log
+      );
+      const stringifyFn = stringify2.bind({
+        [stringifySafeSym]: stringifySafe
+      });
+      const stringifiers = redact ? redaction(redact, stringifyFn) : {};
+      const formatOpts = redact ? { stringify: stringifiers[redactFmtSym] } : { stringify: stringifyFn };
+      const end = "}" + (crlf ? "\r\n" : "\n");
+      const coreChindings = asChindings.bind(null, {
+        [chindingsSym]: "",
+        [serializersSym]: serializers2,
+        [stringifiersSym]: stringifiers,
+        [stringifySym]: stringify2,
+        [stringifySafeSym]: stringifySafe,
+        [formattersSym]: allFormatters
+      });
+      let chindings = "";
+      if (base !== null) {
+        if (name === void 0) {
+          chindings = coreChindings(base);
+        } else {
+          chindings = coreChindings(Object.assign({}, base, { name }));
+        }
+      }
+      const time2 = timestamp instanceof Function ? timestamp : timestamp ? epochTime : nullTime;
+      const timeSliceIndex = time2().indexOf(":") + 1;
+      if (useOnlyCustomLevels && !customLevels)
+        throw Error("customLevels is required if useOnlyCustomLevels is set true");
+      if (mixin && typeof mixin !== "function")
+        throw Error(`Unknown mixin type "${typeof mixin}" - expected "function"`);
+      if (msgPrefix && typeof msgPrefix !== "string")
+        throw Error(`Unknown msgPrefix type "${typeof msgPrefix}" - expected "string"`);
+      assertDefaultLevelFound(level, customLevels, useOnlyCustomLevels);
+      const levels = mappings(customLevels, useOnlyCustomLevels);
+      if (typeof stream.emit === "function") {
+        stream.emit("message", { code: "PINO_CONFIG", config: { levels, messageKey, errorKey } });
+      }
+      assertLevelComparison(levelComparison);
+      const levelCompFunc = genLevelComparison(levelComparison);
+      Object.assign(instance, {
+        levels,
+        [levelCompSym]: levelCompFunc,
+        [useOnlyCustomLevelsSym]: useOnlyCustomLevels,
+        [streamSym]: stream,
+        [timeSym]: time2,
+        [timeSliceIndexSym]: timeSliceIndex,
+        [stringifySym]: stringify2,
+        [stringifySafeSym]: stringifySafe,
+        [stringifiersSym]: stringifiers,
+        [endSym]: end,
+        [formatOptsSym]: formatOpts,
+        [messageKeySym]: messageKey,
+        [errorKeySym]: errorKey,
+        [nestedKeySym]: nestedKey,
+        // protect against injection
+        [nestedKeyStrSym]: nestedKey ? `,${JSON.stringify(nestedKey)}:{` : "",
+        [serializersSym]: serializers2,
+        [mixinSym]: mixin,
+        [mixinMergeStrategySym]: mixinMergeStrategy,
+        [chindingsSym]: chindings,
+        [formattersSym]: allFormatters,
+        [hooksSym]: hooks,
+        silent: noop,
+        onChild,
+        [msgPrefixSym]: msgPrefix
+      });
+      Object.setPrototypeOf(instance, proto());
+      genLsCache(instance);
+      instance[setLevelSym](level);
+      return instance;
+    }
+    module2.exports = pino3;
+    module2.exports.destination = (dest = process.stdout.fd) => {
+      if (typeof dest === "object") {
+        dest.dest = normalizeDestFileDescriptor(dest.dest || process.stdout.fd);
+        return buildSafeSonicBoom(dest);
+      } else {
+        return buildSafeSonicBoom({ dest: normalizeDestFileDescriptor(dest), minLength: 0 });
+      }
+    };
+    module2.exports.transport = require_transport2();
+    module2.exports.multistream = require_multistream2();
+    module2.exports.levels = mappings();
+    module2.exports.stdSerializers = serializers;
+    module2.exports.stdTimeFunctions = Object.assign({}, time);
+    module2.exports.symbols = symbols;
+    module2.exports.version = version2;
+    module2.exports.default = pino3;
+    module2.exports.pino = pino3;
+  }
+});
+
 // node_modules/get-caller-file/index.js
 var require_get_caller_file = __commonJS({
   "node_modules/get-caller-file/index.js"(exports2, module2) {
@@ -70636,8 +73041,8 @@ var require_get_caller_file = __commonJS({
 var require_logger2 = __commonJS({
   "node_modules/pino-http/logger.js"(exports2, module2) {
     "use strict";
-    var { pino: pino3, symbols: { stringifySym, chindingsSym } } = require_pino();
-    var serializers = require_pino_std_serializers();
+    var { pino: pino3, symbols: { stringifySym, chindingsSym } } = require_pino3();
+    var serializers = require_pino_std_serializers2();
     var getCallerFile = require_get_caller_file();
     var startTime = Symbol("startTime");
     var reqObject = Symbol("reqObject");
@@ -70731,7 +73136,7 @@ var require_logger2 = __commonJS({
               [errKey]: error,
               [responseTimeKey]: responseTime
             }),
-            errorMessage(req, res, error)
+            errorMessage(req, res, error, responseTime)
           );
           return;
         }
@@ -71396,7 +73801,7 @@ var require_polyfills = __commonJS({
             var start = Date.now();
             var backoff = 0;
             fs$rename(from, to, function CB(er) {
-              if (er && (er.code === "EACCES" || er.code === "EPERM" || er.code === "EBUSY") && Date.now() - start < 6e4) {
+              if (er && (er.code === "EACCES" || er.code === "EPERM") && Date.now() - start < 6e4) {
                 setTimeout(function() {
                   fs.stat(to, function(stater, st) {
                     if (stater && stater.code === "ENOENT")
@@ -72474,7 +74879,7 @@ var require_pkg_conf = __commonJS({
 });
 
 // node_modules/dotenv/package.json
-var require_package2 = __commonJS({
+var require_package3 = __commonJS({
   "node_modules/dotenv/package.json"(exports2, module2) {
     module2.exports = {
       name: "dotenv",
@@ -72551,7 +74956,7 @@ var require_main = __commonJS({
     var path = __require("path");
     var os = __require("os");
     var crypto4 = __require("crypto");
-    var packageJson = require_package2();
+    var packageJson = require_package3();
     var version2 = packageJson.version;
     var LINE = /(?:^|^)\s*(?:export\s+)?([\w.-]+)(?:\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'|\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]+)?\s*(?:#.*)?(?:$|$)/mg;
     function parse2(src) {
@@ -73196,7 +75601,7 @@ var require_setup2 = __commonJS({
     var import_js_1 = require_import();
     var setup_js_1 = require_setup();
     var success_js_1 = require_success();
-    var setupAppFactory = (host, port) => async function setupApp(app, { getRouter }) {
+    var setupAppFactory = (host, port) => async function setupApp(app2, { getRouter }) {
       if (!getRouter) {
         throw new Error("getRouter is required to use the setup app");
       }
@@ -73206,8 +75611,8 @@ var require_setup2 = __commonJS({
         await setup.createWebhookChannel();
       }
       const route = getRouter();
-      route.use((0, logging_middleware_js_1.getLoggingMiddleware)(app.log));
-      printWelcomeMessage(app, host, port);
+      route.use((0, logging_middleware_js_1.getLoggingMiddleware)(app2.log));
+      printWelcomeMessage(app2, host, port);
       route.get("/probot", async (req, res) => {
         const baseUrl = getBaseUrl(req);
         const manifest = setup.getManifest(pkg, baseUrl);
@@ -73228,16 +75633,16 @@ var require_setup2 = __commonJS({
         }
         const response = await setup.createAppFromCode(code, {
           // @ts-expect-error
-          request: app.state.request
+          request: app2.state.request
         });
         if (process.env.PROJECT_DOMAIN) {
           (0, node_child_process_1.exec)("refresh", (error) => {
             if (error) {
-              app.log.error(error);
+              app2.log.error(error);
             }
           });
         } else {
-          printRestartMessage(app);
+          printRestartMessage(app2);
         }
         res.writeHead(302, {
           "content-type": "text/plain",
@@ -73270,7 +75675,7 @@ var require_setup2 = __commonJS({
           WEBHOOK_SECRET: webhook_secret
         });
         res.end();
-        printRestartMessage(app);
+        printRestartMessage(app2);
       });
       const successViewRendered = (0, success_js_1.successView)({ name: pkg.name });
       route.get("/probot/success", (_req, res) => {
@@ -73279,7 +75684,7 @@ var require_setup2 = __commonJS({
       route.get("/", (_req, res) => res.writeHead(302, { "content-type": "text/plain", location: `/probot` }).end(`Found. Redirecting to /probot`));
     };
     exports2.setupAppFactory = setupAppFactory;
-    function printWelcomeMessage(app, host, port) {
+    function printWelcomeMessage(app2, host, port) {
       const domain = process.env.PROJECT_DOMAIN || `http://${host ?? "localhost"}:${port || 3e3}`;
       [
         ``,
@@ -73291,13 +75696,13 @@ var require_setup2 = __commonJS({
         `Once you are done, restart the server.`,
         ``
       ].forEach((line) => {
-        app.log.info(line);
+        app2.log.info(line);
       });
     }
-    function printRestartMessage(app) {
-      app.log.info("");
-      app.log.info("Probot has been set up, please restart the server!");
-      app.log.info("");
+    function printRestartMessage(app2) {
+      app2.log.info("");
+      app2.log.info("Probot has been set up, please restart the server!");
+      app2.log.info("");
     }
     function getBaseUrl(req) {
       const protocols = req.headers["x-forwarded-proto"] || // @ts-expect-error based on the functionality of express
@@ -73319,7 +75724,6 @@ var require_error2 = __commonJS({
        * @param {number} exitCode suggested exit code which could be used with process.exit
        * @param {string} code an id string representing the error
        * @param {string} message human-readable description of the error
-       * @constructor
        */
       constructor(exitCode, code, message) {
         super(message);
@@ -73334,7 +75738,6 @@ var require_error2 = __commonJS({
       /**
        * Constructs the InvalidArgumentError class
        * @param {string} [message] explanation of why argument is invalid
-       * @constructor
        */
       constructor(message) {
         super(1, "commander.invalidArgument", message);
@@ -73395,7 +75798,7 @@ var require_argument = __commonJS({
         return this._name;
       }
       /**
-       * @package internal use only
+       * @package
        */
       _concatValue(value, previous) {
         if (previous === this.defaultValue || !Array.isArray(previous)) {
@@ -73435,7 +75838,9 @@ var require_argument = __commonJS({
         this.argChoices = values.slice();
         this.parseArg = (arg, previous) => {
           if (!this.argChoices.includes(arg)) {
-            throw new InvalidArgumentError(`Allowed choices are ${this.argChoices.join(", ")}.`);
+            throw new InvalidArgumentError(
+              `Allowed choices are ${this.argChoices.join(", ")}.`
+            );
           }
           if (this.variadic) {
             return this._concatValue(arg, previous);
@@ -73446,6 +75851,8 @@ var require_argument = __commonJS({
       }
       /**
        * Make argument required.
+       *
+       * @returns {Argument}
        */
       argRequired() {
         this.required = true;
@@ -73453,6 +75860,8 @@ var require_argument = __commonJS({
       }
       /**
        * Make argument optional.
+       *
+       * @returns {Argument}
        */
       argOptional() {
         this.required = false;
@@ -73503,7 +75912,7 @@ var require_help = __commonJS({
        *
        * @param {Option} a
        * @param {Option} b
-       * @returns number
+       * @returns {number}
        */
       compareOptions(a, b) {
         const getSortKey = (option) => {
@@ -73526,9 +75935,13 @@ var require_help = __commonJS({
           if (!removeShort && !removeLong) {
             visibleOptions.push(helpOption);
           } else if (helpOption.long && !removeLong) {
-            visibleOptions.push(cmd.createOption(helpOption.long, helpOption.description));
+            visibleOptions.push(
+              cmd.createOption(helpOption.long, helpOption.description)
+            );
           } else if (helpOption.short && !removeShort) {
-            visibleOptions.push(cmd.createOption(helpOption.short, helpOption.description));
+            visibleOptions.push(
+              cmd.createOption(helpOption.short, helpOption.description)
+            );
           }
         }
         if (this.sortOptions) {
@@ -73547,7 +75960,9 @@ var require_help = __commonJS({
           return [];
         const globalOptions = [];
         for (let ancestorCmd = cmd.parent; ancestorCmd; ancestorCmd = ancestorCmd.parent) {
-          const visibleOptions = ancestorCmd.options.filter((option) => !option.hidden);
+          const visibleOptions = ancestorCmd.options.filter(
+            (option) => !option.hidden
+          );
           globalOptions.push(...visibleOptions);
         }
         if (this.sortOptions) {
@@ -73702,7 +76117,9 @@ var require_help = __commonJS({
         if (option.defaultValue !== void 0) {
           const showDefault = option.required || option.optional || option.isBoolean() && typeof option.defaultValue === "boolean";
           if (showDefault) {
-            extraInfo.push(`default: ${option.defaultValueDescription || JSON.stringify(option.defaultValue)}`);
+            extraInfo.push(
+              `default: ${option.defaultValueDescription || JSON.stringify(option.defaultValue)}`
+            );
           }
         }
         if (option.presetArg !== void 0 && option.optional) {
@@ -73731,7 +76148,9 @@ var require_help = __commonJS({
           );
         }
         if (argument.defaultValue !== void 0) {
-          extraInfo.push(`default: ${argument.defaultValueDescription || JSON.stringify(argument.defaultValue)}`);
+          extraInfo.push(
+            `default: ${argument.defaultValueDescription || JSON.stringify(argument.defaultValue)}`
+          );
         }
         if (extraInfo.length > 0) {
           const extraDescripton = `(${extraInfo.join(", ")})`;
@@ -73757,7 +76176,11 @@ var require_help = __commonJS({
         function formatItem(term, description) {
           if (description) {
             const fullText = `${term.padEnd(termWidth + itemSeparatorWidth)}${description}`;
-            return helper.wrap(fullText, helpWidth - itemIndentWidth, termWidth + itemSeparatorWidth);
+            return helper.wrap(
+              fullText,
+              helpWidth - itemIndentWidth,
+              termWidth + itemSeparatorWidth
+            );
           }
           return term;
         }
@@ -73767,30 +76190,49 @@ var require_help = __commonJS({
         let output = [`Usage: ${helper.commandUsage(cmd)}`, ""];
         const commandDescription = helper.commandDescription(cmd);
         if (commandDescription.length > 0) {
-          output = output.concat([helper.wrap(commandDescription, helpWidth, 0), ""]);
+          output = output.concat([
+            helper.wrap(commandDescription, helpWidth, 0),
+            ""
+          ]);
         }
         const argumentList = helper.visibleArguments(cmd).map((argument) => {
-          return formatItem(helper.argumentTerm(argument), helper.argumentDescription(argument));
+          return formatItem(
+            helper.argumentTerm(argument),
+            helper.argumentDescription(argument)
+          );
         });
         if (argumentList.length > 0) {
           output = output.concat(["Arguments:", formatList(argumentList), ""]);
         }
         const optionList = helper.visibleOptions(cmd).map((option) => {
-          return formatItem(helper.optionTerm(option), helper.optionDescription(option));
+          return formatItem(
+            helper.optionTerm(option),
+            helper.optionDescription(option)
+          );
         });
         if (optionList.length > 0) {
           output = output.concat(["Options:", formatList(optionList), ""]);
         }
         if (this.showGlobalOptions) {
           const globalOptionList = helper.visibleGlobalOptions(cmd).map((option) => {
-            return formatItem(helper.optionTerm(option), helper.optionDescription(option));
+            return formatItem(
+              helper.optionTerm(option),
+              helper.optionDescription(option)
+            );
           });
           if (globalOptionList.length > 0) {
-            output = output.concat(["Global Options:", formatList(globalOptionList), ""]);
+            output = output.concat([
+              "Global Options:",
+              formatList(globalOptionList),
+              ""
+            ]);
           }
         }
         const commandList = helper.visibleCommands(cmd).map((cmd2) => {
-          return formatItem(helper.subcommandTerm(cmd2), helper.subcommandDescription(cmd2));
+          return formatItem(
+            helper.subcommandTerm(cmd2),
+            helper.subcommandDescription(cmd2)
+          );
         });
         if (commandList.length > 0) {
           output = output.concat(["Commands:", formatList(commandList), ""]);
@@ -73836,8 +76278,11 @@ var require_help = __commonJS({
         const indentString = " ".repeat(indent);
         const zeroWidthSpace = "\u200B";
         const breaks = `\\s${zeroWidthSpace}`;
-        const regex = new RegExp(`
-|.{1,${columnWidth - 1}}([${breaks}]|$)|[^${breaks}]+?([${breaks}]|$)`, "g");
+        const regex = new RegExp(
+          `
+|.{1,${columnWidth - 1}}([${breaks}]|$)|[^${breaks}]+?([${breaks}]|$)`,
+          "g"
+        );
         const lines = columnText.match(regex) || [];
         return leadingStr + lines.map((line, i) => {
           if (line === "\n")
@@ -73937,7 +76382,7 @@ var require_option = __commonJS({
        *   .addOption(new Option('--log', 'write logging information to file'))
        *   .addOption(new Option('--trace', 'log extra details').implies({ log: 'trace.txt' }));
        *
-       * @param {Object} impliedOptionValues
+       * @param {object} impliedOptionValues
        * @return {Option}
        */
       implies(impliedOptionValues) {
@@ -73992,7 +76437,7 @@ var require_option = __commonJS({
         return this;
       }
       /**
-       * @package internal use only
+       * @package
        */
       _concatValue(value, previous) {
         if (previous === this.defaultValue || !Array.isArray(previous)) {
@@ -74010,7 +76455,9 @@ var require_option = __commonJS({
         this.argChoices = values.slice();
         this.parseArg = (arg, previous) => {
           if (!this.argChoices.includes(arg)) {
-            throw new InvalidArgumentError(`Allowed choices are ${this.argChoices.join(", ")}.`);
+            throw new InvalidArgumentError(
+              `Allowed choices are ${this.argChoices.join(", ")}.`
+            );
           }
           if (this.variadic) {
             return this._concatValue(arg, previous);
@@ -74044,7 +76491,7 @@ var require_option = __commonJS({
        *
        * @param {string} arg
        * @return {boolean}
-       * @package internal use only
+       * @package
        */
       is(arg) {
         return this.short === arg || this.long === arg;
@@ -74055,7 +76502,7 @@ var require_option = __commonJS({
        * Options are one of boolean, negated, required argument, or optional argument.
        *
        * @return {boolean}
-       * @package internal use only
+       * @package
        */
       isBoolean() {
         return !this.required && !this.optional && !this.negate;
@@ -74206,11 +76653,11 @@ var require_suggestSimilar = __commonJS({
 // node_modules/commander/lib/command.js
 var require_command = __commonJS({
   "node_modules/commander/lib/command.js"(exports2) {
-    var EventEmitter = __require("events").EventEmitter;
-    var childProcess = __require("child_process");
-    var path = __require("path");
-    var fs = __require("fs");
-    var process2 = __require("process");
+    var EventEmitter = __require("node:events").EventEmitter;
+    var childProcess = __require("node:child_process");
+    var path = __require("node:path");
+    var fs = __require("node:fs");
+    var process2 = __require("node:process");
     var { Argument, humanReadableArgName } = require_argument();
     var { CommanderError } = require_error2();
     var { Help } = require_help();
@@ -74321,8 +76768,8 @@ var require_command = __commonJS({
        *   .command('stop [service]', 'stop named service, or all if no name supplied');
        *
        * @param {string} nameAndArgs - command name and arguments, args are `<required>` or `[optional]` and last may also be `variadic...`
-       * @param {(Object|string)} [actionOptsOrExecDesc] - configuration options (for action), or description (for executable)
-       * @param {Object} [execOpts] - configuration options (for executable)
+       * @param {(object | string)} [actionOptsOrExecDesc] - configuration options (for action), or description (for executable)
+       * @param {object} [execOpts] - configuration options (for executable)
        * @return {Command} returns new command for action handler, or `this` for executable command
        */
       command(nameAndArgs, actionOptsOrExecDesc, execOpts) {
@@ -74377,8 +76824,8 @@ var require_command = __commonJS({
        * You can customise the help by overriding Help properties using configureHelp(),
        * or with a subclass of Help by overriding createHelp().
        *
-       * @param {Object} [configuration] - configuration options
-       * @return {(Command|Object)} `this` command for chaining, or stored configuration
+       * @param {object} [configuration] - configuration options
+       * @return {(Command | object)} `this` command for chaining, or stored configuration
        */
       configureHelp(configuration) {
         if (configuration === void 0)
@@ -74401,8 +76848,8 @@ var require_command = __commonJS({
        *     // functions based on what is being written out
        *     outputError(str, write) // used for displaying errors, and not used for displaying help
        *
-       * @param {Object} [configuration] - configuration options
-       * @return {(Command|Object)} `this` command for chaining, or stored configuration
+       * @param {object} [configuration] - configuration options
+       * @return {(Command | object)} `this` command for chaining, or stored configuration
        */
       configureOutput(configuration) {
         if (configuration === void 0)
@@ -74438,7 +76885,7 @@ var require_command = __commonJS({
        * See .command() for creating an attached subcommand which inherits settings from its parent.
        *
        * @param {Command} cmd - new subcommand
-       * @param {Object} [opts] - configuration options
+       * @param {object} [opts] - configuration options
        * @return {Command} `this` command for chaining
        */
       addCommand(cmd, opts) {
@@ -74521,10 +76968,14 @@ var require_command = __commonJS({
       addArgument(argument) {
         const previousArgument = this.registeredArguments.slice(-1)[0];
         if (previousArgument && previousArgument.variadic) {
-          throw new Error(`only the last argument can be variadic '${previousArgument.name()}'`);
+          throw new Error(
+            `only the last argument can be variadic '${previousArgument.name()}'`
+          );
         }
         if (argument.required && argument.defaultValue !== void 0 && argument.parseArg === void 0) {
-          throw new Error(`a default value for a required argument is never used: '${argument.name()}'`);
+          throw new Error(
+            `a default value for a required argument is never used: '${argument.name()}'`
+          );
         }
         this.registeredArguments.push(argument);
         return this;
@@ -74532,6 +76983,7 @@ var require_command = __commonJS({
       /**
        * Customise or override default help command. By default a help command is automatically added if your command has subcommands.
        *
+       * @example
        *    program.helpCommand('help [cmd]');
        *    program.helpCommand('help [cmd]', 'show help');
        *    program.helpCommand(false); // suppress default help command
@@ -74712,7 +77164,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
        * Register option if no conflicts found, or throw on conflict.
        *
        * @param {Option} option
-       * @api private
+       * @private
        */
       _registerOption(option) {
         const matchingOption = option.short && this._findOption(option.short) || option.long && this._findOption(option.long);
@@ -74728,17 +77180,21 @@ Expecting one of '${allowedValues.join("', '")}'`);
        * Register command if no conflicts found, or throw on conflict.
        *
        * @param {Command} command
-       * @api private
+       * @private
        */
       _registerCommand(command) {
         const knownBy = (cmd) => {
           return [cmd.name()].concat(cmd.aliases());
         };
-        const alreadyUsed = knownBy(command).find((name) => this._findCommand(name));
+        const alreadyUsed = knownBy(command).find(
+          (name) => this._findCommand(name)
+        );
         if (alreadyUsed) {
           const existingCmd = knownBy(this._findCommand(alreadyUsed)).join("|");
           const newCmd = knownBy(command).join("|");
-          throw new Error(`cannot add command '${newCmd}' as already have command '${existingCmd}'`);
+          throw new Error(
+            `cannot add command '${newCmd}' as already have command '${existingCmd}'`
+          );
         }
         this.commands.push(command);
       }
@@ -74755,7 +77211,11 @@ Expecting one of '${allowedValues.join("', '")}'`);
         if (option.negate) {
           const positiveLongFlag = option.long.replace(/^--no-/, "--");
           if (!this._findOption(positiveLongFlag)) {
-            this.setOptionValueWithSource(name, option.defaultValue === void 0 ? true : option.defaultValue, "default");
+            this.setOptionValueWithSource(
+              name,
+              option.defaultValue === void 0 ? true : option.defaultValue,
+              "default"
+            );
           }
         } else if (option.defaultValue !== void 0) {
           this.setOptionValueWithSource(name, option.defaultValue, "default");
@@ -74796,11 +77256,14 @@ Expecting one of '${allowedValues.join("', '")}'`);
       /**
        * Internal implementation shared by .option() and .requiredOption()
        *
+       * @return {Command} `this` command for chaining
        * @private
        */
       _optionEx(config, flags, description, fn, defaultValue) {
         if (typeof flags === "object" && flags instanceof Option) {
-          throw new Error("To add an Option object use addOption() instead of option() or requiredOption()");
+          throw new Error(
+            "To add an Option object use addOption() instead of option() or requiredOption()"
+          );
         }
         const option = this.createOption(flags, description);
         option.makeOptionMandatory(!!config.mandatory);
@@ -74843,19 +77306,25 @@ Expecting one of '${allowedValues.join("', '")}'`);
         return this._optionEx({}, flags, description, parseArg, defaultValue);
       }
       /**
-      * Add a required option which must have a value after parsing. This usually means
-      * the option must be specified on the command line. (Otherwise the same as .option().)
-      *
-      * The `flags` string contains the short and/or long flags, separated by comma, a pipe or space.
-      *
-      * @param {string} flags
-      * @param {string} [description]
-      * @param {(Function|*)} [parseArg] - custom option processing function or default value
-      * @param {*} [defaultValue]
-      * @return {Command} `this` command for chaining
-      */
+       * Add a required option which must have a value after parsing. This usually means
+       * the option must be specified on the command line. (Otherwise the same as .option().)
+       *
+       * The `flags` string contains the short and/or long flags, separated by comma, a pipe or space.
+       *
+       * @param {string} flags
+       * @param {string} [description]
+       * @param {(Function|*)} [parseArg] - custom option processing function or default value
+       * @param {*} [defaultValue]
+       * @return {Command} `this` command for chaining
+       */
       requiredOption(flags, description, parseArg, defaultValue) {
-        return this._optionEx({ mandatory: true }, flags, description, parseArg, defaultValue);
+        return this._optionEx(
+          { mandatory: true },
+          flags,
+          description,
+          parseArg,
+          defaultValue
+        );
       }
       /**
        * Alter parsing of short flags with optional values.
@@ -74865,7 +77334,8 @@ Expecting one of '${allowedValues.join("', '")}'`);
        * program.combineFlagAndOptionalValue(true);  // `-f80` is treated like `--flag=80`, this is the default behaviour
        * program.combineFlagAndOptionalValue(false) // `-fb` is treated like `-f -b`
        *
-       * @param {boolean} [combine=true] - if `true` or omitted, an optional value can be specified directly after the flag.
+       * @param {boolean} [combine] - if `true` or omitted, an optional value can be specified directly after the flag.
+       * @return {Command} `this` command for chaining
        */
       combineFlagAndOptionalValue(combine = true) {
         this._combineFlagAndOptionalValue = !!combine;
@@ -74874,8 +77344,8 @@ Expecting one of '${allowedValues.join("', '")}'`);
       /**
        * Allow unknown options on the command line.
        *
-       * @param {boolean} [allowUnknown=true] - if `true` or omitted, no error will be thrown
-       * for unknown options.
+       * @param {boolean} [allowUnknown] - if `true` or omitted, no error will be thrown for unknown options.
+       * @return {Command} `this` command for chaining
        */
       allowUnknownOption(allowUnknown = true) {
         this._allowUnknownOption = !!allowUnknown;
@@ -74884,8 +77354,8 @@ Expecting one of '${allowedValues.join("', '")}'`);
       /**
        * Allow excess command-arguments on the command line. Pass false to make excess arguments an error.
        *
-       * @param {boolean} [allowExcess=true] - if `true` or omitted, no error will be thrown
-       * for excess arguments.
+       * @param {boolean} [allowExcess] - if `true` or omitted, no error will be thrown for excess arguments.
+       * @return {Command} `this` command for chaining
        */
       allowExcessArguments(allowExcess = true) {
         this._allowExcessArguments = !!allowExcess;
@@ -74896,7 +77366,8 @@ Expecting one of '${allowedValues.join("', '")}'`);
        * subcommands reuse the same option names, and also enables subcommands to turn on passThroughOptions.
        * The default behaviour is non-positional and global options may appear anywhere on the command line.
        *
-       * @param {boolean} [positional=true]
+       * @param {boolean} [positional]
+       * @return {Command} `this` command for chaining
        */
       enablePositionalOptions(positional = true) {
         this._enablePositionalOptions = !!positional;
@@ -74908,8 +77379,8 @@ Expecting one of '${allowedValues.join("', '")}'`);
        * positional options to have been enabled on the program (parent commands).
        * The default behaviour is non-positional and options may appear before or after command-arguments.
        *
-       * @param {boolean} [passThrough=true]
-       * for unknown options.
+       * @param {boolean} [passThrough] for unknown options.
+       * @return {Command} `this` command for chaining
        */
       passThroughOptions(passThrough = true) {
         this._passThroughOptions = !!passThrough;
@@ -74921,22 +77392,26 @@ Expecting one of '${allowedValues.join("', '")}'`);
        */
       _checkForBrokenPassThrough() {
         if (this.parent && this._passThroughOptions && !this.parent._enablePositionalOptions) {
-          throw new Error(`passThroughOptions cannot be used for '${this._name}' without turning on enablePositionalOptions for parent command(s)`);
+          throw new Error(
+            `passThroughOptions cannot be used for '${this._name}' without turning on enablePositionalOptions for parent command(s)`
+          );
         }
       }
       /**
-        * Whether to store option values as properties on command object,
-        * or store separately (specify false). In both cases the option values can be accessed using .opts().
-        *
-        * @param {boolean} [storeAsProperties=true]
-        * @return {Command} `this` command for chaining
-        */
+       * Whether to store option values as properties on command object,
+       * or store separately (specify false). In both cases the option values can be accessed using .opts().
+       *
+       * @param {boolean} [storeAsProperties=true]
+       * @return {Command} `this` command for chaining
+       */
       storeOptionsAsProperties(storeAsProperties = true) {
         if (this.options.length) {
           throw new Error("call .storeOptionsAsProperties() before adding options");
         }
         if (Object.keys(this._optionValues).length) {
-          throw new Error("call .storeOptionsAsProperties() before setting option values");
+          throw new Error(
+            "call .storeOptionsAsProperties() before setting option values"
+          );
         }
         this._storeOptionsAsProperties = !!storeAsProperties;
         return this;
@@ -74945,7 +77420,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
        * Retrieve option value.
        *
        * @param {string} key
-       * @return {Object} value
+       * @return {object} value
        */
       getOptionValue(key) {
         if (this._storeOptionsAsProperties) {
@@ -74957,20 +77432,20 @@ Expecting one of '${allowedValues.join("', '")}'`);
        * Store option value.
        *
        * @param {string} key
-       * @param {Object} value
+       * @param {object} value
        * @return {Command} `this` command for chaining
        */
       setOptionValue(key, value) {
         return this.setOptionValueWithSource(key, value, void 0);
       }
       /**
-        * Store option value and where the value came from.
-        *
-        * @param {string} key
-        * @param {Object} value
-        * @param {string} source - expected values are default/config/env/cli/implied
-        * @return {Command} `this` command for chaining
-        */
+       * Store option value and where the value came from.
+       *
+       * @param {string} key
+       * @param {object} value
+       * @param {string} source - expected values are default/config/env/cli/implied
+       * @return {Command} `this` command for chaining
+       */
       setOptionValueWithSource(key, value, source) {
         if (this._storeOptionsAsProperties) {
           this[key] = value;
@@ -74981,22 +77456,22 @@ Expecting one of '${allowedValues.join("', '")}'`);
         return this;
       }
       /**
-        * Get source of option value.
-        * Expected values are default | config | env | cli | implied
-        *
-        * @param {string} key
-        * @return {string}
-        */
+       * Get source of option value.
+       * Expected values are default | config | env | cli | implied
+       *
+       * @param {string} key
+       * @return {string}
+       */
       getOptionValueSource(key) {
         return this._optionValueSources[key];
       }
       /**
-        * Get source of option value. See also .optsWithGlobals().
-        * Expected values are default | config | env | cli | implied
-        *
-        * @param {string} key
-        * @return {string}
-        */
+       * Get source of option value. See also .optsWithGlobals().
+       * Expected values are default | config | env | cli | implied
+       *
+       * @param {string} key
+       * @return {string}
+       */
       getOptionValueSourceWithGlobals(key) {
         let source;
         this._getCommandAndAncestors().forEach((cmd) => {
@@ -75017,11 +77492,17 @@ Expecting one of '${allowedValues.join("', '")}'`);
           throw new Error("first parameter to parse must be array or undefined");
         }
         parseOptions = parseOptions || {};
-        if (argv === void 0) {
-          argv = process2.argv;
-          if (process2.versions && process2.versions.electron) {
+        if (argv === void 0 && parseOptions.from === void 0) {
+          if (process2.versions?.electron) {
             parseOptions.from = "electron";
           }
+          const execArgv = process2.execArgv ?? [];
+          if (execArgv.includes("-e") || execArgv.includes("--eval") || execArgv.includes("-p") || execArgv.includes("--print")) {
+            parseOptions.from = "eval";
+          }
+        }
+        if (argv === void 0) {
+          argv = process2.argv;
         }
         this.rawArgs = argv.slice();
         let userArgs;
@@ -75042,8 +77523,13 @@ Expecting one of '${allowedValues.join("', '")}'`);
           case "user":
             userArgs = argv.slice(0);
             break;
+          case "eval":
+            userArgs = argv.slice(1);
+            break;
           default:
-            throw new Error(`unexpected parse option { from: '${parseOptions.from}' }`);
+            throw new Error(
+              `unexpected parse option { from: '${parseOptions.from}' }`
+            );
         }
         if (!this._name && this._scriptPath)
           this.nameFromFilename(this._scriptPath);
@@ -75053,16 +77539,22 @@ Expecting one of '${allowedValues.join("', '")}'`);
       /**
        * Parse `argv`, setting options and invoking commands when defined.
        *
-       * The default expectation is that the arguments are from node and have the application as argv[0]
-       * and the script being run in argv[1], with user parameters after that.
+       * Use parseAsync instead of parse if any of your action handlers are async.
+       *
+       * Call with no parameters to parse `process.argv`. Detects Electron and special node options like `node --eval`. Easy mode!
+       *
+       * Or call with an array of strings to parse, and optionally where the user arguments start by specifying where the arguments are `from`:
+       * - `'node'`: default, `argv[0]` is the application and `argv[1]` is the script being run, with user arguments after that
+       * - `'electron'`: `argv[0]` is the application and `argv[1]` varies depending on whether the electron application is packaged
+       * - `'user'`: just user arguments
        *
        * @example
-       * program.parse(process.argv);
-       * program.parse(); // implicitly use process.argv and auto-detect node vs electron conventions
+       * program.parse(); // parse process.argv and auto-detect electron and special node flags
+       * program.parse(process.argv); // assume argv[0] is app and argv[1] is script
        * program.parse(my-args, { from: 'user' }); // just user supplied arguments, nothing special about argv[0]
        *
        * @param {string[]} [argv] - optional, defaults to process.argv
-       * @param {Object} [parseOptions] - optionally specify style of options with from: node/user/electron
+       * @param {object} [parseOptions] - optionally specify style of options with from: node/user/electron
        * @param {string} [parseOptions.from] - where the args are from: 'node', 'user', 'electron'
        * @return {Command} `this` command for chaining
        */
@@ -75074,18 +77566,20 @@ Expecting one of '${allowedValues.join("', '")}'`);
       /**
        * Parse `argv`, setting options and invoking commands when defined.
        *
-       * Use parseAsync instead of parse if any of your action handlers are async. Returns a Promise.
+       * Call with no parameters to parse `process.argv`. Detects Electron and special node options like `node --eval`. Easy mode!
        *
-       * The default expectation is that the arguments are from node and have the application as argv[0]
-       * and the script being run in argv[1], with user parameters after that.
+       * Or call with an array of strings to parse, and optionally where the user arguments start by specifying where the arguments are `from`:
+       * - `'node'`: default, `argv[0]` is the application and `argv[1]` is the script being run, with user arguments after that
+       * - `'electron'`: `argv[0]` is the application and `argv[1]` varies depending on whether the electron application is packaged
+       * - `'user'`: just user arguments
        *
        * @example
-       * await program.parseAsync(process.argv);
-       * await program.parseAsync(); // implicitly use process.argv and auto-detect node vs electron conventions
+       * await program.parseAsync(); // parse process.argv and auto-detect electron and special node flags
+       * await program.parseAsync(process.argv); // assume argv[0] is app and argv[1] is script
        * await program.parseAsync(my-args, { from: 'user' }); // just user supplied arguments, nothing special about argv[0]
        *
        * @param {string[]} [argv]
-       * @param {Object} [parseOptions]
+       * @param {object} [parseOptions]
        * @param {string} parseOptions.from - where the args are from: 'node', 'user', 'electron'
        * @return {Promise}
        */
@@ -75109,7 +77603,9 @@ Expecting one of '${allowedValues.join("', '")}'`);
             return localBin;
           if (sourceExt.includes(path.extname(baseName)))
             return void 0;
-          const foundExt = sourceExt.find((ext) => fs.existsSync(`${localBin}${ext}`));
+          const foundExt = sourceExt.find(
+            (ext) => fs.existsSync(`${localBin}${ext}`)
+          );
           if (foundExt)
             return `${localBin}${foundExt}`;
           return void 0;
@@ -75125,14 +77621,23 @@ Expecting one of '${allowedValues.join("', '")}'`);
           } catch (err) {
             resolvedScriptPath = this._scriptPath;
           }
-          executableDir = path.resolve(path.dirname(resolvedScriptPath), executableDir);
+          executableDir = path.resolve(
+            path.dirname(resolvedScriptPath),
+            executableDir
+          );
         }
         if (executableDir) {
           let localFile = findFile(executableDir, executableFile);
           if (!localFile && !subcommand._executableFile && this._scriptPath) {
-            const legacyName = path.basename(this._scriptPath, path.extname(this._scriptPath));
+            const legacyName = path.basename(
+              this._scriptPath,
+              path.extname(this._scriptPath)
+            );
             if (legacyName !== this._name) {
-              localFile = findFile(executableDir, `${legacyName}-${subcommand._name}`);
+              localFile = findFile(
+                executableDir,
+                `${legacyName}-${subcommand._name}`
+              );
             }
           }
           executableFile = localFile || executableFile;
@@ -75163,12 +77668,18 @@ Expecting one of '${allowedValues.join("', '")}'`);
           });
         }
         const exitCallback = this._exitCallback;
-        proc.on("close", (code, _signal) => {
+        proc.on("close", (code) => {
           code = code ?? 1;
           if (!exitCallback) {
             process2.exit(code);
           } else {
-            exitCallback(new CommanderError(code, "commander.executeSubCommandAsync", "(close)"));
+            exitCallback(
+              new CommanderError(
+                code,
+                "commander.executeSubCommandAsync",
+                "(close)"
+              )
+            );
           }
         });
         proc.on("error", (err) => {
@@ -75185,7 +77696,11 @@ Expecting one of '${allowedValues.join("', '")}'`);
           if (!exitCallback) {
             process2.exit(1);
           } else {
-            const wrappedError = new CommanderError(1, "commander.executeSubCommandAsync", "(error)");
+            const wrappedError = new CommanderError(
+              1,
+              "commander.executeSubCommandAsync",
+              "(error)"
+            );
             wrappedError.nestedError = err;
             exitCallback(wrappedError);
           }
@@ -75200,7 +77715,11 @@ Expecting one of '${allowedValues.join("', '")}'`);
         if (!subCommand)
           this.help({ error: true });
         let promiseChain;
-        promiseChain = this._chainOrCallSubCommandHook(promiseChain, subCommand, "preSubcommand");
+        promiseChain = this._chainOrCallSubCommandHook(
+          promiseChain,
+          subCommand,
+          "preSubcommand"
+        );
         promiseChain = this._chainOrCall(promiseChain, () => {
           if (subCommand._executableHandler) {
             this._executeSubCommand(subCommand, operands.concat(unknown));
@@ -75224,9 +77743,11 @@ Expecting one of '${allowedValues.join("', '")}'`);
         if (subCommand && !subCommand._executableHandler) {
           subCommand.help();
         }
-        return this._dispatchSubcommand(subcommandName, [], [
-          this._getHelpOption()?.long ?? this._getHelpOption()?.short ?? "--help"
-        ]);
+        return this._dispatchSubcommand(
+          subcommandName,
+          [],
+          [this._getHelpOption()?.long ?? this._getHelpOption()?.short ?? "--help"]
+        );
       }
       /**
        * Check this.args against expected this.registeredArguments.
@@ -75256,7 +77777,12 @@ Expecting one of '${allowedValues.join("', '")}'`);
           let parsedValue = value;
           if (value !== null && argument.parseArg) {
             const invalidValueMessage = `error: command-argument value '${value}' is invalid for argument '${argument.name()}'.`;
-            parsedValue = this._callParseArg(argument, value, previous, invalidValueMessage);
+            parsedValue = this._callParseArg(
+              argument,
+              value,
+              previous,
+              invalidValueMessage
+            );
           }
           return parsedValue;
         };
@@ -75364,7 +77890,11 @@ Expecting one of '${allowedValues.join("', '")}'`);
         }
         if (this._defaultCommandName) {
           this._outputHelpIfRequested(unknown);
-          return this._dispatchSubcommand(this._defaultCommandName, operands, unknown);
+          return this._dispatchSubcommand(
+            this._defaultCommandName,
+            operands,
+            unknown
+          );
         }
         if (this.commands.length && this.args.length === 0 && !this._actionHandler && !this._defaultCommandName) {
           this.help({ error: true });
@@ -75383,7 +77913,10 @@ Expecting one of '${allowedValues.join("', '")}'`);
           this._processArguments();
           let promiseChain;
           promiseChain = this._chainOrCallHooks(promiseChain, "preAction");
-          promiseChain = this._chainOrCall(promiseChain, () => this._actionHandler(this.processedArgs));
+          promiseChain = this._chainOrCall(
+            promiseChain,
+            () => this._actionHandler(this.processedArgs)
+          );
           if (this.parent) {
             promiseChain = this._chainOrCall(promiseChain, () => {
               this.parent.emit(commandEvent, operands, unknown);
@@ -75420,18 +77953,21 @@ Expecting one of '${allowedValues.join("', '")}'`);
        * Find matching command.
        *
        * @private
+       * @return {Command | undefined}
        */
       _findCommand(name) {
         if (!name)
           return void 0;
-        return this.commands.find((cmd) => cmd._name === name || cmd._aliases.includes(name));
+        return this.commands.find(
+          (cmd) => cmd._name === name || cmd._aliases.includes(name)
+        );
       }
       /**
        * Return an option matching `arg` if any.
        *
        * @param {string} arg
        * @return {Option}
-       * @package internal use only
+       * @package
        */
       _findOption(arg) {
         return this.options.find((option) => option.is(arg));
@@ -75457,15 +77993,13 @@ Expecting one of '${allowedValues.join("', '")}'`);
        * @private
        */
       _checkForConflictingLocalOptions() {
-        const definedNonDefaultOptions = this.options.filter(
-          (option) => {
-            const optionKey = option.attributeName();
-            if (this.getOptionValue(optionKey) === void 0) {
-              return false;
-            }
-            return this.getOptionValueSource(optionKey) !== "default";
+        const definedNonDefaultOptions = this.options.filter((option) => {
+          const optionKey = option.attributeName();
+          if (this.getOptionValue(optionKey) === void 0) {
+            return false;
           }
-        );
+          return this.getOptionValueSource(optionKey) !== "default";
+        });
         const optionsWithConflicting = definedNonDefaultOptions.filter(
           (option) => option.conflictsWith.length > 0
         );
@@ -75601,7 +78135,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
       /**
        * Return an object containing local option values as key-value pairs.
        *
-       * @return {Object}
+       * @return {object}
        */
       opts() {
         if (this._storeOptionsAsProperties) {
@@ -75618,7 +78152,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
       /**
        * Return an object containing merged local and global option values as key-value pairs.
        *
-       * @return {Object}
+       * @return {object}
        */
       optsWithGlobals() {
         return this._getCommandAndAncestors().reduce(
@@ -75630,13 +78164,16 @@ Expecting one of '${allowedValues.join("', '")}'`);
        * Display error message and exit (or call exitOverride).
        *
        * @param {string} message
-       * @param {Object} [errorOptions]
+       * @param {object} [errorOptions]
        * @param {string} [errorOptions.code] - an id string representing the error
        * @param {number} [errorOptions.exitCode] - used with process.exit
        */
       error(message, errorOptions) {
-        this._outputConfiguration.outputError(`${message}
-`, this._outputConfiguration.writeErr);
+        this._outputConfiguration.outputError(
+          `${message}
+`,
+          this._outputConfiguration.writeErr
+        );
         if (typeof this._showHelpAfterError === "string") {
           this._outputConfiguration.writeErr(`${this._showHelpAfterError}
 `);
@@ -75659,7 +78196,9 @@ Expecting one of '${allowedValues.join("', '")}'`);
         this.options.forEach((option) => {
           if (option.envVar && option.envVar in process2.env) {
             const optionKey = option.attributeName();
-            if (this.getOptionValue(optionKey) === void 0 || ["default", "config", "env"].includes(this.getOptionValueSource(optionKey))) {
+            if (this.getOptionValue(optionKey) === void 0 || ["default", "config", "env"].includes(
+              this.getOptionValueSource(optionKey)
+            )) {
               if (option.required || option.optional) {
                 this.emit(`optionEnv:${option.name()}`, process2.env[option.envVar]);
               } else {
@@ -75679,9 +78218,18 @@ Expecting one of '${allowedValues.join("', '")}'`);
         const hasCustomOptionValue = (optionKey) => {
           return this.getOptionValue(optionKey) !== void 0 && !["default", "implied"].includes(this.getOptionValueSource(optionKey));
         };
-        this.options.filter((option) => option.implied !== void 0 && hasCustomOptionValue(option.attributeName()) && dualHelper.valueFromOption(this.getOptionValue(option.attributeName()), option)).forEach((option) => {
+        this.options.filter(
+          (option) => option.implied !== void 0 && hasCustomOptionValue(option.attributeName()) && dualHelper.valueFromOption(
+            this.getOptionValue(option.attributeName()),
+            option
+          )
+        ).forEach((option) => {
           Object.keys(option.implied).filter((impliedKey) => !hasCustomOptionValue(impliedKey)).forEach((impliedKey) => {
-            this.setOptionValueWithSource(impliedKey, option.implied[impliedKey], "implied");
+            this.setOptionValueWithSource(
+              impliedKey,
+              option.implied[impliedKey],
+              "implied"
+            );
           });
         });
       }
@@ -75726,8 +78274,12 @@ Expecting one of '${allowedValues.join("', '")}'`);
         const findBestOptionFromValue = (option2) => {
           const optionKey = option2.attributeName();
           const optionValue = this.getOptionValue(optionKey);
-          const negativeOption = this.options.find((target) => target.negate && optionKey === target.attributeName());
-          const positiveOption = this.options.find((target) => !target.negate && optionKey === target.attributeName());
+          const negativeOption = this.options.find(
+            (target) => target.negate && optionKey === target.attributeName()
+          );
+          const positiveOption = this.options.find(
+            (target) => !target.negate && optionKey === target.attributeName()
+          );
           if (negativeOption && (negativeOption.presetArg === void 0 && optionValue === false || negativeOption.presetArg !== void 0 && optionValue === negativeOption.presetArg)) {
             return negativeOption;
           }
@@ -75835,7 +78387,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
        * Set the description.
        *
        * @param {string} [str]
-       * @param {Object} [argsDescription]
+       * @param {object} [argsDescription]
        * @return {(string|Command)}
        */
       description(str, argsDescription) {
@@ -75879,7 +78431,9 @@ Expecting one of '${allowedValues.join("', '")}'`);
         const matchingCommand = this.parent?._findCommand(alias);
         if (matchingCommand) {
           const existingCmd = [matchingCommand.name()].concat(matchingCommand.aliases()).join("|");
-          throw new Error(`cannot add alias '${alias}' to command '${this.name()}' as already have command '${existingCmd}'`);
+          throw new Error(
+            `cannot add alias '${alias}' to command '${this.name()}' as already have command '${existingCmd}'`
+          );
         }
         command._aliases.push(alias);
         return this;
@@ -76022,7 +78576,9 @@ Expecting one of '${allowedValues.join("', '")}'`);
           this.emit(this._getHelpOption().long);
         }
         this.emit("afterHelp", context);
-        this._getCommandAndAncestors().forEach((command) => command.emit("afterAllHelp", context));
+        this._getCommandAndAncestors().forEach(
+          (command) => command.emit("afterAllHelp", context)
+        );
       }
       /**
        * You can pass in flags and a description to customise the built-in help option.
@@ -76055,7 +78611,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
        * Returns null if has been disabled with .helpOption(false).
        *
        * @returns {(Option | null)} the help option
-       * @package internal use only
+       * @package
        */
       _getHelpOption() {
         if (this._helpOption === void 0) {
@@ -76431,7 +78987,7 @@ var require_homedir = __commonJS({
 });
 
 // node_modules/resolve/lib/caller.js
-var require_caller2 = __commonJS({
+var require_caller3 = __commonJS({
   "node_modules/resolve/lib/caller.js"(exports2, module2) {
     module2.exports = function() {
       var origPrepareStackTrace = Error.prepareStackTrace;
@@ -76789,7 +79345,7 @@ var require_async2 = __commonJS({
     var fs = __require("fs");
     var getHomedir = require_homedir();
     var path = __require("path");
-    var caller = require_caller2();
+    var caller = require_caller3();
     var nodeModulesPaths = require_node_modules_paths();
     var normalizeOptions = require_normalize_options();
     var isCore = require_is_core_module();
@@ -77319,7 +79875,7 @@ var require_sync = __commonJS({
     var fs = __require("fs");
     var path = __require("path");
     var getHomedir = require_homedir();
-    var caller = require_caller2();
+    var caller = require_caller3();
     var nodeModulesPaths = require_node_modules_paths();
     var normalizeOptions = require_normalize_options();
     var realpathFS = process.platform !== "win32" && fs.realpathSync && typeof fs.realpathSync.native === "function" ? fs.realpathSync.native : fs.realpathSync;
@@ -77778,6 +80334,2940 @@ var require_lib6 = __commonJS({
     Object.defineProperty(exports2, "createProbot", { enumerable: true, get: function() {
       return create_probot_js_1.createProbot;
     } });
+  }
+});
+
+// node_modules/pino-std-serializers/lib/err-helpers.js
+var require_err_helpers3 = __commonJS({
+  "node_modules/pino-std-serializers/lib/err-helpers.js"(exports2, module2) {
+    "use strict";
+    var isErrorLike = (err) => {
+      return err && typeof err.message === "string";
+    };
+    var getErrorCause = (err) => {
+      if (!err)
+        return;
+      const cause = err.cause;
+      if (typeof cause === "function") {
+        const causeResult = err.cause();
+        return isErrorLike(causeResult) ? causeResult : void 0;
+      } else {
+        return isErrorLike(cause) ? cause : void 0;
+      }
+    };
+    var _stackWithCauses = (err, seen) => {
+      if (!isErrorLike(err))
+        return "";
+      const stack = err.stack || "";
+      if (seen.has(err)) {
+        return stack + "\ncauses have become circular...";
+      }
+      const cause = getErrorCause(err);
+      if (cause) {
+        seen.add(err);
+        return stack + "\ncaused by: " + _stackWithCauses(cause, seen);
+      } else {
+        return stack;
+      }
+    };
+    var stackWithCauses = (err) => _stackWithCauses(err, /* @__PURE__ */ new Set());
+    var _messageWithCauses = (err, seen, skip) => {
+      if (!isErrorLike(err))
+        return "";
+      const message = skip ? "" : err.message || "";
+      if (seen.has(err)) {
+        return message + ": ...";
+      }
+      const cause = getErrorCause(err);
+      if (cause) {
+        seen.add(err);
+        const skipIfVErrorStyleCause = typeof err.cause === "function";
+        return message + (skipIfVErrorStyleCause ? "" : ": ") + _messageWithCauses(cause, seen, skipIfVErrorStyleCause);
+      } else {
+        return message;
+      }
+    };
+    var messageWithCauses = (err) => _messageWithCauses(err, /* @__PURE__ */ new Set());
+    module2.exports = {
+      isErrorLike,
+      getErrorCause,
+      stackWithCauses,
+      messageWithCauses
+    };
+  }
+});
+
+// node_modules/pino-std-serializers/lib/err-proto.js
+var require_err_proto3 = __commonJS({
+  "node_modules/pino-std-serializers/lib/err-proto.js"(exports2, module2) {
+    "use strict";
+    var seen = Symbol("circular-ref-tag");
+    var rawSymbol = Symbol("pino-raw-err-ref");
+    var pinoErrProto = Object.create({}, {
+      type: {
+        enumerable: true,
+        writable: true,
+        value: void 0
+      },
+      message: {
+        enumerable: true,
+        writable: true,
+        value: void 0
+      },
+      stack: {
+        enumerable: true,
+        writable: true,
+        value: void 0
+      },
+      aggregateErrors: {
+        enumerable: true,
+        writable: true,
+        value: void 0
+      },
+      raw: {
+        enumerable: false,
+        get: function() {
+          return this[rawSymbol];
+        },
+        set: function(val) {
+          this[rawSymbol] = val;
+        }
+      }
+    });
+    Object.defineProperty(pinoErrProto, rawSymbol, {
+      writable: true,
+      value: {}
+    });
+    module2.exports = {
+      pinoErrProto,
+      pinoErrorSymbols: {
+        seen,
+        rawSymbol
+      }
+    };
+  }
+});
+
+// node_modules/pino-std-serializers/lib/err.js
+var require_err3 = __commonJS({
+  "node_modules/pino-std-serializers/lib/err.js"(exports2, module2) {
+    "use strict";
+    module2.exports = errSerializer;
+    var { messageWithCauses, stackWithCauses, isErrorLike } = require_err_helpers3();
+    var { pinoErrProto, pinoErrorSymbols } = require_err_proto3();
+    var { seen } = pinoErrorSymbols;
+    var { toString } = Object.prototype;
+    function errSerializer(err) {
+      if (!isErrorLike(err)) {
+        return err;
+      }
+      err[seen] = void 0;
+      const _err = Object.create(pinoErrProto);
+      _err.type = toString.call(err.constructor) === "[object Function]" ? err.constructor.name : err.name;
+      _err.message = messageWithCauses(err);
+      _err.stack = stackWithCauses(err);
+      if (Array.isArray(err.errors)) {
+        _err.aggregateErrors = err.errors.map((err2) => errSerializer(err2));
+      }
+      for (const key in err) {
+        if (_err[key] === void 0) {
+          const val = err[key];
+          if (isErrorLike(val)) {
+            if (key !== "cause" && !Object.prototype.hasOwnProperty.call(val, seen)) {
+              _err[key] = errSerializer(val);
+            }
+          } else {
+            _err[key] = val;
+          }
+        }
+      }
+      delete err[seen];
+      _err.raw = err;
+      return _err;
+    }
+  }
+});
+
+// node_modules/pino-std-serializers/lib/err-with-cause.js
+var require_err_with_cause3 = __commonJS({
+  "node_modules/pino-std-serializers/lib/err-with-cause.js"(exports2, module2) {
+    "use strict";
+    module2.exports = errWithCauseSerializer;
+    var { isErrorLike } = require_err_helpers3();
+    var { pinoErrProto, pinoErrorSymbols } = require_err_proto3();
+    var { seen } = pinoErrorSymbols;
+    var { toString } = Object.prototype;
+    function errWithCauseSerializer(err) {
+      if (!isErrorLike(err)) {
+        return err;
+      }
+      err[seen] = void 0;
+      const _err = Object.create(pinoErrProto);
+      _err.type = toString.call(err.constructor) === "[object Function]" ? err.constructor.name : err.name;
+      _err.message = err.message;
+      _err.stack = err.stack;
+      if (Array.isArray(err.errors)) {
+        _err.aggregateErrors = err.errors.map((err2) => errWithCauseSerializer(err2));
+      }
+      if (isErrorLike(err.cause) && !Object.prototype.hasOwnProperty.call(err.cause, seen)) {
+        _err.cause = errWithCauseSerializer(err.cause);
+      }
+      for (const key in err) {
+        if (_err[key] === void 0) {
+          const val = err[key];
+          if (isErrorLike(val)) {
+            if (!Object.prototype.hasOwnProperty.call(val, seen)) {
+              _err[key] = errWithCauseSerializer(val);
+            }
+          } else {
+            _err[key] = val;
+          }
+        }
+      }
+      delete err[seen];
+      _err.raw = err;
+      return _err;
+    }
+  }
+});
+
+// node_modules/pino-std-serializers/lib/req.js
+var require_req3 = __commonJS({
+  "node_modules/pino-std-serializers/lib/req.js"(exports2, module2) {
+    "use strict";
+    module2.exports = {
+      mapHttpRequest,
+      reqSerializer
+    };
+    var rawSymbol = Symbol("pino-raw-req-ref");
+    var pinoReqProto = Object.create({}, {
+      id: {
+        enumerable: true,
+        writable: true,
+        value: ""
+      },
+      method: {
+        enumerable: true,
+        writable: true,
+        value: ""
+      },
+      url: {
+        enumerable: true,
+        writable: true,
+        value: ""
+      },
+      query: {
+        enumerable: true,
+        writable: true,
+        value: ""
+      },
+      params: {
+        enumerable: true,
+        writable: true,
+        value: ""
+      },
+      headers: {
+        enumerable: true,
+        writable: true,
+        value: {}
+      },
+      remoteAddress: {
+        enumerable: true,
+        writable: true,
+        value: ""
+      },
+      remotePort: {
+        enumerable: true,
+        writable: true,
+        value: ""
+      },
+      raw: {
+        enumerable: false,
+        get: function() {
+          return this[rawSymbol];
+        },
+        set: function(val) {
+          this[rawSymbol] = val;
+        }
+      }
+    });
+    Object.defineProperty(pinoReqProto, rawSymbol, {
+      writable: true,
+      value: {}
+    });
+    function reqSerializer(req) {
+      const connection = req.info || req.socket;
+      const _req = Object.create(pinoReqProto);
+      _req.id = typeof req.id === "function" ? req.id() : req.id || (req.info ? req.info.id : void 0);
+      _req.method = req.method;
+      if (req.originalUrl) {
+        _req.url = req.originalUrl;
+      } else {
+        const path = req.path;
+        _req.url = typeof path === "string" ? path : req.url ? req.url.path || req.url : void 0;
+      }
+      if (req.query) {
+        _req.query = req.query;
+      }
+      if (req.params) {
+        _req.params = req.params;
+      }
+      _req.headers = req.headers;
+      _req.remoteAddress = connection && connection.remoteAddress;
+      _req.remotePort = connection && connection.remotePort;
+      _req.raw = req.raw || req;
+      return _req;
+    }
+    function mapHttpRequest(req) {
+      return {
+        req: reqSerializer(req)
+      };
+    }
+  }
+});
+
+// node_modules/pino-std-serializers/lib/res.js
+var require_res3 = __commonJS({
+  "node_modules/pino-std-serializers/lib/res.js"(exports2, module2) {
+    "use strict";
+    module2.exports = {
+      mapHttpResponse,
+      resSerializer
+    };
+    var rawSymbol = Symbol("pino-raw-res-ref");
+    var pinoResProto = Object.create({}, {
+      statusCode: {
+        enumerable: true,
+        writable: true,
+        value: 0
+      },
+      headers: {
+        enumerable: true,
+        writable: true,
+        value: ""
+      },
+      raw: {
+        enumerable: false,
+        get: function() {
+          return this[rawSymbol];
+        },
+        set: function(val) {
+          this[rawSymbol] = val;
+        }
+      }
+    });
+    Object.defineProperty(pinoResProto, rawSymbol, {
+      writable: true,
+      value: {}
+    });
+    function resSerializer(res) {
+      const _res = Object.create(pinoResProto);
+      _res.statusCode = res.headersSent ? res.statusCode : null;
+      _res.headers = res.getHeaders ? res.getHeaders() : res._headers;
+      _res.raw = res;
+      return _res;
+    }
+    function mapHttpResponse(res) {
+      return {
+        res: resSerializer(res)
+      };
+    }
+  }
+});
+
+// node_modules/pino-std-serializers/index.js
+var require_pino_std_serializers3 = __commonJS({
+  "node_modules/pino-std-serializers/index.js"(exports2, module2) {
+    "use strict";
+    var errSerializer = require_err3();
+    var errWithCauseSerializer = require_err_with_cause3();
+    var reqSerializers = require_req3();
+    var resSerializers = require_res3();
+    module2.exports = {
+      err: errSerializer,
+      errWithCause: errWithCauseSerializer,
+      mapHttpRequest: reqSerializers.mapHttpRequest,
+      mapHttpResponse: resSerializers.mapHttpResponse,
+      req: reqSerializers.reqSerializer,
+      res: resSerializers.resSerializer,
+      wrapErrorSerializer: function wrapErrorSerializer(customSerializer) {
+        if (customSerializer === errSerializer)
+          return customSerializer;
+        return function wrapErrSerializer(err) {
+          return customSerializer(errSerializer(err));
+        };
+      },
+      wrapRequestSerializer: function wrapRequestSerializer(customSerializer) {
+        if (customSerializer === reqSerializers.reqSerializer)
+          return customSerializer;
+        return function wrappedReqSerializer(req) {
+          return customSerializer(reqSerializers.reqSerializer(req));
+        };
+      },
+      wrapResponseSerializer: function wrapResponseSerializer(customSerializer) {
+        if (customSerializer === resSerializers.resSerializer)
+          return customSerializer;
+        return function wrappedResSerializer(res) {
+          return customSerializer(resSerializers.resSerializer(res));
+        };
+      }
+    };
+  }
+});
+
+// node_modules/pino/lib/caller.js
+var require_caller4 = __commonJS({
+  "node_modules/pino/lib/caller.js"(exports2, module2) {
+    "use strict";
+    function noOpPrepareStackTrace(_, stack) {
+      return stack;
+    }
+    module2.exports = function getCallers() {
+      const originalPrepare = Error.prepareStackTrace;
+      Error.prepareStackTrace = noOpPrepareStackTrace;
+      const stack = new Error().stack;
+      Error.prepareStackTrace = originalPrepare;
+      if (!Array.isArray(stack)) {
+        return void 0;
+      }
+      const entries = stack.slice(2);
+      const fileNames = [];
+      for (const entry of entries) {
+        if (!entry) {
+          continue;
+        }
+        fileNames.push(entry.getFileName());
+      }
+      return fileNames;
+    };
+  }
+});
+
+// node_modules/pino/lib/symbols.js
+var require_symbols3 = __commonJS({
+  "node_modules/pino/lib/symbols.js"(exports2, module2) {
+    "use strict";
+    var setLevelSym = Symbol("pino.setLevel");
+    var getLevelSym = Symbol("pino.getLevel");
+    var levelValSym = Symbol("pino.levelVal");
+    var levelCompSym = Symbol("pino.levelComp");
+    var useLevelLabelsSym = Symbol("pino.useLevelLabels");
+    var useOnlyCustomLevelsSym = Symbol("pino.useOnlyCustomLevels");
+    var mixinSym = Symbol("pino.mixin");
+    var lsCacheSym = Symbol("pino.lsCache");
+    var chindingsSym = Symbol("pino.chindings");
+    var asJsonSym = Symbol("pino.asJson");
+    var writeSym = Symbol("pino.write");
+    var redactFmtSym = Symbol("pino.redactFmt");
+    var timeSym = Symbol("pino.time");
+    var timeSliceIndexSym = Symbol("pino.timeSliceIndex");
+    var streamSym = Symbol("pino.stream");
+    var stringifySym = Symbol("pino.stringify");
+    var stringifySafeSym = Symbol("pino.stringifySafe");
+    var stringifiersSym = Symbol("pino.stringifiers");
+    var endSym = Symbol("pino.end");
+    var formatOptsSym = Symbol("pino.formatOpts");
+    var messageKeySym = Symbol("pino.messageKey");
+    var errorKeySym = Symbol("pino.errorKey");
+    var nestedKeySym = Symbol("pino.nestedKey");
+    var nestedKeyStrSym = Symbol("pino.nestedKeyStr");
+    var mixinMergeStrategySym = Symbol("pino.mixinMergeStrategy");
+    var msgPrefixSym = Symbol("pino.msgPrefix");
+    var wildcardFirstSym = Symbol("pino.wildcardFirst");
+    var serializersSym = Symbol.for("pino.serializers");
+    var formattersSym = Symbol.for("pino.formatters");
+    var hooksSym = Symbol.for("pino.hooks");
+    var needsMetadataGsym = Symbol.for("pino.metadata");
+    module2.exports = {
+      setLevelSym,
+      getLevelSym,
+      levelValSym,
+      levelCompSym,
+      useLevelLabelsSym,
+      mixinSym,
+      lsCacheSym,
+      chindingsSym,
+      asJsonSym,
+      writeSym,
+      serializersSym,
+      redactFmtSym,
+      timeSym,
+      timeSliceIndexSym,
+      streamSym,
+      stringifySym,
+      stringifySafeSym,
+      stringifiersSym,
+      endSym,
+      formatOptsSym,
+      messageKeySym,
+      errorKeySym,
+      nestedKeySym,
+      wildcardFirstSym,
+      needsMetadataGsym,
+      useOnlyCustomLevelsSym,
+      formattersSym,
+      hooksSym,
+      nestedKeyStrSym,
+      mixinMergeStrategySym,
+      msgPrefixSym
+    };
+  }
+});
+
+// node_modules/pino/lib/redaction.js
+var require_redaction3 = __commonJS({
+  "node_modules/pino/lib/redaction.js"(exports2, module2) {
+    "use strict";
+    var fastRedact = require_fast_redact();
+    var { redactFmtSym, wildcardFirstSym } = require_symbols3();
+    var { rx, validator } = fastRedact;
+    var validate2 = validator({
+      ERR_PATHS_MUST_BE_STRINGS: () => "pino \u2013 redacted paths must be strings",
+      ERR_INVALID_PATH: (s) => `pino \u2013 redact paths array contains an invalid path (${s})`
+    });
+    var CENSOR = "[Redacted]";
+    var strict = false;
+    function redaction(opts, serialize) {
+      const { paths, censor } = handle(opts);
+      const shape = paths.reduce((o, str) => {
+        rx.lastIndex = 0;
+        const first = rx.exec(str);
+        const next = rx.exec(str);
+        let ns = first[1] !== void 0 ? first[1].replace(/^(?:"|'|`)(.*)(?:"|'|`)$/, "$1") : first[0];
+        if (ns === "*") {
+          ns = wildcardFirstSym;
+        }
+        if (next === null) {
+          o[ns] = null;
+          return o;
+        }
+        if (o[ns] === null) {
+          return o;
+        }
+        const { index } = next;
+        const nextPath = `${str.substr(index, str.length - 1)}`;
+        o[ns] = o[ns] || [];
+        if (ns !== wildcardFirstSym && o[ns].length === 0) {
+          o[ns].push(...o[wildcardFirstSym] || []);
+        }
+        if (ns === wildcardFirstSym) {
+          Object.keys(o).forEach(function(k) {
+            if (o[k]) {
+              o[k].push(nextPath);
+            }
+          });
+        }
+        o[ns].push(nextPath);
+        return o;
+      }, {});
+      const result = {
+        [redactFmtSym]: fastRedact({ paths, censor, serialize, strict })
+      };
+      const topCensor = (...args) => {
+        return typeof censor === "function" ? serialize(censor(...args)) : serialize(censor);
+      };
+      return [...Object.keys(shape), ...Object.getOwnPropertySymbols(shape)].reduce((o, k) => {
+        if (shape[k] === null) {
+          o[k] = (value) => topCensor(value, [k]);
+        } else {
+          const wrappedCensor = typeof censor === "function" ? (value, path) => {
+            return censor(value, [k, ...path]);
+          } : censor;
+          o[k] = fastRedact({
+            paths: shape[k],
+            censor: wrappedCensor,
+            serialize,
+            strict
+          });
+        }
+        return o;
+      }, result);
+    }
+    function handle(opts) {
+      if (Array.isArray(opts)) {
+        opts = { paths: opts, censor: CENSOR };
+        validate2(opts);
+        return opts;
+      }
+      let { paths, censor = CENSOR, remove } = opts;
+      if (Array.isArray(paths) === false) {
+        throw Error("pino \u2013 redact must contain an array of strings");
+      }
+      if (remove === true)
+        censor = void 0;
+      validate2({ paths, censor });
+      return { paths, censor };
+    }
+    module2.exports = redaction;
+  }
+});
+
+// node_modules/pino/lib/time.js
+var require_time4 = __commonJS({
+  "node_modules/pino/lib/time.js"(exports2, module2) {
+    "use strict";
+    var nullTime = () => "";
+    var epochTime = () => `,"time":${Date.now()}`;
+    var unixTime = () => `,"time":${Math.round(Date.now() / 1e3)}`;
+    var isoTime = () => `,"time":"${new Date(Date.now()).toISOString()}"`;
+    module2.exports = { nullTime, epochTime, unixTime, isoTime };
+  }
+});
+
+// node_modules/sonic-boom/index.js
+var require_sonic_boom3 = __commonJS({
+  "node_modules/sonic-boom/index.js"(exports2, module2) {
+    "use strict";
+    var fs = __require("fs");
+    var EventEmitter = __require("events");
+    var inherits = __require("util").inherits;
+    var path = __require("path");
+    var sleep = require_atomic_sleep();
+    var BUSY_WRITE_TIMEOUT = 100;
+    var kEmptyBuffer = Buffer.allocUnsafe(0);
+    var MAX_WRITE = 16 * 1024;
+    var kContentModeBuffer = "buffer";
+    var kContentModeUtf8 = "utf8";
+    function openFile(file, sonic) {
+      sonic._opening = true;
+      sonic._writing = true;
+      sonic._asyncDrainScheduled = false;
+      function fileOpened(err, fd) {
+        if (err) {
+          sonic._reopening = false;
+          sonic._writing = false;
+          sonic._opening = false;
+          if (sonic.sync) {
+            process.nextTick(() => {
+              if (sonic.listenerCount("error") > 0) {
+                sonic.emit("error", err);
+              }
+            });
+          } else {
+            sonic.emit("error", err);
+          }
+          return;
+        }
+        const reopening = sonic._reopening;
+        sonic.fd = fd;
+        sonic.file = file;
+        sonic._reopening = false;
+        sonic._opening = false;
+        sonic._writing = false;
+        if (sonic.sync) {
+          process.nextTick(() => sonic.emit("ready"));
+        } else {
+          sonic.emit("ready");
+        }
+        if (sonic.destroyed) {
+          return;
+        }
+        if (!sonic._writing && sonic._len > sonic.minLength || sonic._flushPending) {
+          sonic._actualWrite();
+        } else if (reopening) {
+          process.nextTick(() => sonic.emit("drain"));
+        }
+      }
+      const flags = sonic.append ? "a" : "w";
+      const mode = sonic.mode;
+      if (sonic.sync) {
+        try {
+          if (sonic.mkdir)
+            fs.mkdirSync(path.dirname(file), { recursive: true });
+          const fd = fs.openSync(file, flags, mode);
+          fileOpened(null, fd);
+        } catch (err) {
+          fileOpened(err);
+          throw err;
+        }
+      } else if (sonic.mkdir) {
+        fs.mkdir(path.dirname(file), { recursive: true }, (err) => {
+          if (err)
+            return fileOpened(err);
+          fs.open(file, flags, mode, fileOpened);
+        });
+      } else {
+        fs.open(file, flags, mode, fileOpened);
+      }
+    }
+    function SonicBoom(opts) {
+      if (!(this instanceof SonicBoom)) {
+        return new SonicBoom(opts);
+      }
+      let { fd, dest, minLength, maxLength, maxWrite, sync, append = true, mkdir, retryEAGAIN, fsync, contentMode, mode } = opts || {};
+      fd = fd || dest;
+      this._len = 0;
+      this.fd = -1;
+      this._bufs = [];
+      this._lens = [];
+      this._writing = false;
+      this._ending = false;
+      this._reopening = false;
+      this._asyncDrainScheduled = false;
+      this._flushPending = false;
+      this._hwm = Math.max(minLength || 0, 16387);
+      this.file = null;
+      this.destroyed = false;
+      this.minLength = minLength || 0;
+      this.maxLength = maxLength || 0;
+      this.maxWrite = maxWrite || MAX_WRITE;
+      this.sync = sync || false;
+      this.writable = true;
+      this._fsync = fsync || false;
+      this.append = append || false;
+      this.mode = mode;
+      this.retryEAGAIN = retryEAGAIN || (() => true);
+      this.mkdir = mkdir || false;
+      let fsWriteSync;
+      let fsWrite;
+      if (contentMode === kContentModeBuffer) {
+        this._writingBuf = kEmptyBuffer;
+        this.write = writeBuffer;
+        this.flush = flushBuffer;
+        this.flushSync = flushBufferSync;
+        this._actualWrite = actualWriteBuffer;
+        fsWriteSync = () => fs.writeSync(this.fd, this._writingBuf);
+        fsWrite = () => fs.write(this.fd, this._writingBuf, this.release);
+      } else if (contentMode === void 0 || contentMode === kContentModeUtf8) {
+        this._writingBuf = "";
+        this.write = write;
+        this.flush = flush;
+        this.flushSync = flushSync;
+        this._actualWrite = actualWrite;
+        fsWriteSync = () => fs.writeSync(this.fd, this._writingBuf, "utf8");
+        fsWrite = () => fs.write(this.fd, this._writingBuf, "utf8", this.release);
+      } else {
+        throw new Error(`SonicBoom supports "${kContentModeUtf8}" and "${kContentModeBuffer}", but passed ${contentMode}`);
+      }
+      if (typeof fd === "number") {
+        this.fd = fd;
+        process.nextTick(() => this.emit("ready"));
+      } else if (typeof fd === "string") {
+        openFile(fd, this);
+      } else {
+        throw new Error("SonicBoom supports only file descriptors and files");
+      }
+      if (this.minLength >= this.maxWrite) {
+        throw new Error(`minLength should be smaller than maxWrite (${this.maxWrite})`);
+      }
+      this.release = (err, n) => {
+        if (err) {
+          if ((err.code === "EAGAIN" || err.code === "EBUSY") && this.retryEAGAIN(err, this._writingBuf.length, this._len - this._writingBuf.length)) {
+            if (this.sync) {
+              try {
+                sleep(BUSY_WRITE_TIMEOUT);
+                this.release(void 0, 0);
+              } catch (err2) {
+                this.release(err2);
+              }
+            } else {
+              setTimeout(fsWrite, BUSY_WRITE_TIMEOUT);
+            }
+          } else {
+            this._writing = false;
+            this.emit("error", err);
+          }
+          return;
+        }
+        this.emit("write", n);
+        const releasedBufObj = releaseWritingBuf(this._writingBuf, this._len, n);
+        this._len = releasedBufObj.len;
+        this._writingBuf = releasedBufObj.writingBuf;
+        if (this._writingBuf.length) {
+          if (!this.sync) {
+            fsWrite();
+            return;
+          }
+          try {
+            do {
+              const n2 = fsWriteSync();
+              const releasedBufObj2 = releaseWritingBuf(this._writingBuf, this._len, n2);
+              this._len = releasedBufObj2.len;
+              this._writingBuf = releasedBufObj2.writingBuf;
+            } while (this._writingBuf.length);
+          } catch (err2) {
+            this.release(err2);
+            return;
+          }
+        }
+        if (this._fsync) {
+          fs.fsyncSync(this.fd);
+        }
+        const len = this._len;
+        if (this._reopening) {
+          this._writing = false;
+          this._reopening = false;
+          this.reopen();
+        } else if (len > this.minLength) {
+          this._actualWrite();
+        } else if (this._ending) {
+          if (len > 0) {
+            this._actualWrite();
+          } else {
+            this._writing = false;
+            actualClose(this);
+          }
+        } else {
+          this._writing = false;
+          if (this.sync) {
+            if (!this._asyncDrainScheduled) {
+              this._asyncDrainScheduled = true;
+              process.nextTick(emitDrain, this);
+            }
+          } else {
+            this.emit("drain");
+          }
+        }
+      };
+      this.on("newListener", function(name) {
+        if (name === "drain") {
+          this._asyncDrainScheduled = false;
+        }
+      });
+    }
+    function releaseWritingBuf(writingBuf, len, n) {
+      if (typeof writingBuf === "string" && Buffer.byteLength(writingBuf) !== n) {
+        n = Buffer.from(writingBuf).subarray(0, n).toString().length;
+      }
+      len = Math.max(len - n, 0);
+      writingBuf = writingBuf.slice(n);
+      return { writingBuf, len };
+    }
+    function emitDrain(sonic) {
+      const hasListeners = sonic.listenerCount("drain") > 0;
+      if (!hasListeners)
+        return;
+      sonic._asyncDrainScheduled = false;
+      sonic.emit("drain");
+    }
+    inherits(SonicBoom, EventEmitter);
+    function mergeBuf(bufs, len) {
+      if (bufs.length === 0) {
+        return kEmptyBuffer;
+      }
+      if (bufs.length === 1) {
+        return bufs[0];
+      }
+      return Buffer.concat(bufs, len);
+    }
+    function write(data) {
+      if (this.destroyed) {
+        throw new Error("SonicBoom destroyed");
+      }
+      const len = this._len + data.length;
+      const bufs = this._bufs;
+      if (this.maxLength && len > this.maxLength) {
+        this.emit("drop", data);
+        return this._len < this._hwm;
+      }
+      if (bufs.length === 0 || bufs[bufs.length - 1].length + data.length > this.maxWrite) {
+        bufs.push("" + data);
+      } else {
+        bufs[bufs.length - 1] += data;
+      }
+      this._len = len;
+      if (!this._writing && this._len >= this.minLength) {
+        this._actualWrite();
+      }
+      return this._len < this._hwm;
+    }
+    function writeBuffer(data) {
+      if (this.destroyed) {
+        throw new Error("SonicBoom destroyed");
+      }
+      const len = this._len + data.length;
+      const bufs = this._bufs;
+      const lens = this._lens;
+      if (this.maxLength && len > this.maxLength) {
+        this.emit("drop", data);
+        return this._len < this._hwm;
+      }
+      if (bufs.length === 0 || lens[lens.length - 1] + data.length > this.maxWrite) {
+        bufs.push([data]);
+        lens.push(data.length);
+      } else {
+        bufs[bufs.length - 1].push(data);
+        lens[lens.length - 1] += data.length;
+      }
+      this._len = len;
+      if (!this._writing && this._len >= this.minLength) {
+        this._actualWrite();
+      }
+      return this._len < this._hwm;
+    }
+    function callFlushCallbackOnDrain(cb) {
+      this._flushPending = true;
+      const onDrain = () => {
+        if (!this._fsync) {
+          fs.fsync(this.fd, (err) => {
+            this._flushPending = false;
+            cb(err);
+          });
+        } else {
+          this._flushPending = false;
+          cb();
+        }
+        this.off("error", onError);
+      };
+      const onError = (err) => {
+        this._flushPending = false;
+        cb(err);
+        this.off("drain", onDrain);
+      };
+      this.once("drain", onDrain);
+      this.once("error", onError);
+    }
+    function flush(cb) {
+      if (cb != null && typeof cb !== "function") {
+        throw new Error("flush cb must be a function");
+      }
+      if (this.destroyed) {
+        const error = new Error("SonicBoom destroyed");
+        if (cb) {
+          cb(error);
+          return;
+        }
+        throw error;
+      }
+      if (this.minLength <= 0) {
+        cb?.();
+        return;
+      }
+      if (cb) {
+        callFlushCallbackOnDrain.call(this, cb);
+      }
+      if (this._writing) {
+        return;
+      }
+      if (this._bufs.length === 0) {
+        this._bufs.push("");
+      }
+      this._actualWrite();
+    }
+    function flushBuffer(cb) {
+      if (cb != null && typeof cb !== "function") {
+        throw new Error("flush cb must be a function");
+      }
+      if (this.destroyed) {
+        const error = new Error("SonicBoom destroyed");
+        if (cb) {
+          cb(error);
+          return;
+        }
+        throw error;
+      }
+      if (this.minLength <= 0) {
+        cb?.();
+        return;
+      }
+      if (cb) {
+        callFlushCallbackOnDrain.call(this, cb);
+      }
+      if (this._writing) {
+        return;
+      }
+      if (this._bufs.length === 0) {
+        this._bufs.push([]);
+        this._lens.push(0);
+      }
+      this._actualWrite();
+    }
+    SonicBoom.prototype.reopen = function(file) {
+      if (this.destroyed) {
+        throw new Error("SonicBoom destroyed");
+      }
+      if (this._opening) {
+        this.once("ready", () => {
+          this.reopen(file);
+        });
+        return;
+      }
+      if (this._ending) {
+        return;
+      }
+      if (!this.file) {
+        throw new Error("Unable to reopen a file descriptor, you must pass a file to SonicBoom");
+      }
+      if (file) {
+        this.file = file;
+      }
+      this._reopening = true;
+      if (this._writing) {
+        return;
+      }
+      const fd = this.fd;
+      this.once("ready", () => {
+        if (fd !== this.fd) {
+          fs.close(fd, (err) => {
+            if (err) {
+              return this.emit("error", err);
+            }
+          });
+        }
+      });
+      openFile(this.file, this);
+    };
+    SonicBoom.prototype.end = function() {
+      if (this.destroyed) {
+        throw new Error("SonicBoom destroyed");
+      }
+      if (this._opening) {
+        this.once("ready", () => {
+          this.end();
+        });
+        return;
+      }
+      if (this._ending) {
+        return;
+      }
+      this._ending = true;
+      if (this._writing) {
+        return;
+      }
+      if (this._len > 0 && this.fd >= 0) {
+        this._actualWrite();
+      } else {
+        actualClose(this);
+      }
+    };
+    function flushSync() {
+      if (this.destroyed) {
+        throw new Error("SonicBoom destroyed");
+      }
+      if (this.fd < 0) {
+        throw new Error("sonic boom is not ready yet");
+      }
+      if (!this._writing && this._writingBuf.length > 0) {
+        this._bufs.unshift(this._writingBuf);
+        this._writingBuf = "";
+      }
+      let buf = "";
+      while (this._bufs.length || buf) {
+        if (buf.length <= 0) {
+          buf = this._bufs[0];
+        }
+        try {
+          const n = fs.writeSync(this.fd, buf, "utf8");
+          const releasedBufObj = releaseWritingBuf(buf, this._len, n);
+          buf = releasedBufObj.writingBuf;
+          this._len = releasedBufObj.len;
+          if (buf.length <= 0) {
+            this._bufs.shift();
+          }
+        } catch (err) {
+          const shouldRetry = err.code === "EAGAIN" || err.code === "EBUSY";
+          if (shouldRetry && !this.retryEAGAIN(err, buf.length, this._len - buf.length)) {
+            throw err;
+          }
+          sleep(BUSY_WRITE_TIMEOUT);
+        }
+      }
+      try {
+        fs.fsyncSync(this.fd);
+      } catch {
+      }
+    }
+    function flushBufferSync() {
+      if (this.destroyed) {
+        throw new Error("SonicBoom destroyed");
+      }
+      if (this.fd < 0) {
+        throw new Error("sonic boom is not ready yet");
+      }
+      if (!this._writing && this._writingBuf.length > 0) {
+        this._bufs.unshift([this._writingBuf]);
+        this._writingBuf = kEmptyBuffer;
+      }
+      let buf = kEmptyBuffer;
+      while (this._bufs.length || buf.length) {
+        if (buf.length <= 0) {
+          buf = mergeBuf(this._bufs[0], this._lens[0]);
+        }
+        try {
+          const n = fs.writeSync(this.fd, buf);
+          buf = buf.subarray(n);
+          this._len = Math.max(this._len - n, 0);
+          if (buf.length <= 0) {
+            this._bufs.shift();
+            this._lens.shift();
+          }
+        } catch (err) {
+          const shouldRetry = err.code === "EAGAIN" || err.code === "EBUSY";
+          if (shouldRetry && !this.retryEAGAIN(err, buf.length, this._len - buf.length)) {
+            throw err;
+          }
+          sleep(BUSY_WRITE_TIMEOUT);
+        }
+      }
+    }
+    SonicBoom.prototype.destroy = function() {
+      if (this.destroyed) {
+        return;
+      }
+      actualClose(this);
+    };
+    function actualWrite() {
+      const release = this.release;
+      this._writing = true;
+      this._writingBuf = this._writingBuf || this._bufs.shift() || "";
+      if (this.sync) {
+        try {
+          const written = fs.writeSync(this.fd, this._writingBuf, "utf8");
+          release(null, written);
+        } catch (err) {
+          release(err);
+        }
+      } else {
+        fs.write(this.fd, this._writingBuf, "utf8", release);
+      }
+    }
+    function actualWriteBuffer() {
+      const release = this.release;
+      this._writing = true;
+      this._writingBuf = this._writingBuf.length ? this._writingBuf : mergeBuf(this._bufs.shift(), this._lens.shift());
+      if (this.sync) {
+        try {
+          const written = fs.writeSync(this.fd, this._writingBuf);
+          release(null, written);
+        } catch (err) {
+          release(err);
+        }
+      } else {
+        fs.write(this.fd, this._writingBuf, release);
+      }
+    }
+    function actualClose(sonic) {
+      if (sonic.fd === -1) {
+        sonic.once("ready", actualClose.bind(null, sonic));
+        return;
+      }
+      sonic.destroyed = true;
+      sonic._bufs = [];
+      sonic._lens = [];
+      fs.fsync(sonic.fd, closeWrapped);
+      function closeWrapped() {
+        if (sonic.fd !== 1 && sonic.fd !== 2) {
+          fs.close(sonic.fd, done);
+        } else {
+          done();
+        }
+      }
+      function done(err) {
+        if (err) {
+          sonic.emit("error", err);
+          return;
+        }
+        if (sonic._ending && !sonic._writing) {
+          sonic.emit("finish");
+        }
+        sonic.emit("close");
+      }
+    }
+    SonicBoom.SonicBoom = SonicBoom;
+    SonicBoom.default = SonicBoom;
+    module2.exports = SonicBoom;
+  }
+});
+
+// node_modules/thread-stream/package.json
+var require_package4 = __commonJS({
+  "node_modules/thread-stream/package.json"(exports2, module2) {
+    module2.exports = {
+      name: "thread-stream",
+      version: "2.7.0",
+      description: "A streaming way to send data to a Node.js Worker Thread",
+      main: "index.js",
+      types: "index.d.ts",
+      dependencies: {
+        "real-require": "^0.2.0"
+      },
+      devDependencies: {
+        "@types/node": "^20.1.0",
+        "@types/tap": "^15.0.0",
+        "@yao-pkg/pkg": "^5.11.5",
+        desm: "^1.3.0",
+        fastbench: "^1.0.1",
+        husky: "^9.0.6",
+        "pino-elasticsearch": "^8.0.0",
+        "sonic-boom": "^3.0.0",
+        standard: "^17.0.0",
+        tap: "^16.2.0",
+        "ts-node": "^10.8.0",
+        typescript: "^5.3.2",
+        "why-is-node-running": "^2.2.2"
+      },
+      scripts: {
+        test: 'standard && npm run transpile && tap "test/**/*.test.*js" && tap --ts test/*.test.*ts',
+        "test:ci": "standard && npm run transpile && npm run test:ci:js && npm run test:ci:ts",
+        "test:ci:js": 'tap --no-check-coverage --timeout=120 --coverage-report=lcovonly "test/**/*.test.*js"',
+        "test:ci:ts": 'tap --ts --no-check-coverage --coverage-report=lcovonly "test/**/*.test.*ts"',
+        "test:yarn": 'npm run transpile && tap "test/**/*.test.js" --no-check-coverage',
+        transpile: "sh ./test/ts/transpile.sh",
+        prepare: "husky install"
+      },
+      standard: {
+        ignore: [
+          "test/ts/**/*"
+        ]
+      },
+      repository: {
+        type: "git",
+        url: "git+https://github.com/mcollina/thread-stream.git"
+      },
+      keywords: [
+        "worker",
+        "thread",
+        "threads",
+        "stream"
+      ],
+      author: "Matteo Collina <hello@matteocollina.com>",
+      license: "MIT",
+      bugs: {
+        url: "https://github.com/mcollina/thread-stream/issues"
+      },
+      homepage: "https://github.com/mcollina/thread-stream#readme"
+    };
+  }
+});
+
+// node_modules/thread-stream/lib/wait.js
+var require_wait3 = __commonJS({
+  "node_modules/thread-stream/lib/wait.js"(exports2, module2) {
+    "use strict";
+    var MAX_TIMEOUT = 1e3;
+    function wait(state, index, expected, timeout, done) {
+      const max = Date.now() + timeout;
+      let current = Atomics.load(state, index);
+      if (current === expected) {
+        done(null, "ok");
+        return;
+      }
+      let prior = current;
+      const check = (backoff) => {
+        if (Date.now() > max) {
+          done(null, "timed-out");
+        } else {
+          setTimeout(() => {
+            prior = current;
+            current = Atomics.load(state, index);
+            if (current === prior) {
+              check(backoff >= MAX_TIMEOUT ? MAX_TIMEOUT : backoff * 2);
+            } else {
+              if (current === expected)
+                done(null, "ok");
+              else
+                done(null, "not-equal");
+            }
+          }, backoff);
+        }
+      };
+      check(1);
+    }
+    function waitDiff(state, index, expected, timeout, done) {
+      const max = Date.now() + timeout;
+      let current = Atomics.load(state, index);
+      if (current !== expected) {
+        done(null, "ok");
+        return;
+      }
+      const check = (backoff) => {
+        if (Date.now() > max) {
+          done(null, "timed-out");
+        } else {
+          setTimeout(() => {
+            current = Atomics.load(state, index);
+            if (current !== expected) {
+              done(null, "ok");
+            } else {
+              check(backoff >= MAX_TIMEOUT ? MAX_TIMEOUT : backoff * 2);
+            }
+          }, backoff);
+        }
+      };
+      check(1);
+    }
+    module2.exports = { wait, waitDiff };
+  }
+});
+
+// node_modules/thread-stream/lib/indexes.js
+var require_indexes3 = __commonJS({
+  "node_modules/thread-stream/lib/indexes.js"(exports2, module2) {
+    "use strict";
+    var WRITE_INDEX = 4;
+    var READ_INDEX = 8;
+    module2.exports = {
+      WRITE_INDEX,
+      READ_INDEX
+    };
+  }
+});
+
+// node_modules/thread-stream/index.js
+var require_thread_stream3 = __commonJS({
+  "node_modules/thread-stream/index.js"(exports2, module2) {
+    "use strict";
+    var { version: version2 } = require_package4();
+    var { EventEmitter } = __require("events");
+    var { Worker } = __require("worker_threads");
+    var { join } = __require("path");
+    var { pathToFileURL } = __require("url");
+    var { wait } = require_wait3();
+    var {
+      WRITE_INDEX,
+      READ_INDEX
+    } = require_indexes3();
+    var buffer = __require("buffer");
+    var assert = __require("assert");
+    var kImpl = Symbol("kImpl");
+    var MAX_STRING = buffer.constants.MAX_STRING_LENGTH;
+    var FakeWeakRef = class {
+      constructor(value) {
+        this._value = value;
+      }
+      deref() {
+        return this._value;
+      }
+    };
+    var FakeFinalizationRegistry = class {
+      register() {
+      }
+      unregister() {
+      }
+    };
+    var FinalizationRegistry2 = process.env.NODE_V8_COVERAGE ? FakeFinalizationRegistry : global.FinalizationRegistry || FakeFinalizationRegistry;
+    var WeakRef2 = process.env.NODE_V8_COVERAGE ? FakeWeakRef : global.WeakRef || FakeWeakRef;
+    var registry = new FinalizationRegistry2((worker) => {
+      if (worker.exited) {
+        return;
+      }
+      worker.terminate();
+    });
+    function createWorker(stream, opts) {
+      const { filename, workerData } = opts;
+      const bundlerOverrides = "__bundlerPathsOverrides" in globalThis ? globalThis.__bundlerPathsOverrides : {};
+      const toExecute = bundlerOverrides["thread-stream-worker"] || join(__dirname, "lib", "worker.js");
+      const worker = new Worker(toExecute, {
+        ...opts.workerOpts,
+        trackUnmanagedFds: false,
+        workerData: {
+          filename: filename.indexOf("file://") === 0 ? filename : pathToFileURL(filename).href,
+          dataBuf: stream[kImpl].dataBuf,
+          stateBuf: stream[kImpl].stateBuf,
+          workerData: {
+            $context: {
+              threadStreamVersion: version2
+            },
+            ...workerData
+          }
+        }
+      });
+      worker.stream = new FakeWeakRef(stream);
+      worker.on("message", onWorkerMessage);
+      worker.on("exit", onWorkerExit);
+      registry.register(stream, worker);
+      return worker;
+    }
+    function drain(stream) {
+      assert(!stream[kImpl].sync);
+      if (stream[kImpl].needDrain) {
+        stream[kImpl].needDrain = false;
+        stream.emit("drain");
+      }
+    }
+    function nextFlush(stream) {
+      const writeIndex = Atomics.load(stream[kImpl].state, WRITE_INDEX);
+      let leftover = stream[kImpl].data.length - writeIndex;
+      if (leftover > 0) {
+        if (stream[kImpl].buf.length === 0) {
+          stream[kImpl].flushing = false;
+          if (stream[kImpl].ending) {
+            end(stream);
+          } else if (stream[kImpl].needDrain) {
+            process.nextTick(drain, stream);
+          }
+          return;
+        }
+        let toWrite = stream[kImpl].buf.slice(0, leftover);
+        let toWriteBytes = Buffer.byteLength(toWrite);
+        if (toWriteBytes <= leftover) {
+          stream[kImpl].buf = stream[kImpl].buf.slice(leftover);
+          write(stream, toWrite, nextFlush.bind(null, stream));
+        } else {
+          stream.flush(() => {
+            if (stream.destroyed) {
+              return;
+            }
+            Atomics.store(stream[kImpl].state, READ_INDEX, 0);
+            Atomics.store(stream[kImpl].state, WRITE_INDEX, 0);
+            while (toWriteBytes > stream[kImpl].data.length) {
+              leftover = leftover / 2;
+              toWrite = stream[kImpl].buf.slice(0, leftover);
+              toWriteBytes = Buffer.byteLength(toWrite);
+            }
+            stream[kImpl].buf = stream[kImpl].buf.slice(leftover);
+            write(stream, toWrite, nextFlush.bind(null, stream));
+          });
+        }
+      } else if (leftover === 0) {
+        if (writeIndex === 0 && stream[kImpl].buf.length === 0) {
+          return;
+        }
+        stream.flush(() => {
+          Atomics.store(stream[kImpl].state, READ_INDEX, 0);
+          Atomics.store(stream[kImpl].state, WRITE_INDEX, 0);
+          nextFlush(stream);
+        });
+      } else {
+        destroy(stream, new Error("overwritten"));
+      }
+    }
+    function onWorkerMessage(msg) {
+      const stream = this.stream.deref();
+      if (stream === void 0) {
+        this.exited = true;
+        this.terminate();
+        return;
+      }
+      switch (msg.code) {
+        case "READY":
+          this.stream = new WeakRef2(stream);
+          stream.flush(() => {
+            stream[kImpl].ready = true;
+            stream.emit("ready");
+          });
+          break;
+        case "ERROR":
+          destroy(stream, msg.err);
+          break;
+        case "EVENT":
+          if (Array.isArray(msg.args)) {
+            stream.emit(msg.name, ...msg.args);
+          } else {
+            stream.emit(msg.name, msg.args);
+          }
+          break;
+        case "WARNING":
+          process.emitWarning(msg.err);
+          break;
+        default:
+          destroy(stream, new Error("this should not happen: " + msg.code));
+      }
+    }
+    function onWorkerExit(code) {
+      const stream = this.stream.deref();
+      if (stream === void 0) {
+        return;
+      }
+      registry.unregister(stream);
+      stream.worker.exited = true;
+      stream.worker.off("exit", onWorkerExit);
+      destroy(stream, code !== 0 ? new Error("the worker thread exited") : null);
+    }
+    var ThreadStream = class extends EventEmitter {
+      constructor(opts = {}) {
+        super();
+        if (opts.bufferSize < 4) {
+          throw new Error("bufferSize must at least fit a 4-byte utf-8 char");
+        }
+        this[kImpl] = {};
+        this[kImpl].stateBuf = new SharedArrayBuffer(128);
+        this[kImpl].state = new Int32Array(this[kImpl].stateBuf);
+        this[kImpl].dataBuf = new SharedArrayBuffer(opts.bufferSize || 4 * 1024 * 1024);
+        this[kImpl].data = Buffer.from(this[kImpl].dataBuf);
+        this[kImpl].sync = opts.sync || false;
+        this[kImpl].ending = false;
+        this[kImpl].ended = false;
+        this[kImpl].needDrain = false;
+        this[kImpl].destroyed = false;
+        this[kImpl].flushing = false;
+        this[kImpl].ready = false;
+        this[kImpl].finished = false;
+        this[kImpl].errored = null;
+        this[kImpl].closed = false;
+        this[kImpl].buf = "";
+        this.worker = createWorker(this, opts);
+        this.on("message", (message, transferList) => {
+          this.worker.postMessage(message, transferList);
+        });
+      }
+      write(data) {
+        if (this[kImpl].destroyed) {
+          error(this, new Error("the worker has exited"));
+          return false;
+        }
+        if (this[kImpl].ending) {
+          error(this, new Error("the worker is ending"));
+          return false;
+        }
+        if (this[kImpl].flushing && this[kImpl].buf.length + data.length >= MAX_STRING) {
+          try {
+            writeSync(this);
+            this[kImpl].flushing = true;
+          } catch (err) {
+            destroy(this, err);
+            return false;
+          }
+        }
+        this[kImpl].buf += data;
+        if (this[kImpl].sync) {
+          try {
+            writeSync(this);
+            return true;
+          } catch (err) {
+            destroy(this, err);
+            return false;
+          }
+        }
+        if (!this[kImpl].flushing) {
+          this[kImpl].flushing = true;
+          setImmediate(nextFlush, this);
+        }
+        this[kImpl].needDrain = this[kImpl].data.length - this[kImpl].buf.length - Atomics.load(this[kImpl].state, WRITE_INDEX) <= 0;
+        return !this[kImpl].needDrain;
+      }
+      end() {
+        if (this[kImpl].destroyed) {
+          return;
+        }
+        this[kImpl].ending = true;
+        end(this);
+      }
+      flush(cb) {
+        if (this[kImpl].destroyed) {
+          if (typeof cb === "function") {
+            process.nextTick(cb, new Error("the worker has exited"));
+          }
+          return;
+        }
+        const writeIndex = Atomics.load(this[kImpl].state, WRITE_INDEX);
+        wait(this[kImpl].state, READ_INDEX, writeIndex, Infinity, (err, res) => {
+          if (err) {
+            destroy(this, err);
+            process.nextTick(cb, err);
+            return;
+          }
+          if (res === "not-equal") {
+            this.flush(cb);
+            return;
+          }
+          process.nextTick(cb);
+        });
+      }
+      flushSync() {
+        if (this[kImpl].destroyed) {
+          return;
+        }
+        writeSync(this);
+        flushSync(this);
+      }
+      unref() {
+        this.worker.unref();
+      }
+      ref() {
+        this.worker.ref();
+      }
+      get ready() {
+        return this[kImpl].ready;
+      }
+      get destroyed() {
+        return this[kImpl].destroyed;
+      }
+      get closed() {
+        return this[kImpl].closed;
+      }
+      get writable() {
+        return !this[kImpl].destroyed && !this[kImpl].ending;
+      }
+      get writableEnded() {
+        return this[kImpl].ending;
+      }
+      get writableFinished() {
+        return this[kImpl].finished;
+      }
+      get writableNeedDrain() {
+        return this[kImpl].needDrain;
+      }
+      get writableObjectMode() {
+        return false;
+      }
+      get writableErrored() {
+        return this[kImpl].errored;
+      }
+    };
+    function error(stream, err) {
+      setImmediate(() => {
+        stream.emit("error", err);
+      });
+    }
+    function destroy(stream, err) {
+      if (stream[kImpl].destroyed) {
+        return;
+      }
+      stream[kImpl].destroyed = true;
+      if (err) {
+        stream[kImpl].errored = err;
+        error(stream, err);
+      }
+      if (!stream.worker.exited) {
+        stream.worker.terminate().catch(() => {
+        }).then(() => {
+          stream[kImpl].closed = true;
+          stream.emit("close");
+        });
+      } else {
+        setImmediate(() => {
+          stream[kImpl].closed = true;
+          stream.emit("close");
+        });
+      }
+    }
+    function write(stream, data, cb) {
+      const current = Atomics.load(stream[kImpl].state, WRITE_INDEX);
+      const length = Buffer.byteLength(data);
+      stream[kImpl].data.write(data, current);
+      Atomics.store(stream[kImpl].state, WRITE_INDEX, current + length);
+      Atomics.notify(stream[kImpl].state, WRITE_INDEX);
+      cb();
+      return true;
+    }
+    function end(stream) {
+      if (stream[kImpl].ended || !stream[kImpl].ending || stream[kImpl].flushing) {
+        return;
+      }
+      stream[kImpl].ended = true;
+      try {
+        stream.flushSync();
+        let readIndex = Atomics.load(stream[kImpl].state, READ_INDEX);
+        Atomics.store(stream[kImpl].state, WRITE_INDEX, -1);
+        Atomics.notify(stream[kImpl].state, WRITE_INDEX);
+        let spins = 0;
+        while (readIndex !== -1) {
+          Atomics.wait(stream[kImpl].state, READ_INDEX, readIndex, 1e3);
+          readIndex = Atomics.load(stream[kImpl].state, READ_INDEX);
+          if (readIndex === -2) {
+            destroy(stream, new Error("end() failed"));
+            return;
+          }
+          if (++spins === 10) {
+            destroy(stream, new Error("end() took too long (10s)"));
+            return;
+          }
+        }
+        process.nextTick(() => {
+          stream[kImpl].finished = true;
+          stream.emit("finish");
+        });
+      } catch (err) {
+        destroy(stream, err);
+      }
+    }
+    function writeSync(stream) {
+      const cb = () => {
+        if (stream[kImpl].ending) {
+          end(stream);
+        } else if (stream[kImpl].needDrain) {
+          process.nextTick(drain, stream);
+        }
+      };
+      stream[kImpl].flushing = false;
+      while (stream[kImpl].buf.length !== 0) {
+        const writeIndex = Atomics.load(stream[kImpl].state, WRITE_INDEX);
+        let leftover = stream[kImpl].data.length - writeIndex;
+        if (leftover === 0) {
+          flushSync(stream);
+          Atomics.store(stream[kImpl].state, READ_INDEX, 0);
+          Atomics.store(stream[kImpl].state, WRITE_INDEX, 0);
+          continue;
+        } else if (leftover < 0) {
+          throw new Error("overwritten");
+        }
+        let toWrite = stream[kImpl].buf.slice(0, leftover);
+        let toWriteBytes = Buffer.byteLength(toWrite);
+        if (toWriteBytes <= leftover) {
+          stream[kImpl].buf = stream[kImpl].buf.slice(leftover);
+          write(stream, toWrite, cb);
+        } else {
+          flushSync(stream);
+          Atomics.store(stream[kImpl].state, READ_INDEX, 0);
+          Atomics.store(stream[kImpl].state, WRITE_INDEX, 0);
+          while (toWriteBytes > stream[kImpl].buf.length) {
+            leftover = leftover / 2;
+            toWrite = stream[kImpl].buf.slice(0, leftover);
+            toWriteBytes = Buffer.byteLength(toWrite);
+          }
+          stream[kImpl].buf = stream[kImpl].buf.slice(leftover);
+          write(stream, toWrite, cb);
+        }
+      }
+    }
+    function flushSync(stream) {
+      if (stream[kImpl].flushing) {
+        throw new Error("unable to flush while flushing");
+      }
+      const writeIndex = Atomics.load(stream[kImpl].state, WRITE_INDEX);
+      let spins = 0;
+      while (true) {
+        const readIndex = Atomics.load(stream[kImpl].state, READ_INDEX);
+        if (readIndex === -2) {
+          throw Error("_flushSync failed");
+        }
+        if (readIndex !== writeIndex) {
+          Atomics.wait(stream[kImpl].state, READ_INDEX, readIndex, 1e3);
+        } else {
+          break;
+        }
+        if (++spins === 10) {
+          throw new Error("_flushSync took too long (10s)");
+        }
+      }
+    }
+    module2.exports = ThreadStream;
+  }
+});
+
+// node_modules/pino/lib/transport.js
+var require_transport3 = __commonJS({
+  "node_modules/pino/lib/transport.js"(exports2, module2) {
+    "use strict";
+    var { createRequire } = __require("module");
+    var getCallers = require_caller4();
+    var { join, isAbsolute, sep } = __require("path");
+    var sleep = require_atomic_sleep();
+    var onExit = require_on_exit_leak_free();
+    var ThreadStream = require_thread_stream3();
+    function setupOnExit(stream) {
+      onExit.register(stream, autoEnd);
+      onExit.registerBeforeExit(stream, flush);
+      stream.on("close", function() {
+        onExit.unregister(stream);
+      });
+    }
+    function buildStream(filename, workerData, workerOpts) {
+      const stream = new ThreadStream({
+        filename,
+        workerData,
+        workerOpts
+      });
+      stream.on("ready", onReady);
+      stream.on("close", function() {
+        process.removeListener("exit", onExit2);
+      });
+      process.on("exit", onExit2);
+      function onReady() {
+        process.removeListener("exit", onExit2);
+        stream.unref();
+        if (workerOpts.autoEnd !== false) {
+          setupOnExit(stream);
+        }
+      }
+      function onExit2() {
+        if (stream.closed) {
+          return;
+        }
+        stream.flushSync();
+        sleep(100);
+        stream.end();
+      }
+      return stream;
+    }
+    function autoEnd(stream) {
+      stream.ref();
+      stream.flushSync();
+      stream.end();
+      stream.once("close", function() {
+        stream.unref();
+      });
+    }
+    function flush(stream) {
+      stream.flushSync();
+    }
+    function transport2(fullOptions) {
+      const { pipeline, targets, levels, dedupe, options: options2 = {}, worker = {}, caller = getCallers() } = fullOptions;
+      const callers = typeof caller === "string" ? [caller] : caller;
+      const bundlerOverrides = "__bundlerPathsOverrides" in globalThis ? globalThis.__bundlerPathsOverrides : {};
+      let target = fullOptions.target;
+      if (target && targets) {
+        throw new Error("only one of target or targets can be specified");
+      }
+      if (targets) {
+        target = bundlerOverrides["pino-worker"] || join(__dirname, "worker.js");
+        options2.targets = targets.map((dest) => {
+          return {
+            ...dest,
+            target: fixTarget(dest.target)
+          };
+        });
+      } else if (pipeline) {
+        target = bundlerOverrides["pino-pipeline-worker"] || join(__dirname, "worker-pipeline.js");
+        options2.targets = pipeline.map((dest) => {
+          return {
+            ...dest,
+            target: fixTarget(dest.target)
+          };
+        });
+      }
+      if (levels) {
+        options2.levels = levels;
+      }
+      if (dedupe) {
+        options2.dedupe = dedupe;
+      }
+      options2.pinoWillSendConfig = true;
+      return buildStream(fixTarget(target), options2, worker);
+      function fixTarget(origin) {
+        origin = bundlerOverrides[origin] || origin;
+        if (isAbsolute(origin) || origin.indexOf("file://") === 0) {
+          return origin;
+        }
+        if (origin === "pino/file") {
+          return join(__dirname, "..", "file.js");
+        }
+        let fixTarget2;
+        for (const filePath of callers) {
+          try {
+            const context = filePath === "node:repl" ? process.cwd() + sep : filePath;
+            fixTarget2 = createRequire(context).resolve(origin);
+            break;
+          } catch (err) {
+            continue;
+          }
+        }
+        if (!fixTarget2) {
+          throw new Error(`unable to determine transport target for "${origin}"`);
+        }
+        return fixTarget2;
+      }
+    }
+    module2.exports = transport2;
+  }
+});
+
+// node_modules/pino/lib/tools.js
+var require_tools3 = __commonJS({
+  "node_modules/pino/lib/tools.js"(exports2, module2) {
+    "use strict";
+    var format = require_quick_format_unescaped();
+    var { mapHttpRequest, mapHttpResponse } = require_pino_std_serializers3();
+    var SonicBoom = require_sonic_boom3();
+    var onExit = require_on_exit_leak_free();
+    var {
+      lsCacheSym,
+      chindingsSym,
+      writeSym,
+      serializersSym,
+      formatOptsSym,
+      endSym,
+      stringifiersSym,
+      stringifySym,
+      stringifySafeSym,
+      wildcardFirstSym,
+      nestedKeySym,
+      formattersSym,
+      messageKeySym,
+      errorKeySym,
+      nestedKeyStrSym,
+      msgPrefixSym
+    } = require_symbols3();
+    var { isMainThread } = __require("worker_threads");
+    var transport2 = require_transport3();
+    function noop() {
+    }
+    function genLog(level, hook) {
+      if (!hook)
+        return LOG;
+      return function hookWrappedLog(...args) {
+        hook.call(this, args, LOG, level);
+      };
+      function LOG(o, ...n) {
+        if (typeof o === "object") {
+          let msg = o;
+          if (o !== null) {
+            if (o.method && o.headers && o.socket) {
+              o = mapHttpRequest(o);
+            } else if (typeof o.setHeader === "function") {
+              o = mapHttpResponse(o);
+            }
+          }
+          let formatParams;
+          if (msg === null && n.length === 0) {
+            formatParams = [null];
+          } else {
+            msg = n.shift();
+            formatParams = n;
+          }
+          if (typeof this[msgPrefixSym] === "string" && msg !== void 0 && msg !== null) {
+            msg = this[msgPrefixSym] + msg;
+          }
+          this[writeSym](o, format(msg, formatParams, this[formatOptsSym]), level);
+        } else {
+          let msg = o === void 0 ? n.shift() : o;
+          if (typeof this[msgPrefixSym] === "string" && msg !== void 0 && msg !== null) {
+            msg = this[msgPrefixSym] + msg;
+          }
+          this[writeSym](null, format(msg, n, this[formatOptsSym]), level);
+        }
+      }
+    }
+    function asString(str) {
+      let result = "";
+      let last = 0;
+      let found = false;
+      let point = 255;
+      const l = str.length;
+      if (l > 100) {
+        return JSON.stringify(str);
+      }
+      for (var i = 0; i < l && point >= 32; i++) {
+        point = str.charCodeAt(i);
+        if (point === 34 || point === 92) {
+          result += str.slice(last, i) + "\\";
+          last = i;
+          found = true;
+        }
+      }
+      if (!found) {
+        result = str;
+      } else {
+        result += str.slice(last);
+      }
+      return point < 32 ? JSON.stringify(str) : '"' + result + '"';
+    }
+    function asJson(obj, msg, num, time) {
+      const stringify3 = this[stringifySym];
+      const stringifySafe = this[stringifySafeSym];
+      const stringifiers = this[stringifiersSym];
+      const end = this[endSym];
+      const chindings = this[chindingsSym];
+      const serializers = this[serializersSym];
+      const formatters = this[formattersSym];
+      const messageKey = this[messageKeySym];
+      const errorKey = this[errorKeySym];
+      let data = this[lsCacheSym][num] + time;
+      data = data + chindings;
+      let value;
+      if (formatters.log) {
+        obj = formatters.log(obj);
+      }
+      const wildcardStringifier = stringifiers[wildcardFirstSym];
+      let propStr = "";
+      for (const key in obj) {
+        value = obj[key];
+        if (Object.prototype.hasOwnProperty.call(obj, key) && value !== void 0) {
+          if (serializers[key]) {
+            value = serializers[key](value);
+          } else if (key === errorKey && serializers.err) {
+            value = serializers.err(value);
+          }
+          const stringifier = stringifiers[key] || wildcardStringifier;
+          switch (typeof value) {
+            case "undefined":
+            case "function":
+              continue;
+            case "number":
+              if (Number.isFinite(value) === false) {
+                value = null;
+              }
+            case "boolean":
+              if (stringifier)
+                value = stringifier(value);
+              break;
+            case "string":
+              value = (stringifier || asString)(value);
+              break;
+            default:
+              value = (stringifier || stringify3)(value, stringifySafe);
+          }
+          if (value === void 0)
+            continue;
+          const strKey = asString(key);
+          propStr += "," + strKey + ":" + value;
+        }
+      }
+      let msgStr = "";
+      if (msg !== void 0) {
+        value = serializers[messageKey] ? serializers[messageKey](msg) : msg;
+        const stringifier = stringifiers[messageKey] || wildcardStringifier;
+        switch (typeof value) {
+          case "function":
+            break;
+          case "number":
+            if (Number.isFinite(value) === false) {
+              value = null;
+            }
+          case "boolean":
+            if (stringifier)
+              value = stringifier(value);
+            msgStr = ',"' + messageKey + '":' + value;
+            break;
+          case "string":
+            value = (stringifier || asString)(value);
+            msgStr = ',"' + messageKey + '":' + value;
+            break;
+          default:
+            value = (stringifier || stringify3)(value, stringifySafe);
+            msgStr = ',"' + messageKey + '":' + value;
+        }
+      }
+      if (this[nestedKeySym] && propStr) {
+        return data + this[nestedKeyStrSym] + propStr.slice(1) + "}" + msgStr + end;
+      } else {
+        return data + propStr + msgStr + end;
+      }
+    }
+    function asChindings(instance, bindings) {
+      let value;
+      let data = instance[chindingsSym];
+      const stringify3 = instance[stringifySym];
+      const stringifySafe = instance[stringifySafeSym];
+      const stringifiers = instance[stringifiersSym];
+      const wildcardStringifier = stringifiers[wildcardFirstSym];
+      const serializers = instance[serializersSym];
+      const formatter = instance[formattersSym].bindings;
+      bindings = formatter(bindings);
+      for (const key in bindings) {
+        value = bindings[key];
+        const valid = key !== "level" && key !== "serializers" && key !== "formatters" && key !== "customLevels" && bindings.hasOwnProperty(key) && value !== void 0;
+        if (valid === true) {
+          value = serializers[key] ? serializers[key](value) : value;
+          value = (stringifiers[key] || wildcardStringifier || stringify3)(value, stringifySafe);
+          if (value === void 0)
+            continue;
+          data += ',"' + key + '":' + value;
+        }
+      }
+      return data;
+    }
+    function hasBeenTampered(stream) {
+      return stream.write !== stream.constructor.prototype.write;
+    }
+    var hasNodeCodeCoverage = process.env.NODE_V8_COVERAGE || process.env.V8_COVERAGE;
+    function buildSafeSonicBoom(opts) {
+      const stream = new SonicBoom(opts);
+      stream.on("error", filterBrokenPipe);
+      if (!hasNodeCodeCoverage && !opts.sync && isMainThread) {
+        onExit.register(stream, autoEnd);
+        stream.on("close", function() {
+          onExit.unregister(stream);
+        });
+      }
+      return stream;
+      function filterBrokenPipe(err) {
+        if (err.code === "EPIPE") {
+          stream.write = noop;
+          stream.end = noop;
+          stream.flushSync = noop;
+          stream.destroy = noop;
+          return;
+        }
+        stream.removeListener("error", filterBrokenPipe);
+        stream.emit("error", err);
+      }
+    }
+    function autoEnd(stream, eventName) {
+      if (stream.destroyed) {
+        return;
+      }
+      if (eventName === "beforeExit") {
+        stream.flush();
+        stream.on("drain", function() {
+          stream.end();
+        });
+      } else {
+        stream.flushSync();
+      }
+    }
+    function createArgsNormalizer(defaultOptions) {
+      return function normalizeArgs(instance, caller, opts = {}, stream) {
+        if (typeof opts === "string") {
+          stream = buildSafeSonicBoom({ dest: opts });
+          opts = {};
+        } else if (typeof stream === "string") {
+          if (opts && opts.transport) {
+            throw Error("only one of option.transport or stream can be specified");
+          }
+          stream = buildSafeSonicBoom({ dest: stream });
+        } else if (opts instanceof SonicBoom || opts.writable || opts._writableState) {
+          stream = opts;
+          opts = {};
+        } else if (opts.transport) {
+          if (opts.transport instanceof SonicBoom || opts.transport.writable || opts.transport._writableState) {
+            throw Error("option.transport do not allow stream, please pass to option directly. e.g. pino(transport)");
+          }
+          if (opts.transport.targets && opts.transport.targets.length && opts.formatters && typeof opts.formatters.level === "function") {
+            throw Error("option.transport.targets do not allow custom level formatters");
+          }
+          let customLevels;
+          if (opts.customLevels) {
+            customLevels = opts.useOnlyCustomLevels ? opts.customLevels : Object.assign({}, opts.levels, opts.customLevels);
+          }
+          stream = transport2({ caller, ...opts.transport, levels: customLevels });
+        }
+        opts = Object.assign({}, defaultOptions, opts);
+        opts.serializers = Object.assign({}, defaultOptions.serializers, opts.serializers);
+        opts.formatters = Object.assign({}, defaultOptions.formatters, opts.formatters);
+        if (opts.prettyPrint) {
+          throw new Error("prettyPrint option is no longer supported, see the pino-pretty package (https://github.com/pinojs/pino-pretty)");
+        }
+        const { enabled, onChild } = opts;
+        if (enabled === false)
+          opts.level = "silent";
+        if (!onChild)
+          opts.onChild = noop;
+        if (!stream) {
+          if (!hasBeenTampered(process.stdout)) {
+            stream = buildSafeSonicBoom({ fd: process.stdout.fd || 1 });
+          } else {
+            stream = process.stdout;
+          }
+        }
+        return { opts, stream };
+      };
+    }
+    function stringify2(obj, stringifySafeFn) {
+      try {
+        return JSON.stringify(obj);
+      } catch (_) {
+        try {
+          const stringify3 = stringifySafeFn || this[stringifySafeSym];
+          return stringify3(obj);
+        } catch (_2) {
+          return '"[unable to serialize, circular reference is too complex to analyze]"';
+        }
+      }
+    }
+    function buildFormatters(level, bindings, log) {
+      return {
+        level,
+        bindings,
+        log
+      };
+    }
+    function normalizeDestFileDescriptor(destination) {
+      const fd = Number(destination);
+      if (typeof destination === "string" && Number.isFinite(fd)) {
+        return fd;
+      }
+      if (destination === void 0) {
+        return 1;
+      }
+      return destination;
+    }
+    module2.exports = {
+      noop,
+      buildSafeSonicBoom,
+      asChindings,
+      asJson,
+      genLog,
+      createArgsNormalizer,
+      stringify: stringify2,
+      buildFormatters,
+      normalizeDestFileDescriptor
+    };
+  }
+});
+
+// node_modules/pino/lib/constants.js
+var require_constants5 = __commonJS({
+  "node_modules/pino/lib/constants.js"(exports2, module2) {
+    var DEFAULT_LEVELS = {
+      trace: 10,
+      debug: 20,
+      info: 30,
+      warn: 40,
+      error: 50,
+      fatal: 60
+    };
+    var SORTING_ORDER = {
+      ASC: "ASC",
+      DESC: "DESC"
+    };
+    module2.exports = {
+      DEFAULT_LEVELS,
+      SORTING_ORDER
+    };
+  }
+});
+
+// node_modules/pino/lib/levels.js
+var require_levels3 = __commonJS({
+  "node_modules/pino/lib/levels.js"(exports2, module2) {
+    "use strict";
+    var {
+      lsCacheSym,
+      levelValSym,
+      useOnlyCustomLevelsSym,
+      streamSym,
+      formattersSym,
+      hooksSym,
+      levelCompSym
+    } = require_symbols3();
+    var { noop, genLog } = require_tools3();
+    var { DEFAULT_LEVELS, SORTING_ORDER } = require_constants5();
+    var levelMethods = {
+      fatal: (hook) => {
+        const logFatal = genLog(DEFAULT_LEVELS.fatal, hook);
+        return function(...args) {
+          const stream = this[streamSym];
+          logFatal.call(this, ...args);
+          if (typeof stream.flushSync === "function") {
+            try {
+              stream.flushSync();
+            } catch (e) {
+            }
+          }
+        };
+      },
+      error: (hook) => genLog(DEFAULT_LEVELS.error, hook),
+      warn: (hook) => genLog(DEFAULT_LEVELS.warn, hook),
+      info: (hook) => genLog(DEFAULT_LEVELS.info, hook),
+      debug: (hook) => genLog(DEFAULT_LEVELS.debug, hook),
+      trace: (hook) => genLog(DEFAULT_LEVELS.trace, hook)
+    };
+    var nums = Object.keys(DEFAULT_LEVELS).reduce((o, k) => {
+      o[DEFAULT_LEVELS[k]] = k;
+      return o;
+    }, {});
+    var initialLsCache = Object.keys(nums).reduce((o, k) => {
+      o[k] = '{"level":' + Number(k);
+      return o;
+    }, {});
+    function genLsCache(instance) {
+      const formatter = instance[formattersSym].level;
+      const { labels } = instance.levels;
+      const cache = {};
+      for (const label in labels) {
+        const level = formatter(labels[label], Number(label));
+        cache[label] = JSON.stringify(level).slice(0, -1);
+      }
+      instance[lsCacheSym] = cache;
+      return instance;
+    }
+    function isStandardLevel(level, useOnlyCustomLevels) {
+      if (useOnlyCustomLevels) {
+        return false;
+      }
+      switch (level) {
+        case "fatal":
+        case "error":
+        case "warn":
+        case "info":
+        case "debug":
+        case "trace":
+          return true;
+        default:
+          return false;
+      }
+    }
+    function setLevel(level) {
+      const { labels, values } = this.levels;
+      if (typeof level === "number") {
+        if (labels[level] === void 0)
+          throw Error("unknown level value" + level);
+        level = labels[level];
+      }
+      if (values[level] === void 0)
+        throw Error("unknown level " + level);
+      const preLevelVal = this[levelValSym];
+      const levelVal = this[levelValSym] = values[level];
+      const useOnlyCustomLevelsVal = this[useOnlyCustomLevelsSym];
+      const levelComparison = this[levelCompSym];
+      const hook = this[hooksSym].logMethod;
+      for (const key in values) {
+        if (levelComparison(values[key], levelVal) === false) {
+          this[key] = noop;
+          continue;
+        }
+        this[key] = isStandardLevel(key, useOnlyCustomLevelsVal) ? levelMethods[key](hook) : genLog(values[key], hook);
+      }
+      this.emit(
+        "level-change",
+        level,
+        levelVal,
+        labels[preLevelVal],
+        preLevelVal,
+        this
+      );
+    }
+    function getLevel(level) {
+      const { levels, levelVal } = this;
+      return levels && levels.labels ? levels.labels[levelVal] : "";
+    }
+    function isLevelEnabled(logLevel) {
+      const { values } = this.levels;
+      const logLevelVal = values[logLevel];
+      return logLevelVal !== void 0 && this[levelCompSym](logLevelVal, this[levelValSym]);
+    }
+    function compareLevel(direction, current, expected) {
+      if (direction === SORTING_ORDER.DESC) {
+        return current <= expected;
+      }
+      return current >= expected;
+    }
+    function genLevelComparison(levelComparison) {
+      if (typeof levelComparison === "string") {
+        return compareLevel.bind(null, levelComparison);
+      }
+      return levelComparison;
+    }
+    function mappings(customLevels = null, useOnlyCustomLevels = false) {
+      const customNums = customLevels ? Object.keys(customLevels).reduce((o, k) => {
+        o[customLevels[k]] = k;
+        return o;
+      }, {}) : null;
+      const labels = Object.assign(
+        Object.create(Object.prototype, { Infinity: { value: "silent" } }),
+        useOnlyCustomLevels ? null : nums,
+        customNums
+      );
+      const values = Object.assign(
+        Object.create(Object.prototype, { silent: { value: Infinity } }),
+        useOnlyCustomLevels ? null : DEFAULT_LEVELS,
+        customLevels
+      );
+      return { labels, values };
+    }
+    function assertDefaultLevelFound(defaultLevel, customLevels, useOnlyCustomLevels) {
+      if (typeof defaultLevel === "number") {
+        const values = [].concat(
+          Object.keys(customLevels || {}).map((key) => customLevels[key]),
+          useOnlyCustomLevels ? [] : Object.keys(nums).map((level) => +level),
+          Infinity
+        );
+        if (!values.includes(defaultLevel)) {
+          throw Error(`default level:${defaultLevel} must be included in custom levels`);
+        }
+        return;
+      }
+      const labels = Object.assign(
+        Object.create(Object.prototype, { silent: { value: Infinity } }),
+        useOnlyCustomLevels ? null : DEFAULT_LEVELS,
+        customLevels
+      );
+      if (!(defaultLevel in labels)) {
+        throw Error(`default level:${defaultLevel} must be included in custom levels`);
+      }
+    }
+    function assertNoLevelCollisions(levels, customLevels) {
+      const { labels, values } = levels;
+      for (const k in customLevels) {
+        if (k in values) {
+          throw Error("levels cannot be overridden");
+        }
+        if (customLevels[k] in labels) {
+          throw Error("pre-existing level values cannot be used for new levels");
+        }
+      }
+    }
+    function assertLevelComparison(levelComparison) {
+      if (typeof levelComparison === "function") {
+        return;
+      }
+      if (typeof levelComparison === "string" && Object.values(SORTING_ORDER).includes(levelComparison)) {
+        return;
+      }
+      throw new Error('Levels comparison should be one of "ASC", "DESC" or "function" type');
+    }
+    module2.exports = {
+      initialLsCache,
+      genLsCache,
+      levelMethods,
+      getLevel,
+      setLevel,
+      isLevelEnabled,
+      mappings,
+      assertNoLevelCollisions,
+      assertDefaultLevelFound,
+      genLevelComparison,
+      assertLevelComparison
+    };
+  }
+});
+
+// node_modules/pino/lib/meta.js
+var require_meta3 = __commonJS({
+  "node_modules/pino/lib/meta.js"(exports2, module2) {
+    "use strict";
+    module2.exports = { version: "8.21.0" };
+  }
+});
+
+// node_modules/pino/lib/proto.js
+var require_proto3 = __commonJS({
+  "node_modules/pino/lib/proto.js"(exports2, module2) {
+    "use strict";
+    var { EventEmitter } = __require("events");
+    var {
+      lsCacheSym,
+      levelValSym,
+      setLevelSym,
+      getLevelSym,
+      chindingsSym,
+      parsedChindingsSym,
+      mixinSym,
+      asJsonSym,
+      writeSym,
+      mixinMergeStrategySym,
+      timeSym,
+      timeSliceIndexSym,
+      streamSym,
+      serializersSym,
+      formattersSym,
+      errorKeySym,
+      messageKeySym,
+      useOnlyCustomLevelsSym,
+      needsMetadataGsym,
+      redactFmtSym,
+      stringifySym,
+      formatOptsSym,
+      stringifiersSym,
+      msgPrefixSym
+    } = require_symbols3();
+    var {
+      getLevel,
+      setLevel,
+      isLevelEnabled,
+      mappings,
+      initialLsCache,
+      genLsCache,
+      assertNoLevelCollisions
+    } = require_levels3();
+    var {
+      asChindings,
+      asJson,
+      buildFormatters,
+      stringify: stringify2
+    } = require_tools3();
+    var {
+      version: version2
+    } = require_meta3();
+    var redaction = require_redaction3();
+    var constructor = class Pino {
+    };
+    var prototype = {
+      constructor,
+      child,
+      bindings,
+      setBindings,
+      flush,
+      isLevelEnabled,
+      version: version2,
+      get level() {
+        return this[getLevelSym]();
+      },
+      set level(lvl) {
+        this[setLevelSym](lvl);
+      },
+      get levelVal() {
+        return this[levelValSym];
+      },
+      set levelVal(n) {
+        throw Error("levelVal is read-only");
+      },
+      [lsCacheSym]: initialLsCache,
+      [writeSym]: write,
+      [asJsonSym]: asJson,
+      [getLevelSym]: getLevel,
+      [setLevelSym]: setLevel
+    };
+    Object.setPrototypeOf(prototype, EventEmitter.prototype);
+    module2.exports = function() {
+      return Object.create(prototype);
+    };
+    var resetChildingsFormatter = (bindings2) => bindings2;
+    function child(bindings2, options2) {
+      if (!bindings2) {
+        throw Error("missing bindings for child Pino");
+      }
+      options2 = options2 || {};
+      const serializers = this[serializersSym];
+      const formatters = this[formattersSym];
+      const instance = Object.create(this);
+      if (options2.hasOwnProperty("serializers") === true) {
+        instance[serializersSym] = /* @__PURE__ */ Object.create(null);
+        for (const k in serializers) {
+          instance[serializersSym][k] = serializers[k];
+        }
+        const parentSymbols = Object.getOwnPropertySymbols(serializers);
+        for (var i = 0; i < parentSymbols.length; i++) {
+          const ks = parentSymbols[i];
+          instance[serializersSym][ks] = serializers[ks];
+        }
+        for (const bk in options2.serializers) {
+          instance[serializersSym][bk] = options2.serializers[bk];
+        }
+        const bindingsSymbols = Object.getOwnPropertySymbols(options2.serializers);
+        for (var bi = 0; bi < bindingsSymbols.length; bi++) {
+          const bks = bindingsSymbols[bi];
+          instance[serializersSym][bks] = options2.serializers[bks];
+        }
+      } else
+        instance[serializersSym] = serializers;
+      if (options2.hasOwnProperty("formatters")) {
+        const { level, bindings: chindings, log } = options2.formatters;
+        instance[formattersSym] = buildFormatters(
+          level || formatters.level,
+          chindings || resetChildingsFormatter,
+          log || formatters.log
+        );
+      } else {
+        instance[formattersSym] = buildFormatters(
+          formatters.level,
+          resetChildingsFormatter,
+          formatters.log
+        );
+      }
+      if (options2.hasOwnProperty("customLevels") === true) {
+        assertNoLevelCollisions(this.levels, options2.customLevels);
+        instance.levels = mappings(options2.customLevels, instance[useOnlyCustomLevelsSym]);
+        genLsCache(instance);
+      }
+      if (typeof options2.redact === "object" && options2.redact !== null || Array.isArray(options2.redact)) {
+        instance.redact = options2.redact;
+        const stringifiers = redaction(instance.redact, stringify2);
+        const formatOpts = { stringify: stringifiers[redactFmtSym] };
+        instance[stringifySym] = stringify2;
+        instance[stringifiersSym] = stringifiers;
+        instance[formatOptsSym] = formatOpts;
+      }
+      if (typeof options2.msgPrefix === "string") {
+        instance[msgPrefixSym] = (this[msgPrefixSym] || "") + options2.msgPrefix;
+      }
+      instance[chindingsSym] = asChindings(instance, bindings2);
+      const childLevel = options2.level || this.level;
+      instance[setLevelSym](childLevel);
+      this.onChild(instance);
+      return instance;
+    }
+    function bindings() {
+      const chindings = this[chindingsSym];
+      const chindingsJson = `{${chindings.substr(1)}}`;
+      const bindingsFromJson = JSON.parse(chindingsJson);
+      delete bindingsFromJson.pid;
+      delete bindingsFromJson.hostname;
+      return bindingsFromJson;
+    }
+    function setBindings(newBindings) {
+      const chindings = asChindings(this, newBindings);
+      this[chindingsSym] = chindings;
+      delete this[parsedChindingsSym];
+    }
+    function defaultMixinMergeStrategy(mergeObject, mixinObject) {
+      return Object.assign(mixinObject, mergeObject);
+    }
+    function write(_obj, msg, num) {
+      const t = this[timeSym]();
+      const mixin = this[mixinSym];
+      const errorKey = this[errorKeySym];
+      const messageKey = this[messageKeySym];
+      const mixinMergeStrategy = this[mixinMergeStrategySym] || defaultMixinMergeStrategy;
+      let obj;
+      if (_obj === void 0 || _obj === null) {
+        obj = {};
+      } else if (_obj instanceof Error) {
+        obj = { [errorKey]: _obj };
+        if (msg === void 0) {
+          msg = _obj.message;
+        }
+      } else {
+        obj = _obj;
+        if (msg === void 0 && _obj[messageKey] === void 0 && _obj[errorKey]) {
+          msg = _obj[errorKey].message;
+        }
+      }
+      if (mixin) {
+        obj = mixinMergeStrategy(obj, mixin(obj, num, this));
+      }
+      const s = this[asJsonSym](obj, msg, num, t);
+      const stream = this[streamSym];
+      if (stream[needsMetadataGsym] === true) {
+        stream.lastLevel = num;
+        stream.lastObj = obj;
+        stream.lastMsg = msg;
+        stream.lastTime = t.slice(this[timeSliceIndexSym]);
+        stream.lastLogger = this;
+      }
+      stream.write(s);
+    }
+    function noop() {
+    }
+    function flush(cb) {
+      if (cb != null && typeof cb !== "function") {
+        throw Error("callback must be a function");
+      }
+      const stream = this[streamSym];
+      if (typeof stream.flush === "function") {
+        stream.flush(cb || noop);
+      } else if (cb)
+        cb();
+    }
+  }
+});
+
+// node_modules/pino/lib/multistream.js
+var require_multistream3 = __commonJS({
+  "node_modules/pino/lib/multistream.js"(exports2, module2) {
+    "use strict";
+    var metadata = Symbol.for("pino.metadata");
+    var { DEFAULT_LEVELS } = require_constants5();
+    var DEFAULT_INFO_LEVEL = DEFAULT_LEVELS.info;
+    function multistream(streamsArray, opts) {
+      let counter = 0;
+      streamsArray = streamsArray || [];
+      opts = opts || { dedupe: false };
+      const streamLevels = Object.create(DEFAULT_LEVELS);
+      streamLevels.silent = Infinity;
+      if (opts.levels && typeof opts.levels === "object") {
+        Object.keys(opts.levels).forEach((i) => {
+          streamLevels[i] = opts.levels[i];
+        });
+      }
+      const res = {
+        write,
+        add,
+        emit,
+        flushSync,
+        end,
+        minLevel: 0,
+        streams: [],
+        clone,
+        [metadata]: true,
+        streamLevels
+      };
+      if (Array.isArray(streamsArray)) {
+        streamsArray.forEach(add, res);
+      } else {
+        add.call(res, streamsArray);
+      }
+      streamsArray = null;
+      return res;
+      function write(data) {
+        let dest;
+        const level = this.lastLevel;
+        const { streams } = this;
+        let recordedLevel = 0;
+        let stream;
+        for (let i = initLoopVar(streams.length, opts.dedupe); checkLoopVar(i, streams.length, opts.dedupe); i = adjustLoopVar(i, opts.dedupe)) {
+          dest = streams[i];
+          if (dest.level <= level) {
+            if (recordedLevel !== 0 && recordedLevel !== dest.level) {
+              break;
+            }
+            stream = dest.stream;
+            if (stream[metadata]) {
+              const { lastTime, lastMsg, lastObj, lastLogger } = this;
+              stream.lastLevel = level;
+              stream.lastTime = lastTime;
+              stream.lastMsg = lastMsg;
+              stream.lastObj = lastObj;
+              stream.lastLogger = lastLogger;
+            }
+            stream.write(data);
+            if (opts.dedupe) {
+              recordedLevel = dest.level;
+            }
+          } else if (!opts.dedupe) {
+            break;
+          }
+        }
+      }
+      function emit(...args) {
+        for (const { stream } of this.streams) {
+          if (typeof stream.emit === "function") {
+            stream.emit(...args);
+          }
+        }
+      }
+      function flushSync() {
+        for (const { stream } of this.streams) {
+          if (typeof stream.flushSync === "function") {
+            stream.flushSync();
+          }
+        }
+      }
+      function add(dest) {
+        if (!dest) {
+          return res;
+        }
+        const isStream = typeof dest.write === "function" || dest.stream;
+        const stream_ = dest.write ? dest : dest.stream;
+        if (!isStream) {
+          throw Error("stream object needs to implement either StreamEntry or DestinationStream interface");
+        }
+        const { streams, streamLevels: streamLevels2 } = this;
+        let level;
+        if (typeof dest.levelVal === "number") {
+          level = dest.levelVal;
+        } else if (typeof dest.level === "string") {
+          level = streamLevels2[dest.level];
+        } else if (typeof dest.level === "number") {
+          level = dest.level;
+        } else {
+          level = DEFAULT_INFO_LEVEL;
+        }
+        const dest_ = {
+          stream: stream_,
+          level,
+          levelVal: void 0,
+          id: counter++
+        };
+        streams.unshift(dest_);
+        streams.sort(compareByLevel);
+        this.minLevel = streams[0].level;
+        return res;
+      }
+      function end() {
+        for (const { stream } of this.streams) {
+          if (typeof stream.flushSync === "function") {
+            stream.flushSync();
+          }
+          stream.end();
+        }
+      }
+      function clone(level) {
+        const streams = new Array(this.streams.length);
+        for (let i = 0; i < streams.length; i++) {
+          streams[i] = {
+            level,
+            stream: this.streams[i].stream
+          };
+        }
+        return {
+          write,
+          add,
+          minLevel: level,
+          streams,
+          clone,
+          emit,
+          flushSync,
+          [metadata]: true
+        };
+      }
+    }
+    function compareByLevel(a, b) {
+      return a.level - b.level;
+    }
+    function initLoopVar(length, dedupe) {
+      return dedupe ? length - 1 : 0;
+    }
+    function adjustLoopVar(i, dedupe) {
+      return dedupe ? i - 1 : i + 1;
+    }
+    function checkLoopVar(i, length, dedupe) {
+      return dedupe ? i >= 0 : i < length;
+    }
+    module2.exports = multistream;
+  }
+});
+
+// node_modules/pino/pino.js
+var require_pino4 = __commonJS({
+  "node_modules/pino/pino.js"(exports2, module2) {
+    "use strict";
+    var os = __require("os");
+    var stdSerializers = require_pino_std_serializers3();
+    var caller = require_caller4();
+    var redaction = require_redaction3();
+    var time = require_time4();
+    var proto = require_proto3();
+    var symbols = require_symbols3();
+    var { configure } = require_safe_stable_stringify();
+    var { assertDefaultLevelFound, mappings, genLsCache, genLevelComparison, assertLevelComparison } = require_levels3();
+    var { DEFAULT_LEVELS, SORTING_ORDER } = require_constants5();
+    var {
+      createArgsNormalizer,
+      asChindings,
+      buildSafeSonicBoom,
+      buildFormatters,
+      stringify: stringify2,
+      normalizeDestFileDescriptor,
+      noop
+    } = require_tools3();
+    var { version: version2 } = require_meta3();
+    var {
+      chindingsSym,
+      redactFmtSym,
+      serializersSym,
+      timeSym,
+      timeSliceIndexSym,
+      streamSym,
+      stringifySym,
+      stringifySafeSym,
+      stringifiersSym,
+      setLevelSym,
+      endSym,
+      formatOptsSym,
+      messageKeySym,
+      errorKeySym,
+      nestedKeySym,
+      mixinSym,
+      levelCompSym,
+      useOnlyCustomLevelsSym,
+      formattersSym,
+      hooksSym,
+      nestedKeyStrSym,
+      mixinMergeStrategySym,
+      msgPrefixSym
+    } = symbols;
+    var { epochTime, nullTime } = time;
+    var { pid } = process;
+    var hostname = os.hostname();
+    var defaultErrorSerializer = stdSerializers.err;
+    var defaultOptions = {
+      level: "info",
+      levelComparison: SORTING_ORDER.ASC,
+      levels: DEFAULT_LEVELS,
+      messageKey: "msg",
+      errorKey: "err",
+      nestedKey: null,
+      enabled: true,
+      base: { pid, hostname },
+      serializers: Object.assign(/* @__PURE__ */ Object.create(null), {
+        err: defaultErrorSerializer
+      }),
+      formatters: Object.assign(/* @__PURE__ */ Object.create(null), {
+        bindings(bindings) {
+          return bindings;
+        },
+        level(label, number) {
+          return { level: number };
+        }
+      }),
+      hooks: {
+        logMethod: void 0
+      },
+      timestamp: epochTime,
+      name: void 0,
+      redact: null,
+      customLevels: null,
+      useOnlyCustomLevels: false,
+      depthLimit: 5,
+      edgeLimit: 100
+    };
+    var normalize = createArgsNormalizer(defaultOptions);
+    var serializers = Object.assign(/* @__PURE__ */ Object.create(null), stdSerializers);
+    function pino3(...args) {
+      const instance = {};
+      const { opts, stream } = normalize(instance, caller(), ...args);
+      const {
+        redact,
+        crlf,
+        serializers: serializers2,
+        timestamp,
+        messageKey,
+        errorKey,
+        nestedKey,
+        base,
+        name,
+        level,
+        customLevels,
+        levelComparison,
+        mixin,
+        mixinMergeStrategy,
+        useOnlyCustomLevels,
+        formatters,
+        hooks,
+        depthLimit,
+        edgeLimit,
+        onChild,
+        msgPrefix
+      } = opts;
+      const stringifySafe = configure({
+        maximumDepth: depthLimit,
+        maximumBreadth: edgeLimit
+      });
+      const allFormatters = buildFormatters(
+        formatters.level,
+        formatters.bindings,
+        formatters.log
+      );
+      const stringifyFn = stringify2.bind({
+        [stringifySafeSym]: stringifySafe
+      });
+      const stringifiers = redact ? redaction(redact, stringifyFn) : {};
+      const formatOpts = redact ? { stringify: stringifiers[redactFmtSym] } : { stringify: stringifyFn };
+      const end = "}" + (crlf ? "\r\n" : "\n");
+      const coreChindings = asChindings.bind(null, {
+        [chindingsSym]: "",
+        [serializersSym]: serializers2,
+        [stringifiersSym]: stringifiers,
+        [stringifySym]: stringify2,
+        [stringifySafeSym]: stringifySafe,
+        [formattersSym]: allFormatters
+      });
+      let chindings = "";
+      if (base !== null) {
+        if (name === void 0) {
+          chindings = coreChindings(base);
+        } else {
+          chindings = coreChindings(Object.assign({}, base, { name }));
+        }
+      }
+      const time2 = timestamp instanceof Function ? timestamp : timestamp ? epochTime : nullTime;
+      const timeSliceIndex = time2().indexOf(":") + 1;
+      if (useOnlyCustomLevels && !customLevels)
+        throw Error("customLevels is required if useOnlyCustomLevels is set true");
+      if (mixin && typeof mixin !== "function")
+        throw Error(`Unknown mixin type "${typeof mixin}" - expected "function"`);
+      if (msgPrefix && typeof msgPrefix !== "string")
+        throw Error(`Unknown msgPrefix type "${typeof msgPrefix}" - expected "string"`);
+      assertDefaultLevelFound(level, customLevels, useOnlyCustomLevels);
+      const levels = mappings(customLevels, useOnlyCustomLevels);
+      if (typeof stream.emit === "function") {
+        stream.emit("message", { code: "PINO_CONFIG", config: { levels, messageKey, errorKey } });
+      }
+      assertLevelComparison(levelComparison);
+      const levelCompFunc = genLevelComparison(levelComparison);
+      Object.assign(instance, {
+        levels,
+        [levelCompSym]: levelCompFunc,
+        [useOnlyCustomLevelsSym]: useOnlyCustomLevels,
+        [streamSym]: stream,
+        [timeSym]: time2,
+        [timeSliceIndexSym]: timeSliceIndex,
+        [stringifySym]: stringify2,
+        [stringifySafeSym]: stringifySafe,
+        [stringifiersSym]: stringifiers,
+        [endSym]: end,
+        [formatOptsSym]: formatOpts,
+        [messageKeySym]: messageKey,
+        [errorKeySym]: errorKey,
+        [nestedKeySym]: nestedKey,
+        // protect against injection
+        [nestedKeyStrSym]: nestedKey ? `,${JSON.stringify(nestedKey)}:{` : "",
+        [serializersSym]: serializers2,
+        [mixinSym]: mixin,
+        [mixinMergeStrategySym]: mixinMergeStrategy,
+        [chindingsSym]: chindings,
+        [formattersSym]: allFormatters,
+        [hooksSym]: hooks,
+        silent: noop,
+        onChild,
+        [msgPrefixSym]: msgPrefix
+      });
+      Object.setPrototypeOf(instance, proto());
+      genLsCache(instance);
+      instance[setLevelSym](level);
+      return instance;
+    }
+    module2.exports = pino3;
+    module2.exports.destination = (dest = process.stdout.fd) => {
+      if (typeof dest === "object") {
+        dest.dest = normalizeDestFileDescriptor(dest.dest || process.stdout.fd);
+        return buildSafeSonicBoom(dest);
+      } else {
+        return buildSafeSonicBoom({ dest: normalizeDestFileDescriptor(dest), minLength: 0 });
+      }
+    };
+    module2.exports.transport = require_transport3();
+    module2.exports.multistream = require_multistream3();
+    module2.exports.levels = mappings();
+    module2.exports.stdSerializers = serializers;
+    module2.exports.stdTimeFunctions = Object.assign({}, time);
+    module2.exports.symbols = symbols;
+    module2.exports.version = version2;
+    module2.exports.default = pino3;
+    module2.exports.pino = pino3;
   }
 });
 
@@ -81210,7 +86700,7 @@ var require_tunnel2 = __commonJS({
 });
 
 // node_modules/undici/lib/core/symbols.js
-var require_symbols2 = __commonJS({
+var require_symbols4 = __commonJS({
   "node_modules/undici/lib/core/symbols.js"(exports2, module2) {
     module2.exports = {
       kClose: Symbol("close"),
@@ -81493,12 +86983,127 @@ var require_errors4 = __commonJS({
   }
 });
 
+// node_modules/undici/lib/core/constants.js
+var require_constants6 = __commonJS({
+  "node_modules/undici/lib/core/constants.js"(exports2, module2) {
+    "use strict";
+    var headerNameLowerCasedRecord = {};
+    var wellknownHeaderNames = [
+      "Accept",
+      "Accept-Encoding",
+      "Accept-Language",
+      "Accept-Ranges",
+      "Access-Control-Allow-Credentials",
+      "Access-Control-Allow-Headers",
+      "Access-Control-Allow-Methods",
+      "Access-Control-Allow-Origin",
+      "Access-Control-Expose-Headers",
+      "Access-Control-Max-Age",
+      "Access-Control-Request-Headers",
+      "Access-Control-Request-Method",
+      "Age",
+      "Allow",
+      "Alt-Svc",
+      "Alt-Used",
+      "Authorization",
+      "Cache-Control",
+      "Clear-Site-Data",
+      "Connection",
+      "Content-Disposition",
+      "Content-Encoding",
+      "Content-Language",
+      "Content-Length",
+      "Content-Location",
+      "Content-Range",
+      "Content-Security-Policy",
+      "Content-Security-Policy-Report-Only",
+      "Content-Type",
+      "Cookie",
+      "Cross-Origin-Embedder-Policy",
+      "Cross-Origin-Opener-Policy",
+      "Cross-Origin-Resource-Policy",
+      "Date",
+      "Device-Memory",
+      "Downlink",
+      "ECT",
+      "ETag",
+      "Expect",
+      "Expect-CT",
+      "Expires",
+      "Forwarded",
+      "From",
+      "Host",
+      "If-Match",
+      "If-Modified-Since",
+      "If-None-Match",
+      "If-Range",
+      "If-Unmodified-Since",
+      "Keep-Alive",
+      "Last-Modified",
+      "Link",
+      "Location",
+      "Max-Forwards",
+      "Origin",
+      "Permissions-Policy",
+      "Pragma",
+      "Proxy-Authenticate",
+      "Proxy-Authorization",
+      "RTT",
+      "Range",
+      "Referer",
+      "Referrer-Policy",
+      "Refresh",
+      "Retry-After",
+      "Sec-WebSocket-Accept",
+      "Sec-WebSocket-Extensions",
+      "Sec-WebSocket-Key",
+      "Sec-WebSocket-Protocol",
+      "Sec-WebSocket-Version",
+      "Server",
+      "Server-Timing",
+      "Service-Worker-Allowed",
+      "Service-Worker-Navigation-Preload",
+      "Set-Cookie",
+      "SourceMap",
+      "Strict-Transport-Security",
+      "Supports-Loading-Mode",
+      "TE",
+      "Timing-Allow-Origin",
+      "Trailer",
+      "Transfer-Encoding",
+      "Upgrade",
+      "Upgrade-Insecure-Requests",
+      "User-Agent",
+      "Vary",
+      "Via",
+      "WWW-Authenticate",
+      "X-Content-Type-Options",
+      "X-DNS-Prefetch-Control",
+      "X-Frame-Options",
+      "X-Permitted-Cross-Domain-Policies",
+      "X-Powered-By",
+      "X-Requested-With",
+      "X-XSS-Protection"
+    ];
+    for (let i = 0; i < wellknownHeaderNames.length; ++i) {
+      const key = wellknownHeaderNames[i];
+      const lowerCasedKey = key.toLowerCase();
+      headerNameLowerCasedRecord[key] = headerNameLowerCasedRecord[lowerCasedKey] = lowerCasedKey;
+    }
+    Object.setPrototypeOf(headerNameLowerCasedRecord, null);
+    module2.exports = {
+      wellknownHeaderNames,
+      headerNameLowerCasedRecord
+    };
+  }
+});
+
 // node_modules/undici/lib/core/util.js
 var require_util2 = __commonJS({
   "node_modules/undici/lib/core/util.js"(exports2, module2) {
     "use strict";
     var assert = __require("assert");
-    var { kDestroyed, kBodyUsed } = require_symbols2();
+    var { kDestroyed, kBodyUsed } = require_symbols4();
     var { IncomingMessage } = __require("http");
     var stream = __require("stream");
     var net = __require("net");
@@ -81506,6 +87111,7 @@ var require_util2 = __commonJS({
     var { Blob: Blob2 } = __require("buffer");
     var nodeUtil = __require("util");
     var { stringify: stringify2 } = __require("querystring");
+    var { headerNameLowerCasedRecord } = require_constants6();
     var [nodeMajor, nodeMinor] = process.versions.node.split(".").map((v) => Number(v));
     function nop() {
     }
@@ -81648,6 +87254,9 @@ var require_util2 = __commonJS({
     function parseKeepAliveTimeout(val) {
       const m = val.toString().match(KEEPALIVE_TIMEOUT_EXPR);
       return m ? parseInt(m[1], 10) * 1e3 : null;
+    }
+    function headerNameToString(value) {
+      return headerNameLowerCasedRecord[value] || value.toLowerCase();
     }
     function parseHeaders(headers, obj = {}) {
       if (!Array.isArray(headers))
@@ -81852,6 +87461,7 @@ var require_util2 = __commonJS({
       isIterable,
       isAsyncIterable,
       isDestroyed,
+      headerNameToString,
       parseRawHeaders,
       parseHeaders,
       parseKeepAliveTimeout,
@@ -83947,7 +89557,7 @@ var require_main2 = __commonJS({
 });
 
 // node_modules/undici/lib/fetch/constants.js
-var require_constants4 = __commonJS({
+var require_constants7 = __commonJS({
   "node_modules/undici/lib/fetch/constants.js"(exports2, module2) {
     "use strict";
     var { MessageChannel, receiveMessageOnPort } = __require("worker_threads");
@@ -84185,15 +89795,18 @@ var require_global2 = __commonJS({
 var require_util3 = __commonJS({
   "node_modules/undici/lib/fetch/util.js"(exports2, module2) {
     "use strict";
-    var { redirectStatusSet, referrerPolicySet: referrerPolicyTokens, badPortsSet } = require_constants4();
+    var { redirectStatusSet, referrerPolicySet: referrerPolicyTokens, badPortsSet } = require_constants7();
     var { getGlobalOrigin } = require_global2();
     var { performance: performance2 } = __require("perf_hooks");
     var { isBlobLike, toUSVString, ReadableStreamFrom } = require_util2();
     var assert = __require("assert");
     var { isUint8Array } = __require("util/types");
+    var supportedHashes = [];
     var crypto4;
     try {
       crypto4 = __require("crypto");
+      const possibleRelevantHashes = ["sha256", "sha384", "sha512"];
+      supportedHashes = crypto4.getHashes().filter((hash) => possibleRelevantHashes.includes(hash));
     } catch {
     }
     function responseURL(response) {
@@ -84469,45 +90082,37 @@ var require_util3 = __commonJS({
       if (parsedMetadata.length === 0) {
         return true;
       }
-      const list = parsedMetadata.sort((c, d) => d.algo.localeCompare(c.algo));
-      const strongest = list[0].algo;
-      const metadata = list.filter((item) => item.algo === strongest);
+      const strongest = getStrongestMetadata(parsedMetadata);
+      const metadata = filterMetadataListByAlgorithm(parsedMetadata, strongest);
       for (const item of metadata) {
         const algorithm = item.algo;
-        let expectedValue = item.hash;
-        if (expectedValue.endsWith("==")) {
-          expectedValue = expectedValue.slice(0, -2);
-        }
+        const expectedValue = item.hash;
         let actualValue = crypto4.createHash(algorithm).update(bytes).digest("base64");
-        if (actualValue.endsWith("==")) {
-          actualValue = actualValue.slice(0, -2);
+        if (actualValue[actualValue.length - 1] === "=") {
+          if (actualValue[actualValue.length - 2] === "=") {
+            actualValue = actualValue.slice(0, -2);
+          } else {
+            actualValue = actualValue.slice(0, -1);
+          }
         }
-        if (actualValue === expectedValue) {
-          return true;
-        }
-        let actualBase64URL = crypto4.createHash(algorithm).update(bytes).digest("base64url");
-        if (actualBase64URL.endsWith("==")) {
-          actualBase64URL = actualBase64URL.slice(0, -2);
-        }
-        if (actualBase64URL === expectedValue) {
+        if (compareBase64Mixed(actualValue, expectedValue)) {
           return true;
         }
       }
       return false;
     }
-    var parseHashWithOptions = /((?<algo>sha256|sha384|sha512)-(?<hash>[A-z0-9+/]{1}.*={0,2}))( +[\x21-\x7e]?)?/i;
+    var parseHashWithOptions = /(?<algo>sha256|sha384|sha512)-((?<hash>[A-Za-z0-9+/]+|[A-Za-z0-9_-]+)={0,2}(?:\s|$)( +[!-~]*)?)?/i;
     function parseMetadata(metadata) {
       const result = [];
       let empty = true;
-      const supportedHashes = crypto4.getHashes();
       for (const token of metadata.split(" ")) {
         empty = false;
         const parsedToken = parseHashWithOptions.exec(token);
-        if (parsedToken === null || parsedToken.groups === void 0) {
+        if (parsedToken === null || parsedToken.groups === void 0 || parsedToken.groups.algo === void 0) {
           continue;
         }
-        const algorithm = parsedToken.groups.algo;
-        if (supportedHashes.includes(algorithm.toLowerCase())) {
+        const algorithm = parsedToken.groups.algo.toLowerCase();
+        if (supportedHashes.includes(algorithm)) {
           result.push(parsedToken.groups);
         }
       }
@@ -84515,6 +90120,51 @@ var require_util3 = __commonJS({
         return "no metadata";
       }
       return result;
+    }
+    function getStrongestMetadata(metadataList) {
+      let algorithm = metadataList[0].algo;
+      if (algorithm[3] === "5") {
+        return algorithm;
+      }
+      for (let i = 1; i < metadataList.length; ++i) {
+        const metadata = metadataList[i];
+        if (metadata.algo[3] === "5") {
+          algorithm = "sha512";
+          break;
+        } else if (algorithm[3] === "3") {
+          continue;
+        } else if (metadata.algo[3] === "3") {
+          algorithm = "sha384";
+        }
+      }
+      return algorithm;
+    }
+    function filterMetadataListByAlgorithm(metadataList, algorithm) {
+      if (metadataList.length === 1) {
+        return metadataList;
+      }
+      let pos = 0;
+      for (let i = 0; i < metadataList.length; ++i) {
+        if (metadataList[i].algo === algorithm) {
+          metadataList[pos++] = metadataList[i];
+        }
+      }
+      metadataList.length = pos;
+      return metadataList;
+    }
+    function compareBase64Mixed(actualValue, expectedValue) {
+      if (actualValue.length !== expectedValue.length) {
+        return false;
+      }
+      for (let i = 0; i < actualValue.length; ++i) {
+        if (actualValue[i] !== expectedValue[i]) {
+          if (actualValue[i] === "+" && expectedValue[i] === "-" || actualValue[i] === "/" && expectedValue[i] === "_") {
+            continue;
+          }
+          return false;
+        }
+      }
+      return true;
     }
     function tryUpgradeRequestToAPotentiallyTrustworthyURL(request) {
     }
@@ -84739,13 +90389,14 @@ var require_util3 = __commonJS({
       urlHasHttpsScheme,
       urlIsHttpHttpsScheme,
       readAllBytes,
-      normalizeMethodRecord
+      normalizeMethodRecord,
+      parseMetadata
     };
   }
 });
 
 // node_modules/undici/lib/fetch/symbols.js
-var require_symbols3 = __commonJS({
+var require_symbols5 = __commonJS({
   "node_modules/undici/lib/fetch/symbols.js"(exports2, module2) {
     "use strict";
     module2.exports = {
@@ -85423,7 +91074,7 @@ var require_file = __commonJS({
     "use strict";
     var { Blob: Blob2, File: NativeFile } = __require("buffer");
     var { types } = __require("util");
-    var { kState } = require_symbols3();
+    var { kState } = require_symbols5();
     var { isBlobLike } = require_util3();
     var { webidl } = require_webidl();
     var { parseMIMEType, serializeAMimeType } = require_dataURL();
@@ -85608,7 +91259,7 @@ var require_formdata = __commonJS({
   "node_modules/undici/lib/fetch/formdata.js"(exports2, module2) {
     "use strict";
     var { isBlobLike, toUSVString, makeIterator } = require_util3();
-    var { kState } = require_symbols3();
+    var { kState } = require_symbols5();
     var { File: UndiciFile, FileLike, isFileLike } = require_file();
     var { webidl } = require_webidl();
     var { Blob: Blob2, File: NativeFile } = __require("buffer");
@@ -85774,11 +91425,11 @@ var require_body = __commonJS({
       fullyReadBody
     } = require_util3();
     var { FormData } = require_formdata();
-    var { kState } = require_symbols3();
+    var { kState } = require_symbols5();
     var { webidl } = require_webidl();
-    var { DOMException: DOMException2, structuredClone } = require_constants4();
+    var { DOMException: DOMException2, structuredClone } = require_constants7();
     var { Blob: Blob2, File: NativeFile } = __require("buffer");
-    var { kBodyUsed } = require_symbols2();
+    var { kBodyUsed } = require_symbols4();
     var assert = __require("assert");
     var { isErrored } = require_util2();
     var { isUint8Array, isArrayBuffer } = __require("util/types");
@@ -86142,7 +91793,7 @@ var require_request3 = __commonJS({
       NotSupportedError
     } = require_errors4();
     var assert = __require("assert");
-    var { kHTTP2BuildRequest, kHTTP2CopyHeaders, kHTTP1BuildRequest } = require_symbols2();
+    var { kHTTP2BuildRequest, kHTTP2CopyHeaders, kHTTP1BuildRequest } = require_symbols4();
     var util = require_util2();
     var tokenRegExp = /^[\^_`a-zA-Z\-0-9!#$%&'*+.|~]+$/;
     var headerCharRegex = /[^\t\x20-\x7e\x80-\xff]/;
@@ -86542,7 +92193,7 @@ var require_dispatcher_base = __commonJS({
       ClientClosedError,
       InvalidArgumentError
     } = require_errors4();
-    var { kDestroy, kClose, kDispatch, kInterceptors } = require_symbols2();
+    var { kDestroy, kClose, kDispatch, kInterceptors } = require_symbols4();
     var kDestroyed = Symbol("destroyed");
     var kClosed = Symbol("closed");
     var kOnDestroyed = Symbol("onDestroyed");
@@ -86872,7 +92523,7 @@ var require_utils8 = __commonJS({
 });
 
 // node_modules/undici/lib/llhttp/constants.js
-var require_constants5 = __commonJS({
+var require_constants8 = __commonJS({
   "node_modules/undici/lib/llhttp/constants.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
@@ -87197,7 +92848,7 @@ var require_RedirectHandler = __commonJS({
   "node_modules/undici/lib/handler/RedirectHandler.js"(exports2, module2) {
     "use strict";
     var util = require_util2();
-    var { kBodyUsed } = require_symbols2();
+    var { kBodyUsed } = require_symbols4();
     var assert = __require("assert");
     var { InvalidArgumentError } = require_errors4();
     var EE = __require("events");
@@ -87307,7 +92958,17 @@ var require_RedirectHandler = __commonJS({
       }
     }
     function shouldRemoveHeader(header, removeContent, unknownOrigin) {
-      return header.length === 4 && header.toString().toLowerCase() === "host" || removeContent && header.toString().toLowerCase().indexOf("content-") === 0 || unknownOrigin && header.length === 13 && header.toString().toLowerCase() === "authorization" || unknownOrigin && header.length === 6 && header.toString().toLowerCase() === "cookie";
+      if (header.length === 4) {
+        return util.headerNameToString(header) === "host";
+      }
+      if (removeContent && util.headerNameToString(header).startsWith("content-")) {
+        return true;
+      }
+      if (unknownOrigin && (header.length === 13 || header.length === 6 || header.length === 19)) {
+        const name = util.headerNameToString(header);
+        return name === "authorization" || name === "cookie" || name === "proxy-authorization";
+      }
+      return false;
     }
     function cleanRequestHeaders(headers, removeContent, unknownOrigin) {
       const ret = [];
@@ -87446,7 +93107,7 @@ var require_client2 = __commonJS({
       kHTTP2BuildRequest,
       kHTTP2CopyHeaders,
       kHTTP1BuildRequest
-    } = require_symbols2();
+    } = require_symbols4();
     var http2;
     try {
       http2 = __require("http2");
@@ -87752,7 +93413,7 @@ var require_client2 = __commonJS({
       );
       resume(client);
     }
-    var constants = require_constants5();
+    var constants = require_constants8();
     var createRedirectInterceptor = require_redirectInterceptor();
     var EMPTY_BUF = Buffer.alloc(0);
     async function lazyllhttp() {
@@ -89138,7 +94799,7 @@ var require_fixed_queue = __commonJS({
 // node_modules/undici/lib/pool-stats.js
 var require_pool_stats = __commonJS({
   "node_modules/undici/lib/pool-stats.js"(exports2, module2) {
-    var { kFree, kConnected, kPending, kQueued, kRunning, kSize } = require_symbols2();
+    var { kFree, kConnected, kPending, kQueued, kRunning, kSize } = require_symbols4();
     var kPool = Symbol("pool");
     var PoolStats = class {
       constructor(pool) {
@@ -89173,7 +94834,7 @@ var require_pool_base = __commonJS({
     "use strict";
     var DispatcherBase = require_dispatcher_base();
     var FixedQueue = require_fixed_queue();
-    var { kConnected, kSize, kRunning, kPending, kQueued, kBusy, kFree, kUrl, kClose, kDestroy, kDispatch } = require_symbols2();
+    var { kConnected, kSize, kRunning, kPending, kQueued, kBusy, kFree, kUrl, kClose, kDestroy, kDispatch } = require_symbols4();
     var PoolStats = require_pool_stats();
     var kClients = Symbol("clients");
     var kNeedDrain = Symbol("needDrain");
@@ -89338,7 +94999,7 @@ var require_pool = __commonJS({
       InvalidArgumentError
     } = require_errors4();
     var util = require_util2();
-    var { kUrl, kInterceptors } = require_symbols2();
+    var { kUrl, kInterceptors } = require_symbols4();
     var buildConnector = require_connect();
     var kOptions = Symbol("options");
     var kConnections = Symbol("connections");
@@ -89421,7 +95082,7 @@ var require_balanced_pool = __commonJS({
       kGetDispatcher
     } = require_pool_base();
     var Pool = require_pool();
-    var { kUrl, kInterceptors } = require_symbols2();
+    var { kUrl, kInterceptors } = require_symbols4();
     var { parseOrigin } = require_util2();
     var kFactory = Symbol("factory");
     var kOptions = Symbol("options");
@@ -89544,7 +95205,7 @@ var require_balanced_pool = __commonJS({
 var require_dispatcher_weakref = __commonJS({
   "node_modules/undici/lib/compat/dispatcher-weakref.js"(exports2, module2) {
     "use strict";
-    var { kConnected, kSize } = require_symbols2();
+    var { kConnected, kSize } = require_symbols4();
     var CompatWeakRef = class {
       constructor(value) {
         this.value = value;
@@ -89587,7 +95248,7 @@ var require_agent2 = __commonJS({
   "node_modules/undici/lib/agent.js"(exports2, module2) {
     "use strict";
     var { InvalidArgumentError } = require_errors4();
-    var { kClients, kRunning, kClose, kDestroy, kDispatch, kInterceptors } = require_symbols2();
+    var { kClients, kRunning, kClose, kDestroy, kDispatch, kInterceptors } = require_symbols4();
     var DispatcherBase = require_dispatcher_base();
     var Pool = require_pool();
     var Client = require_client2();
@@ -91265,7 +96926,7 @@ var require_mock_client = __commonJS({
       kConnected
     } = require_mock_symbols();
     var { MockInterceptor } = require_mock_interceptor();
-    var Symbols = require_symbols2();
+    var Symbols = require_symbols4();
     var { InvalidArgumentError } = require_errors4();
     var MockClient = class extends Client {
       constructor(origin, opts) {
@@ -91318,7 +96979,7 @@ var require_mock_pool = __commonJS({
       kConnected
     } = require_mock_symbols();
     var { MockInterceptor } = require_mock_interceptor();
-    var Symbols = require_symbols2();
+    var Symbols = require_symbols4();
     var { InvalidArgumentError } = require_errors4();
     var MockPool = class extends Pool {
       constructor(origin, opts) {
@@ -91428,7 +97089,7 @@ var require_pending_interceptors_formatter = __commonJS({
 var require_mock_agent = __commonJS({
   "node_modules/undici/lib/mock/mock-agent.js"(exports2, module2) {
     "use strict";
-    var { kClients } = require_symbols2();
+    var { kClients } = require_symbols4();
     var Agent = require_agent2();
     var {
       kAgent,
@@ -91567,7 +97228,7 @@ ${pendingInterceptorsFormatter.format(pending)}
 var require_proxy_agent = __commonJS({
   "node_modules/undici/lib/proxy-agent.js"(exports2, module2) {
     "use strict";
-    var { kProxy, kClose, kDestroy, kInterceptors } = require_symbols2();
+    var { kProxy, kClose, kDestroy, kInterceptors } = require_symbols4();
     var { URL: URL3 } = __require("url");
     var Agent = require_agent2();
     var Pool = require_pool();
@@ -91719,7 +97380,7 @@ var require_proxy_agent = __commonJS({
 var require_RetryHandler = __commonJS({
   "node_modules/undici/lib/handler/RetryHandler.js"(exports2, module2) {
     var assert = __require("assert");
-    var { kRetryHandlerDefaultRetry } = require_symbols2();
+    var { kRetryHandlerDefaultRetry } = require_symbols4();
     var { RequestRetryError } = require_errors4();
     var { isDisturbed, parseHeaders, parseRangeHeader } = require_util2();
     function calculateRetryAfterHeader(retryAfter) {
@@ -92051,8 +97712,8 @@ var require_DecoratorHandler = __commonJS({
 var require_headers = __commonJS({
   "node_modules/undici/lib/fetch/headers.js"(exports2, module2) {
     "use strict";
-    var { kHeadersList, kConstruct } = require_symbols2();
-    var { kGuard } = require_symbols3();
+    var { kHeadersList, kConstruct } = require_symbols4();
+    var { kGuard } = require_symbols5();
     var { kEnumerableProperty } = require_util2();
     var {
       makeIterator,
@@ -92456,13 +98117,13 @@ var require_response2 = __commonJS({
       redirectStatusSet,
       nullBodyStatus,
       DOMException: DOMException2
-    } = require_constants4();
-    var { kState, kHeaders, kGuard, kRealm } = require_symbols3();
+    } = require_constants7();
+    var { kState, kHeaders, kGuard, kRealm } = require_symbols5();
     var { webidl } = require_webidl();
     var { FormData } = require_formdata();
     var { getGlobalOrigin } = require_global2();
     var { URLSerializer } = require_dataURL();
-    var { kHeadersList, kConstruct } = require_symbols2();
+    var { kHeadersList, kConstruct } = require_symbols4();
     var assert = __require("assert");
     var { types } = __require("util");
     var ReadableStream = globalThis.ReadableStream || __require("stream/web").ReadableStream;
@@ -92838,13 +98499,13 @@ var require_request4 = __commonJS({
       requestCredentials,
       requestCache,
       requestDuplex
-    } = require_constants4();
+    } = require_constants7();
     var { kEnumerableProperty } = util;
-    var { kHeaders, kSignal, kState, kGuard, kRealm } = require_symbols3();
+    var { kHeaders, kSignal, kState, kGuard, kRealm } = require_symbols5();
     var { webidl } = require_webidl();
     var { getGlobalOrigin } = require_global2();
     var { URLSerializer } = require_dataURL();
-    var { kHeadersList, kConstruct } = require_symbols2();
+    var { kHeadersList, kConstruct } = require_symbols4();
     var assert = __require("assert");
     var { getMaxListeners, setMaxListeners, getEventListeners, defaultMaxListeners } = __require("events");
     var TransformStream = globalThis.TransformStream;
@@ -93497,7 +99158,7 @@ var require_fetch = __commonJS({
       urlIsHttpHttpsScheme,
       urlHasHttpsScheme
     } = require_util3();
-    var { kState, kHeaders, kGuard, kRealm } = require_symbols3();
+    var { kState, kHeaders, kGuard, kRealm } = require_symbols5();
     var assert = __require("assert");
     var { safelyExtractBody } = require_body();
     var {
@@ -93507,8 +99168,8 @@ var require_fetch = __commonJS({
       requestBodyHeader,
       subresourceSet,
       DOMException: DOMException2
-    } = require_constants4();
-    var { kHeadersList } = require_symbols2();
+    } = require_constants7();
+    var { kHeadersList } = require_symbols4();
     var EE = __require("events");
     var { Readable, pipeline } = __require("stream");
     var { addAbortListener, isErrored, isReadable, nodeMajor, nodeMinor } = require_util2();
@@ -94490,7 +100151,7 @@ var require_fetch = __commonJS({
 });
 
 // node_modules/undici/lib/fileapi/symbols.js
-var require_symbols4 = __commonJS({
+var require_symbols6 = __commonJS({
   "node_modules/undici/lib/fileapi/symbols.js"(exports2, module2) {
     "use strict";
     module2.exports = {
@@ -94868,10 +100529,10 @@ var require_util5 = __commonJS({
       kResult,
       kAborted,
       kLastProgressEventFired
-    } = require_symbols4();
+    } = require_symbols6();
     var { ProgressEvent } = require_progressevent();
     var { getEncoding } = require_encoding2();
-    var { DOMException: DOMException2 } = require_constants4();
+    var { DOMException: DOMException2 } = require_constants7();
     var { serializeAMimeType, parseMIMEType } = require_dataURL();
     var { types } = __require("util");
     var { StringDecoder } = __require("string_decoder");
@@ -95059,7 +100720,7 @@ var require_filereader = __commonJS({
       kResult,
       kEvents,
       kAborted
-    } = require_symbols4();
+    } = require_symbols6();
     var { webidl } = require_webidl();
     var { kEnumerableProperty } = require_util2();
     var FileReader = class _FileReader extends EventTarget {
@@ -95304,11 +100965,11 @@ var require_filereader = __commonJS({
 });
 
 // node_modules/undici/lib/cache/symbols.js
-var require_symbols5 = __commonJS({
+var require_symbols7 = __commonJS({
   "node_modules/undici/lib/cache/symbols.js"(exports2, module2) {
     "use strict";
     module2.exports = {
-      kConstruct: require_symbols2().kConstruct
+      kConstruct: require_symbols4().kConstruct
     };
   }
 });
@@ -95350,14 +101011,14 @@ var require_util6 = __commonJS({
 var require_cache = __commonJS({
   "node_modules/undici/lib/cache/cache.js"(exports2, module2) {
     "use strict";
-    var { kConstruct } = require_symbols5();
+    var { kConstruct } = require_symbols7();
     var { urlEquals, fieldValues: getFieldValues } = require_util6();
     var { kEnumerableProperty, isDisturbed } = require_util2();
-    var { kHeadersList } = require_symbols2();
+    var { kHeadersList } = require_symbols4();
     var { webidl } = require_webidl();
     var { Response: Response2, cloneResponse } = require_response2();
     var { Request: Request2 } = require_request4();
-    var { kState, kHeaders, kGuard, kRealm } = require_symbols3();
+    var { kState, kHeaders, kGuard, kRealm } = require_symbols5();
     var { fetching } = require_fetch();
     var { urlIsHttpHttpsScheme, createDeferredPromise, readAllBytes } = require_util3();
     var assert = __require("assert");
@@ -95884,7 +101545,7 @@ var require_cache = __commonJS({
 var require_cachestorage = __commonJS({
   "node_modules/undici/lib/cache/cachestorage.js"(exports2, module2) {
     "use strict";
-    var { kConstruct } = require_symbols5();
+    var { kConstruct } = require_symbols7();
     var { Cache } = require_cache();
     var { webidl } = require_webidl();
     var { kEnumerableProperty } = require_util2();
@@ -95987,7 +101648,7 @@ var require_cachestorage = __commonJS({
 });
 
 // node_modules/undici/lib/cookies/constants.js
-var require_constants6 = __commonJS({
+var require_constants9 = __commonJS({
   "node_modules/undici/lib/cookies/constants.js"(exports2, module2) {
     "use strict";
     var maxAttributeValueSize = 1024;
@@ -96004,7 +101665,7 @@ var require_util7 = __commonJS({
   "node_modules/undici/lib/cookies/util.js"(exports2, module2) {
     "use strict";
     var assert = __require("assert");
-    var { kHeadersList } = require_symbols2();
+    var { kHeadersList } = require_symbols4();
     function isCTLExcludingHtab(value) {
       if (value.length === 0) {
         return false;
@@ -96162,7 +101823,7 @@ var require_util7 = __commonJS({
 var require_parse4 = __commonJS({
   "node_modules/undici/lib/cookies/parse.js"(exports2, module2) {
     "use strict";
-    var { maxNameValuePairSize, maxAttributeValueSize } = require_constants6();
+    var { maxNameValuePairSize, maxAttributeValueSize } = require_constants9();
     var { isCTLExcludingHtab } = require_util7();
     var { collectASequenceOfCodePointsFast } = require_dataURL();
     var assert = __require("assert");
@@ -96427,7 +102088,7 @@ var require_cookies = __commonJS({
 });
 
 // node_modules/undici/lib/websocket/constants.js
-var require_constants7 = __commonJS({
+var require_constants10 = __commonJS({
   "node_modules/undici/lib/websocket/constants.js"(exports2, module2) {
     "use strict";
     var uid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
@@ -96471,7 +102132,7 @@ var require_constants7 = __commonJS({
 });
 
 // node_modules/undici/lib/websocket/symbols.js
-var require_symbols6 = __commonJS({
+var require_symbols8 = __commonJS({
   "node_modules/undici/lib/websocket/symbols.js"(exports2, module2) {
     "use strict";
     module2.exports = {
@@ -96734,8 +102395,8 @@ var require_events = __commonJS({
 var require_util8 = __commonJS({
   "node_modules/undici/lib/websocket/util.js"(exports2, module2) {
     "use strict";
-    var { kReadyState, kController, kResponse, kBinaryType, kWebSocketURL } = require_symbols6();
-    var { states, opcodes } = require_constants7();
+    var { kReadyState, kController, kResponse, kBinaryType, kWebSocketURL } = require_symbols8();
+    var { states, opcodes } = require_constants10();
     var { MessageEvent, ErrorEvent: ErrorEvent2 } = require_events();
     function isEstablished(ws) {
       return ws[kReadyState] === states.OPEN;
@@ -96825,20 +102486,20 @@ var require_connection = __commonJS({
   "node_modules/undici/lib/websocket/connection.js"(exports2, module2) {
     "use strict";
     var diagnosticsChannel = __require("diagnostics_channel");
-    var { uid, states } = require_constants7();
+    var { uid, states } = require_constants10();
     var {
       kReadyState,
       kSentClose,
       kByteParser,
       kReceivedClose
-    } = require_symbols6();
+    } = require_symbols8();
     var { fireEvent, failWebsocketConnection } = require_util8();
     var { CloseEvent } = require_events();
     var { makeRequest } = require_request4();
     var { fetching } = require_fetch();
     var { Headers: Headers2 } = require_headers();
     var { getGlobalDispatcher } = require_global3();
-    var { kHeadersList } = require_symbols2();
+    var { kHeadersList } = require_symbols4();
     var channels = {};
     channels.open = diagnosticsChannel.channel("undici:websocket:open");
     channels.close = diagnosticsChannel.channel("undici:websocket:close");
@@ -96972,7 +102633,7 @@ var require_connection = __commonJS({
 var require_frame = __commonJS({
   "node_modules/undici/lib/websocket/frame.js"(exports2, module2) {
     "use strict";
-    var { maxUnsigned16Bit } = require_constants7();
+    var { maxUnsigned16Bit } = require_constants10();
     var crypto4;
     try {
       crypto4 = __require("crypto");
@@ -97031,8 +102692,8 @@ var require_receiver = __commonJS({
     "use strict";
     var { Writable } = __require("stream");
     var diagnosticsChannel = __require("diagnostics_channel");
-    var { parserStates, opcodes, states, emptyBuffer } = require_constants7();
-    var { kReadyState, kSentClose, kResponse, kReceivedClose } = require_symbols6();
+    var { parserStates, opcodes, states, emptyBuffer } = require_constants10();
+    var { kReadyState, kSentClose, kResponse, kReceivedClose } = require_symbols8();
     var { isValidStatusCode, failWebsocketConnection, websocketMessageReceived } = require_util8();
     var { WebsocketFrameSend } = require_frame();
     var channels = {};
@@ -97266,10 +102927,10 @@ var require_websocket = __commonJS({
   "node_modules/undici/lib/websocket/websocket.js"(exports2, module2) {
     "use strict";
     var { webidl } = require_webidl();
-    var { DOMException: DOMException2 } = require_constants4();
+    var { DOMException: DOMException2 } = require_constants7();
     var { URLSerializer } = require_dataURL();
     var { getGlobalOrigin } = require_global2();
-    var { staticPropertyDescriptors, states, opcodes, emptyBuffer } = require_constants7();
+    var { staticPropertyDescriptors, states, opcodes, emptyBuffer } = require_constants10();
     var {
       kWebSocketURL,
       kReadyState,
@@ -97278,7 +102939,7 @@ var require_websocket = __commonJS({
       kResponse,
       kSentClose,
       kByteParser
-    } = require_symbols6();
+    } = require_symbols8();
     var { isEstablished, isClosing, isValidSubprotocol, failWebsocketConnection, fireEvent } = require_util8();
     var { establishWebSocketConnection } = require_connection();
     var { WebsocketFrameSend } = require_frame();
@@ -97776,7 +103437,7 @@ var require_undici = __commonJS({
       module2.exports.setGlobalOrigin = setGlobalOrigin;
       module2.exports.getGlobalOrigin = getGlobalOrigin;
       const { CacheStorage } = require_cachestorage();
-      const { kConstruct } = require_symbols5();
+      const { kConstruct } = require_symbols7();
       module2.exports.caches = new CacheStorage(kConstruct);
     }
     if (util.nodeMajor >= 16) {
@@ -99204,6 +104865,597 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
   }
 });
 
+// node_modules/@repository-settings/app/lib/mergeArrayByName.js
+var require_mergeArrayByName = __commonJS({
+  "node_modules/@repository-settings/app/lib/mergeArrayByName.js"(exports2, module2) {
+    var merge = require_cjs();
+    function findMatchingIndex(sourceItem, target) {
+      if (Object.prototype.hasOwnProperty.call(sourceItem, "name")) {
+        return target.filter((targetItem) => Object.prototype.hasOwnProperty.call(targetItem, "name")).findIndex((targetItem) => sourceItem.name === targetItem.name);
+      }
+    }
+    function mergeByName(target, source, options2) {
+      const destination = target.slice();
+      source.forEach((sourceItem) => {
+        const matchingIndex = findMatchingIndex(sourceItem, target);
+        if (matchingIndex > -1) {
+          destination[matchingIndex] = merge(target[matchingIndex], sourceItem, options2);
+        } else {
+          destination.push(sourceItem);
+        }
+      });
+      return destination;
+    }
+    module2.exports = mergeByName;
+  }
+});
+
+// node_modules/@repository-settings/app/lib/plugins/repository.js
+var require_repository = __commonJS({
+  "node_modules/@repository-settings/app/lib/plugins/repository.js"(exports2, module2) {
+    var enableAutomatedSecurityFixes = ({ github, settings, enabled }) => {
+      if (enabled === void 0) {
+        return Promise.resolve();
+      }
+      const args = {
+        owner: settings.owner,
+        repo: settings.repo,
+        mediaType: {
+          previews: ["london"]
+        }
+      };
+      const methodName = enabled ? "enableAutomatedSecurityFixes" : "disableAutomatedSecurityFixes";
+      return github.repos[methodName](args);
+    };
+    var enableVulnerabilityAlerts = ({ github, settings, enabled }) => {
+      if (enabled === void 0) {
+        return Promise.resolve();
+      }
+      const args = {
+        owner: settings.owner,
+        repo: settings.repo,
+        mediaType: {
+          previews: ["dorian"]
+        }
+      };
+      const methodName = enabled ? "enableVulnerabilityAlerts" : "disableVulnerabilityAlerts";
+      return github.repos[methodName](args);
+    };
+    module2.exports = class Repository {
+      constructor(github, repo, settings) {
+        this.github = github;
+        this.settings = Object.assign({ mediaType: { previews: ["baptiste"] } }, settings, repo);
+        this.topics = this.settings.topics;
+        delete this.settings.topics;
+        this.enableVulnerabilityAlerts = this.settings.enable_vulnerability_alerts;
+        delete this.settings.enable_vulnerability_alerts;
+        this.enableAutomatedSecurityFixes = this.settings.enable_automated_security_fixes;
+        delete this.settings.enable_automated_security_fixes;
+      }
+      sync() {
+        this.settings.name = this.settings.name || this.settings.repo;
+        return this.github.repos.update(this.settings).then(() => {
+          if (this.topics) {
+            return this.github.repos.replaceAllTopics({
+              owner: this.settings.owner,
+              repo: this.settings.repo,
+              names: this.topics.split(/\s*,\s*/),
+              mediaType: {
+                previews: ["mercy"]
+              }
+            });
+          }
+        }).then(() => enableVulnerabilityAlerts({ enabled: this.enableVulnerabilityAlerts, ...this })).then(() => enableAutomatedSecurityFixes({ enabled: this.enableAutomatedSecurityFixes, ...this }));
+      }
+    };
+  }
+});
+
+// node_modules/@repository-settings/app/lib/plugins/diffable.js
+var require_diffable = __commonJS({
+  "node_modules/@repository-settings/app/lib/plugins/diffable.js"(exports2, module2) {
+    module2.exports = class Diffable {
+      constructor(github, repo, entries) {
+        this.github = github;
+        this.repo = repo;
+        this.entries = entries;
+      }
+      sync() {
+        if (this.entries) {
+          return this.find().then((existingRecords) => {
+            const changes = [];
+            this.entries.forEach((attrs) => {
+              const existing = existingRecords.find((record) => {
+                return this.comparator(record, attrs);
+              });
+              if (!existing) {
+                changes.push(this.add(attrs));
+              } else if (this.changed(existing, attrs)) {
+                changes.push(this.update(existing, attrs));
+              }
+            });
+            existingRecords.forEach((x) => {
+              if (!this.entries.find((y) => this.comparator(x, y))) {
+                changes.push(this.remove(x));
+              }
+            });
+            return Promise.all(changes);
+          });
+        }
+      }
+    };
+  }
+});
+
+// node_modules/@repository-settings/app/lib/plugins/labels.js
+var require_labels = __commonJS({
+  "node_modules/@repository-settings/app/lib/plugins/labels.js"(exports2, module2) {
+    var Diffable = require_diffable();
+    var previewHeaders = { accept: "application/vnd.github.symmetra-preview+json" };
+    module2.exports = class Labels extends Diffable {
+      constructor(...args) {
+        super(...args);
+        if (this.entries) {
+          this.entries.forEach((label) => {
+            if (label.color) {
+              label.color = String(label.color).replace(/^#/, "");
+              if (label.color.length < 6) {
+                label.color = label.color.padStart(6, "0");
+              }
+            }
+          });
+        }
+      }
+      find() {
+        const options2 = this.github.issues.listLabelsForRepo.endpoint.merge(this.wrapAttrs({ per_page: 100 }));
+        return this.github.paginate(options2);
+      }
+      comparator(existing, attrs) {
+        return existing.name === attrs.name;
+      }
+      changed(existing, attrs) {
+        return "new_name" in attrs || existing.color !== attrs.color || existing.description !== attrs.description;
+      }
+      update(existing, attrs) {
+        return this.github.issues.updateLabel(this.wrapAttrs(attrs));
+      }
+      add(attrs) {
+        return this.github.issues.createLabel(this.wrapAttrs(attrs));
+      }
+      remove(existing) {
+        return this.github.issues.deleteLabel(this.wrapAttrs({ name: existing.name }));
+      }
+      wrapAttrs(attrs) {
+        return Object.assign({}, attrs, this.repo, { headers: previewHeaders });
+      }
+    };
+  }
+});
+
+// node_modules/@repository-settings/app/lib/plugins/collaborators.js
+var require_collaborators = __commonJS({
+  "node_modules/@repository-settings/app/lib/plugins/collaborators.js"(exports2, module2) {
+    var Diffable = require_diffable();
+    module2.exports = class Collaborators extends Diffable {
+      constructor(...args) {
+        super(...args);
+        if (this.entries) {
+          this.entries.forEach((collaborator) => {
+            collaborator.username = collaborator.username.toLowerCase();
+          });
+        }
+      }
+      find() {
+        return this.github.repos.listCollaborators({ repo: this.repo.repo, owner: this.repo.owner, affiliation: "direct" }).then((res) => {
+          return res.data.map((user) => {
+            return {
+              // Force all usernames to lowercase to avoid comparison issues.
+              username: user.login.toLowerCase(),
+              permission: user.permissions.admin && "admin" || user.permissions.push && "push" || user.permissions.pull && "pull"
+            };
+          });
+        });
+      }
+      comparator(existing, attrs) {
+        return existing.username === attrs.username;
+      }
+      changed(existing, attrs) {
+        return existing.permission !== attrs.permission;
+      }
+      update(existing, attrs) {
+        return this.add(attrs);
+      }
+      add(attrs) {
+        return this.github.repos.addCollaborator(Object.assign({}, attrs, this.repo));
+      }
+      remove(existing) {
+        return this.github.repos.removeCollaborator(Object.assign({ username: existing.username }, this.repo));
+      }
+    };
+  }
+});
+
+// node_modules/@repository-settings/app/lib/plugins/environments.js
+var require_environments = __commonJS({
+  "node_modules/@repository-settings/app/lib/plugins/environments.js"(exports2, module2) {
+    var Diffable = require_diffable();
+    var environmentRepoEndpoint = "/repos/:org/:repo/environments/:environment_name";
+    function shouldUseProtectedBranches(protectedBranches, customBranchPolicies) {
+      return !!(protectedBranches || customBranchPolicies === void 0 || customBranchPolicies === null);
+    }
+    function attributeSorter(a, b) {
+      if (a.id < b.id)
+        return -1;
+      if (a.id > b.id)
+        return 1;
+      if (a.type < b.type)
+        return -1;
+      if (a.type > b.type)
+        return 1;
+      return 0;
+    }
+    function reviewersToString(reviewers) {
+      if (reviewers === null || reviewers === void 0) {
+        return "";
+      } else {
+        reviewers.sort(attributeSorter);
+        return JSON.stringify(
+          reviewers.map((reviewer) => {
+            return {
+              id: reviewer.id,
+              type: reviewer.type
+            };
+          })
+        );
+      }
+    }
+    function deploymentBranchPolicyToString(attrs) {
+      if (attrs === null || attrs === void 0) {
+        return "";
+      } else {
+        return JSON.stringify(
+          shouldUseProtectedBranches(attrs.protected_branches, attrs.custom_branches) ? { protected_branches: true } : { custom_branches: attrs.custom_branches.sort() }
+        );
+      }
+    }
+    function waitTimerHasChanged(existing, attrs) {
+      return (existing.wait_timer || 0) !== attrs.wait_timer;
+    }
+    function reviewersHasChanged(existing, attrs) {
+      return reviewersToString(existing.reviewers) !== reviewersToString(attrs.reviewers);
+    }
+    function deploymentBranchPolicyHasChanged(existing, attrs) {
+      return deploymentBranchPolicyToString(existing.deployment_branch_policy) !== deploymentBranchPolicyToString(attrs.deployment_branch_policy);
+    }
+    module2.exports = class Environments extends Diffable {
+      constructor(...args) {
+        super(...args);
+        if (this.entries) {
+          this.entries.forEach((environment) => {
+            environment.name = environment.name.toLowerCase();
+          });
+        }
+      }
+      async find() {
+        const {
+          data: { environments }
+        } = await this.github.request("GET /repos/:org/:repo/environments", {
+          org: this.repo.owner,
+          repo: this.repo.repo
+        });
+        return Promise.all(
+          environments.map(async (environment) => {
+            if (environment.deployment_branch_policy) {
+              if (environment.deployment_branch_policy.custom_branch_policies) {
+                const branchPolicies = await this.getDeploymentBranchPolicies(
+                  this.repo.owner,
+                  this.repo.repo,
+                  environment.name
+                );
+                environment.deployment_branch_policy = {
+                  custom_branches: branchPolicies.map((_) => _.name)
+                };
+              } else {
+                environment.deployment_branch_policy = {
+                  protected_branches: true
+                };
+              }
+            }
+            return {
+              ...environment,
+              // Force all names to lowercase to avoid comparison issues.
+              name: environment.name.toLowerCase()
+            };
+          })
+        );
+      }
+      comparator(existing, attrs) {
+        return existing.name === attrs.name;
+      }
+      changed(existing, attrs) {
+        if (!attrs.wait_timer)
+          attrs.wait_timer = 0;
+        return waitTimerHasChanged(existing, attrs) || reviewersHasChanged(existing, attrs) || deploymentBranchPolicyHasChanged(existing, attrs);
+      }
+      async update(existing, attrs) {
+        if (existing.deployment_branch_policy && existing.deployment_branch_policy.custom_branches) {
+          const branchPolicies = await this.getDeploymentBranchPolicies(this.repo.owner, this.repo.repo, existing.name);
+          await Promise.all(
+            branchPolicies.map(
+              (branchPolicy) => this.github.request(
+                "DELETE /repos/:org/:repo/environments/:environment_name/deployment-branch-policies/:id",
+                {
+                  org: this.repo.owner,
+                  repo: this.repo.repo,
+                  environment_name: existing.name,
+                  id: branchPolicy.id
+                }
+              )
+            )
+          );
+        }
+        return this.add(attrs);
+      }
+      async add(attrs) {
+        await this.github.request(`PUT ${environmentRepoEndpoint}`, this.toParams({ name: attrs.name }, attrs));
+        if (attrs.deployment_branch_policy && attrs.deployment_branch_policy.custom_branches) {
+          await Promise.all(
+            attrs.deployment_branch_policy.custom_branches.map(
+              (name) => this.github.request("POST /repos/:org/:repo/environments/:environment_name/deployment-branch-policies", {
+                org: this.repo.owner,
+                repo: this.repo.repo,
+                environment_name: attrs.name,
+                name
+              })
+            )
+          );
+        }
+      }
+      remove(existing) {
+        return this.github.request(`DELETE ${environmentRepoEndpoint}`, {
+          environment_name: existing.name,
+          repo: this.repo.repo,
+          org: this.repo.owner
+        });
+      }
+      async getDeploymentBranchPolicies(owner, repo, environmentName) {
+        const {
+          data: { branch_policies: branchPolicies }
+        } = await this.github.request("GET /repos/:org/:repo/environments/:environment_name/deployment-branch-policies", {
+          org: owner,
+          repo,
+          environment_name: environmentName
+        });
+        return branchPolicies;
+      }
+      toParams(existing, attrs) {
+        const deploymentBranchPolicy = attrs.deployment_branch_policy ? shouldUseProtectedBranches(
+          attrs.deployment_branch_policy.protected_branches,
+          attrs.deployment_branch_policy.custom_branches
+        ) ? { protected_branches: true, custom_branch_policies: false } : { protected_branches: false, custom_branch_policies: true } : null;
+        return {
+          environment_name: existing.name,
+          repo: this.repo.repo,
+          org: this.repo.owner,
+          wait_timer: attrs.wait_timer,
+          reviewers: attrs.reviewers,
+          deployment_branch_policy: deploymentBranchPolicy
+        };
+      }
+    };
+  }
+});
+
+// node_modules/@repository-settings/app/lib/plugins/teams.js
+var require_teams = __commonJS({
+  "node_modules/@repository-settings/app/lib/plugins/teams.js"(exports2, module2) {
+    var Diffable = require_diffable();
+    var teamRepoEndpoint = "/teams/:team_id/repos/:owner/:repo";
+    module2.exports = class Teams extends Diffable {
+      find() {
+        return this.github.repos.listTeams(this.repo).then((res) => res.data);
+      }
+      comparator(existing, attrs) {
+        return existing.slug === attrs.name;
+      }
+      changed(existing, attrs) {
+        return existing.permission !== attrs.permission;
+      }
+      update(existing, attrs) {
+        return this.github.request(`PUT ${teamRepoEndpoint}`, this.toParams(existing, attrs));
+      }
+      async add(attrs) {
+        const { data: existing } = await this.github.request("GET /orgs/:org/teams/:team_slug", {
+          org: this.repo.owner,
+          team_slug: attrs.name
+        });
+        return this.github.request(`PUT ${teamRepoEndpoint}`, this.toParams(existing, attrs));
+      }
+      remove(existing) {
+        return this.github.request(`DELETE ${teamRepoEndpoint}`, {
+          team_id: existing.id,
+          ...this.repo,
+          org: this.repo.owner
+        });
+      }
+      toParams(existing, attrs) {
+        return {
+          team_id: existing.id,
+          owner: this.repo.owner,
+          repo: this.repo.repo,
+          org: this.repo.owner,
+          permission: attrs.permission
+        };
+      }
+    };
+  }
+});
+
+// node_modules/@repository-settings/app/lib/plugins/milestones.js
+var require_milestones = __commonJS({
+  "node_modules/@repository-settings/app/lib/plugins/milestones.js"(exports2, module2) {
+    var Diffable = require_diffable();
+    module2.exports = class Milestones extends Diffable {
+      constructor(...args) {
+        super(...args);
+        if (this.entries) {
+          this.entries.forEach((milestone) => {
+            if (milestone.due_on) {
+              delete milestone.due_on;
+            }
+          });
+        }
+      }
+      find() {
+        const options2 = this.github.issues.listMilestones.endpoint.merge(
+          Object.assign({ per_page: 100, state: "all" }, this.repo)
+        );
+        return this.github.paginate(options2);
+      }
+      comparator(existing, attrs) {
+        return existing.title === attrs.title;
+      }
+      changed(existing, attrs) {
+        return existing.description !== attrs.description || existing.state !== attrs.state;
+      }
+      update(existing, attrs) {
+        const { owner, repo } = this.repo;
+        return this.github.issues.updateMilestone(
+          Object.assign({ milestone_number: existing.number }, attrs, { owner, repo })
+        );
+      }
+      add(attrs) {
+        const { owner, repo } = this.repo;
+        return this.github.issues.createMilestone(Object.assign({}, attrs, { owner, repo }));
+      }
+      remove(existing) {
+        const { owner, repo } = this.repo;
+        return this.github.issues.deleteMilestone(Object.assign({ milestone_number: existing.number }, { owner, repo }));
+      }
+    };
+  }
+});
+
+// node_modules/@repository-settings/app/lib/plugins/branches.js
+var require_branches = __commonJS({
+  "node_modules/@repository-settings/app/lib/plugins/branches.js"(exports2, module2) {
+    var previewHeaders = {
+      accept: "application/vnd.github.hellcat-preview+json,application/vnd.github.luke-cage-preview+json,application/vnd.github.zzzax-preview+json"
+    };
+    module2.exports = class Branches {
+      constructor(github, repo, settings) {
+        this.github = github;
+        this.repo = repo;
+        this.branches = settings;
+      }
+      sync() {
+        return Promise.all(
+          this.branches.filter((branch) => branch.protection !== void 0).map((branch) => {
+            const params = Object.assign(this.repo, { branch: branch.name });
+            if (this.isEmpty(branch.protection)) {
+              return this.github.repos.deleteBranchProtection(params);
+            } else {
+              Object.assign(params, branch.protection, { headers: previewHeaders });
+              return this.github.repos.updateBranchProtection(params);
+            }
+          })
+        );
+      }
+      isEmpty(maybeEmpty) {
+        return maybeEmpty === null || Object.keys(maybeEmpty).length === 0;
+      }
+    };
+  }
+});
+
+// node_modules/@repository-settings/app/lib/settings.js
+var require_settings = __commonJS({
+  "node_modules/@repository-settings/app/lib/settings.js"(exports2, module2) {
+    var Settings = class _Settings {
+      static sync(github, repo, config) {
+        return new _Settings(github, repo, config).update();
+      }
+      constructor(github, repo, config) {
+        this.github = github;
+        this.repo = repo;
+        this.config = config;
+      }
+      update() {
+        const { branches, ...rest } = this.config;
+        return Promise.all(
+          Object.entries(rest).map(([section, config]) => {
+            return this.processSection(section, config);
+          })
+        ).then(() => {
+          if (branches) {
+            return this.processSection("branches", branches);
+          }
+        });
+      }
+      processSection(section, config) {
+        const debug = { repo: this.repo };
+        debug[section] = config;
+        const Plugin = _Settings.PLUGINS[section];
+        return new Plugin(this.github, this.repo, config).sync();
+      }
+    };
+    Settings.FILE_NAME = ".github/settings.yml";
+    Settings.PLUGINS = {
+      repository: require_repository(),
+      labels: require_labels(),
+      collaborators: require_collaborators(),
+      environments: require_environments(),
+      teams: require_teams(),
+      milestones: require_milestones(),
+      branches: require_branches()
+    };
+    module2.exports = Settings;
+  }
+});
+
+// node_modules/@repository-settings/app/index.js
+var require_app = __commonJS({
+  "node_modules/@repository-settings/app/index.js"(exports2, module2) {
+    var mergeArrayByName = require_mergeArrayByName();
+    module2.exports = (robot, _, Settings = require_settings()) => {
+      async function syncSettings(context, repo = context.repo()) {
+        const config = await context.config("settings.yml", {}, { arrayMerge: mergeArrayByName });
+        return Settings.sync(context.octokit, repo, config);
+      }
+      robot.on("push", async (context) => {
+        const { payload } = context;
+        const { repository } = payload;
+        const defaultBranch = payload.ref === "refs/heads/" + repository.default_branch;
+        if (!defaultBranch) {
+          robot.log.debug("Not working on the default branch, returning...");
+          return;
+        }
+        const settingsModified = payload.commits.find((commit) => {
+          return commit.added.includes(Settings.FILE_NAME) || commit.modified.includes(Settings.FILE_NAME);
+        });
+        if (!settingsModified) {
+          robot.log.debug(`No changes in '${Settings.FILE_NAME}' detected, returning...`);
+          return;
+        }
+        return syncSettings(context);
+      });
+      robot.on("repository.edited", async (context) => {
+        const { payload } = context;
+        const { changes, repository } = payload;
+        if (!Object.prototype.hasOwnProperty.call(changes, "default_branch")) {
+          robot.log.debug("Repository configuration was edited but the default branch was not affected, returning...");
+          return;
+        }
+        robot.log.debug(`Default branch changed from '${changes.default_branch.from}' to '${repository.default_branch}'`);
+        return syncSettings(context);
+      });
+      robot.on("repository.created", async (context) => {
+        return syncSettings(context);
+      });
+    };
+  }
+});
+
 // node_modules/@probot/adapter-github-actions/index.js
 var adapter_github_actions_exports = {};
 __export(adapter_github_actions_exports, {
@@ -99211,13 +105463,13 @@ __export(adapter_github_actions_exports, {
 });
 __reExport(adapter_github_actions_exports, __toESM(require_lib6(), 1));
 var import_probot = __toESM(require_lib6(), 1);
-var import_pino2 = __toESM(require_pino(), 1);
+var import_pino2 = __toESM(require_pino4(), 1);
 import { readFileSync } from "node:fs";
 
 // node_modules/@probot/adapter-github-actions/pino-transport-github-actions.js
 var import_through2 = __toESM(require_through2(), 1);
 var import_core = __toESM(require_core5(), 1);
-var import_pino = __toESM(require_pino(), 1);
+var import_pino = __toESM(require_pino4(), 1);
 import { inspect } from "util";
 var LEVEL_TO_ACTIONS_CORE_LOG_METHOD = {
   trace: "debug",
@@ -99244,7 +105496,7 @@ var transport = import_through2.default.obj(function(chunk, enc, cb) {
 });
 
 // node_modules/@probot/adapter-github-actions/index.js
-async function run(app) {
+async function run(app2) {
   const log = (0, import_pino2.default)({}, transport);
   const githubToken = process.env.GITHUB_TOKEN || process.env.INPUT_GITHUB_TOKEN || process.env.INPUT_TOKEN;
   if (!githubToken) {
@@ -99272,7 +105524,7 @@ async function run(app) {
       log
     }
   });
-  await probot.load(app);
+  await probot.load(app2);
   return probot.receive({
     id: process.env.GITHUB_RUN_ID,
     name: process.env.GITHUB_EVENT_NAME,
@@ -99282,18 +105534,9 @@ async function run(app) {
   });
 }
 
-// app.js
-var app_default = (app) => {
-  app.log.info("Yay! The app was loaded!");
-  app.on("issues.opened", async (context) => {
-    return context.octokit.issues.createComment(
-      context.issue({ body: "Hello, World!" })
-    );
-  });
-};
-
 // index.js
-run(app_default);
+var import_app = __toESM(require_app(), 1);
+run(import_app.default);
 /*! Bundled license information:
 
 safe-buffer/index.js:
