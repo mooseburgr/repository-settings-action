@@ -1,8 +1,10 @@
-name: Probot Example
-description: 'Example Action built with Probot'
+name: Repository Settings Action
+description: GitHub Actions wrapper for the repository-settings/app Probot app
+
 branding:
-  icon: 'gift'
+  icon: settings
   color: orange
+
 runs:
-  using: 'node20'
-  main: 'dist/index.js'
+  using: node20
+  main: dist/index.js
