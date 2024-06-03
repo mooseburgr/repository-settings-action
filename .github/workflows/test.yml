@@ -1,6 +1,6 @@
 name: Test
 on:
-  push: {}
+  push:
 
 jobs:
   test:
@@ -13,6 +13,4 @@ jobs:
           cache: npm
           node-version-file: .node-version
 
-      - run: |
-          npm ci
-          npm test
+      - run: npm ci && npm test
