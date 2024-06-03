@@ -2,8 +2,12 @@ name: Call self
 on:
   workflow_dispatch:
 
+permissions: write-all
+
 jobs:
   sync-settings:
     runs-on: ubuntu-latest
     steps:
       - uses: mooseburgr/repository-settings-action@main
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
