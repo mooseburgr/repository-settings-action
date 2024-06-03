@@ -20,7 +20,7 @@ jobs:
 
       - run: |
           npm ci
-          npm run build
+          npm run all
           rm .gitignore
 
       - run: npx semantic-release

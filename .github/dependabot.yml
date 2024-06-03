@@ -1,42 +1,41 @@
 version: 2
 updates:
   - package-ecosystem: cargo
-    directory: "/"
+    directory: '/'
     schedule:
       interval: weekly
 
   - package-ecosystem: docker
-    directory: "/"
+    directory: '/'
     schedule:
       interval: weekly
 
   - package-ecosystem: github-actions
-    directory: "/"
+    directory: '/'
     schedule:
-      interval: weekly      
+      interval: weekly
 
   - package-ecosystem: gomod
-    directory: "/"
+    directory: '/'
     schedule:
       interval: weekly
 
   - package-ecosystem: gradle
-    directory: "/"
+    directory: '/'
     schedule:
       interval: weekly
 
   - package-ecosystem: maven
-    directory: "/"
+    directory: '/'
     schedule:
       interval: weekly
 
   - package-ecosystem: npm
-    directory: "/"
+    directory: '/'
     schedule:
-      interval: weekly   
+      interval: weekly
 
   - package-ecosystem: terraform
-    directory: "/"
+    directory: '/'
     schedule:
-      interval: weekly      
-   
+      interval: weekly

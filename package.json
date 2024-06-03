@@ -4,8 +4,15 @@
   "private": true,
   "description": "GitHub Actions wrapper for the repository-settings/app Probot app",
   "scripts": {
-    "build": "esbuild index.js --bundle --platform=node --outfile=dist/index.js --format=esm",
-    "test": "node --test"
+    "build-old": "esbuild index.js --bundle --platform=node --outfile=dist/index.js --format=esm",
+    "bundle": "npm run format:write && npm run package",
+    "coverage": "npx make-coverage-badge --output-path ./badges/coverage.svg",
+    "format:write": "npx prettier --write .",
+    "format:check": "npx prettier --check .",
+    "package": "npx ncc build index.js -o dist --source-map --license licenses.txt",
+    "package:watch": "npm run package -- --watch",
+    "test": "node --test",
+    "all": "npm run format:write && npm run test && npm run package"
   },
   "author": "Kyle Johnson (https://github.com/mooseburgr)",
   "repository": "github:mooseburgr/repository-settings-action",
@@ -17,8 +24,10 @@
     "@semantic-release/git": "^10.0.1",
     "esbuild": "^0.21.0",
     "nock": "^14.0.0-beta.7",
+    "@vercel/ncc": "^0.38.1",
     "semantic-release": "^24.0.0"
   },
+  "license": "MIT",
   "release": {
     "branches": [
       "main"

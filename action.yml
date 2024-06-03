@@ -1,8 +1,8 @@
 name: Probot Example
-description: "Example Action built with Probot"
+description: 'Example Action built with Probot'
 branding:
-  icon: "gift"
+  icon: 'gift'
   color: orange
 runs:
-  using: "node20"
-  main: "dist/index.js"
+  using: 'node20'
+  main: 'dist/index.js'
