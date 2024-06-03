@@ -1,15 +1,14 @@
 {
-  "name": "example-github-action",
-  "version": "1.0.0",
+  "name": "repository-settings-action",
+  "version": "0.0.1",
   "private": true,
-  "description": "Probot & GitHub Action example",
+  "description": "GitHub Actions wrapper for the repository-settings/app Probot app",
   "scripts": {
     "build": "esbuild index.js --bundle --platform=node --outfile=dist/index.js --format=esm",
     "test": "node --test"
   },
-  "author": "Gregor Martynus (https://twitter.com/gr2m)",
-  "license": "ISC",
-  "repository": "github:probot/example-github-action",
+  "author": "Kyle Johnson (https://github.com/mooseburgr)",
+  "repository": "github:mooseburgr/repository-settings-action",
   "dependencies": {
     "@probot/adapter-github-actions": "^4.0.0",
     "@repository-settings/app": "^3.0.8"
