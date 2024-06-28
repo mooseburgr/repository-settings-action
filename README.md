@@ -53,9 +53,9 @@ logged by default in GitHub Actions, but can be enabled by creating a
 
 The Probot application function is defined in [`app.js`](app.js).
 
-The Action will run the [`index.js`](index.js) file which verifies the required
-environment variables are set, loads the Probot application function and then
-receives the event from the file system.
+The Action will run the [`index.js`](src/index.js) file which verifies the
+required environment variables are set, loads the Probot application function
+and then receives the event from the file system.
 
 **Important:** GitHub Actions do not automatically install npm dependencies.
 Because you need to use `@probot/github-action` and probably other external
