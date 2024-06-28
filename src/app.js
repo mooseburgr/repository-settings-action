@@ -8,23 +8,30 @@ const mergeArrayByName = require('@repository-settings/app/lib/mergeArrayByName'
  * @param _
  * @param Settings
  */
-module.exports = (robot, _, Settings = require('@repository-settings/app/lib/settings')) => {
-    async function syncSettings (context, repo = context.repo()) {
-        const config = await context.config('settings.yml', {}, { arrayMerge: mergeArrayByName })
-        return Settings.sync(context.octokit, repo, config)
-    }
+module.exports = (
+  robot,
+  _,
+  Settings = require('@repository-settings/app/lib/settings')
+) => {
+  async function syncSettings(context, repo = context.repo()) {
+    const config = await context.config(
+      'settings.yml',
+      {},
+      { arrayMerge: mergeArrayByName }
+    )
+    return Settings.sync(context.octokit, repo, config)
+  }
 
-    try {
-        robot.on('push', async context => {
-            return syncSettings(context)
-        })
+  try {
+    robot.on('push', async context => {
+      return syncSettings(context)
+    })
 
-        robot.onAny(async context => {
-            return syncSettings(context)
-        })
-
-    } catch (error) {
-        console.error(error)
-        core.setFailed(error)
-    }
+    robot.onAny(async context => {
+      return syncSettings(context)
+    })
+  } catch (error) {
+    console.error(error)
+    core.setFailed(error)
+  }
 }
