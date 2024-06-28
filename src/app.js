@@ -1,7 +1,7 @@
 // copy-pasta fork of: https://github.com/repository-settings/app/blob/master/index.js
 import * as core from '@actions/core'
 
-const mergeArrayByName = require('@repository-settings/app/lib/mergeArrayByName')
+const mergeArrayByName = import('@repository-settings/app/lib/mergeArrayByName')
 
 /**
  * @param {import('probot').Probot} robot
@@ -11,7 +11,7 @@ const mergeArrayByName = require('@repository-settings/app/lib/mergeArrayByName'
 module.exports = (
   robot,
   _,
-  Settings = require('@repository-settings/app/lib/settings')
+  Settings = import('@repository-settings/app/lib/settings')
 ) => {
   async function syncSettings(context, repo = context.repo()) {
     const config = await context.config(
