@@ -1,0 +1,14 @@
+name: Keep the major-version-only tags up-to-date with the releases
+
+on:
+  release:
+    types:
+      - published
+      - edited
+
+jobs:
+  actions-tagger:
+    runs-on: ubuntu-latest
+    steps:
+      # https://github.com/Actions-R-Us/actions-tagger
+      - uses: Actions-R-Us/actions-tagger@v2
