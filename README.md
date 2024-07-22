@@ -123,7 +123,7 @@ jobs:
 ## Contributing
 
 Contributions are welcome! Feel free to open issues or submit pull requests with
-improvements or bug fixes.
+improvements or bugfixes.
 
 ### Publishing a New Release
 
