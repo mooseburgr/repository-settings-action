@@ -6,9 +6,13 @@ on:
       - published
       - edited
 
+permissions: read-all
+
 jobs:
   actions-tagger:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       # https://github.com/Actions-R-Us/actions-tagger
       - uses: Actions-R-Us/actions-tagger@v2
