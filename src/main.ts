@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
-import { wait } from './wait'
+import * as github from '@actions/github'
+import * as api from './api'
 
 /**
  * The main function for the action.
@@ -7,20 +8,30 @@ import { wait } from './wait'
  */
 export async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
+    // gather inputs
+    const token: string = core.getInput('token', { required: true })
+    const settingsPath: string =
+      core.getInput('settings-path') ?? '.github/settings.yml'
 
-    // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-    core.debug(`Waiting ${ms} milliseconds ...`)
+    const octokit = github.getOctokit(token)
 
-    // Log the current timestamp, wait, then log the new timestamp
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
+    // context of the current action run
+    const context = github.context
 
-    // Set outputs for other workflow steps to use
-    core.setOutput('time', new Date().toTimeString())
+    const settings = await api.fetchSettingsFile(octokit, context, settingsPath)
+
+    if (!settings) {
+      core.info('settings file not found')
+      return
+    }
+
+    await api.updateRepoSettings(octokit, context, settings)
   } catch (error) {
-    // Fail the workflow run if an error occurs
-    if (error instanceof Error) core.setFailed(error.message)
+    core.warning(`caught error: ${JSON.stringify(error, null, 2)}`)
+
+    // fail the workflow run if an error occurs
+    if (error instanceof Error) {
+      core.setFailed(error)
+    }
   }
 }

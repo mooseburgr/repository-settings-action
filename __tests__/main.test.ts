@@ -1,89 +1,85 @@
-/**
- * Unit tests for the action's main functionality, src/main.ts
- *
- * These should be run as if the action was called from a workflow.
- * Specifically, the inputs listed in `action.yml` should be set as environment
- * variables following the pattern `INPUT_<INPUT_NAME>`.
- */
-
 import * as core from '@actions/core'
-import * as main from '../src/main'
+import * as api from '../src/api'
+import { run } from '../src/main'
 
-// Mock the action's main function
-const runMock = jest.spyOn(main, 'run')
+jest.mock('@actions/core')
 
-// Other utilities
-const timeRegex = /^\d{2}:\d{2}:\d{2}/
+describe('GitHub Action main functionality', () => {
+  const originalEnvironment = process.env
 
-// Mock the GitHub Actions core library
-let debugMock: jest.SpiedFunction<typeof core.debug>
-let errorMock: jest.SpiedFunction<typeof core.error>
-let getInputMock: jest.SpiedFunction<typeof core.getInput>
-let setFailedMock: jest.SpiedFunction<typeof core.setFailed>
-let setOutputMock: jest.SpiedFunction<typeof core.setOutput>
-
-describe('action', () => {
   beforeEach(() => {
+    jest.resetModules() // Most important - it clears the cache
+    process.env = { ...originalEnvironment } // Make a copy
     jest.clearAllMocks()
-
-    debugMock = jest.spyOn(core, 'debug').mockImplementation()
-    errorMock = jest.spyOn(core, 'error').mockImplementation()
-    getInputMock = jest.spyOn(core, 'getInput').mockImplementation()
-    setFailedMock = jest.spyOn(core, 'setFailed').mockImplementation()
-    setOutputMock = jest.spyOn(core, 'setOutput').mockImplementation()
   })
 
-  it('sets the time output', async () => {
-    // Set the action's inputs as return values from core.getInput()
-    getInputMock.mockImplementation(name => {
-      switch (name) {
-        case 'milliseconds':
-          return '500'
-        default:
-          return ''
-      }
-    })
-
-    await main.run()
-    expect(runMock).toHaveReturned()
-
-    // Verify that all of the core library functions were called correctly
-    expect(debugMock).toHaveBeenNthCalledWith(1, 'Waiting 500 milliseconds ...')
-    expect(debugMock).toHaveBeenNthCalledWith(
-      2,
-      expect.stringMatching(timeRegex)
-    )
-    expect(debugMock).toHaveBeenNthCalledWith(
-      3,
-      expect.stringMatching(timeRegex)
-    )
-    expect(setOutputMock).toHaveBeenNthCalledWith(
-      1,
-      'time',
-      expect.stringMatching(timeRegex)
-    )
-    expect(errorMock).not.toHaveBeenCalled()
+  afterAll(() => {
+    process.env = originalEnvironment // Restore old environment
   })
 
-  it('sets a failed status', async () => {
-    // Set the action's inputs as return values from core.getInput()
-    getInputMock.mockImplementation(name => {
-      switch (name) {
-        case 'milliseconds':
-          return 'this is not a number'
-        default:
-          return ''
-      }
-    })
+  it('successfully updates repository settings when settings file is found', async () => {
+    const mockGetInput = jest
+      .spyOn(core, 'getInput')
+      .mockImplementation(name => {
+        if (name === 'token') return 'fake_token'
+        if (name === 'settings-path') return 'path/to/settings.yml'
+        return ''
+      })
+    const mockSetFailed = jest.spyOn(core, 'setFailed')
+    const mockFetchSettingsFile = jest
+      .spyOn(api, 'fetchSettingsFile')
+      .mockResolvedValue({ repository: { allow_merge_commit: false } })
+    const mockUpdateRepoSettings = jest
+      .spyOn(api, 'updateRepoSettings')
+      .mockResolvedValue(undefined)
 
-    await main.run()
-    expect(runMock).toHaveReturned()
+    await run()
 
-    // Verify that all of the core library functions were called correctly
-    expect(setFailedMock).toHaveBeenNthCalledWith(
-      1,
-      'milliseconds not a number'
+    expect(mockGetInput).toHaveBeenCalledTimes(2)
+    expect(mockFetchSettingsFile).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      'path/to/settings.yml'
     )
-    expect(errorMock).not.toHaveBeenCalled()
+    expect(mockUpdateRepoSettings).toHaveBeenCalled()
+    expect(mockSetFailed).not.toHaveBeenCalled()
+  })
+
+  it('logs information and exits early if settings file is not found', async () => {
+    jest.spyOn(core, 'getInput').mockImplementation(name => {
+      if (name === 'token') return 'fake_token'
+      if (name === 'settings-path') return 'path/to/settings.yml'
+      return ''
+    })
+    const mockInfo = jest.spyOn(core, 'info').mockImplementation(() => {})
+    jest.spyOn(api, 'fetchSettingsFile').mockResolvedValue(null)
+
+    await run()
+
+    expect(mockInfo).toHaveBeenCalledWith('settings file not found')
+  })
+
+  it('fails the action if an error occurs during the process', async () => {
+    jest.spyOn(core, 'getInput').mockImplementation(() => 'fake_value')
+    jest
+      .spyOn(api, 'fetchSettingsFile')
+      .mockRejectedValue(new Error('Error fetching settings'))
+    const mockSetFailed = jest.spyOn(core, 'setFailed')
+
+    await run()
+
+    expect(mockSetFailed).toHaveBeenCalledWith(expect.any(Error))
+  })
+
+  it('fails the action if the GitHub token is missing', async () => {
+    jest.spyOn(core, 'getInput').mockImplementation(name => {
+      if (name === 'token') return ''
+      return 'fake_value'
+    })
+    const mockSetFailed = jest.spyOn(core, 'setFailed')
+
+    await run()
+
+    expect(mockSetFailed).toHaveBeenCalled()
   })
 })

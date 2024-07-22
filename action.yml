@@ -1,23 +1,22 @@
-name: 'The name of your action here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions
+
+name: Repository Settings Action
+description: GitHub Action to manage repository settings as code
+author: Kyle Johnson
 
 # Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
-  icon: 'heart'
-  color: 'red'
+  icon: 'settings'
+  color: 'orange'
 
 # Define your inputs here.
 inputs:
-  milliseconds:
-    description: 'Your input description here'
+  token:
+    description: The GitHub token to use for authentication
     required: true
-    default: '1000'
-
-# Define your outputs here.
-outputs:
-  time:
-    description: 'Your output description here'
+  settings-path:
+    description: The path to the settings file
+    default: '.github/settings.yml'
 
 runs:
   using: node20
