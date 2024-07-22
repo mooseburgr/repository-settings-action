@@ -46,6 +46,7 @@ jobs:
 
   test-action:
     name: GitHub Actions Test
+    permissions: write-all
     runs-on: ubuntu-latest
 
     steps:
