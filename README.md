@@ -62,7 +62,7 @@ teams:
     permission: admin
 
 collaborators:
-  - username: mtplewis
+  - username: cool-username
     permission: maintain
 
 branches:
