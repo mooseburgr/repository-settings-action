@@ -1,0 +1,22 @@
+
+name: Apply repo settings
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/settings.yml
+  schedule:
+    - cron: '0 0 * * *' # daily
+  workflow_dispatch:
+
+jobs:
+  update-settings:
+    runs-on: ubuntu-latest
+    steps:
+      # https://github.com/mooseburgr/repository-settings-action
+      - name: Apply repo settings
+        uses: mooseburgr/repository-settings-action@v0
+        with:
+          token: ${{ secrets.SETTINGS_PAT }}

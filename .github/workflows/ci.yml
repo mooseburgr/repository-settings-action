@@ -58,4 +58,4 @@ jobs:
         id: test-action
         uses: ./
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.SETTINGS_PAT }}
