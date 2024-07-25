@@ -10,6 +10,8 @@ on:
     - cron: '0 0 * * *' # daily
   workflow_dispatch:
 
+permissions: read-all
+
 jobs:
   update-settings:
     runs-on: ubuntu-latest
