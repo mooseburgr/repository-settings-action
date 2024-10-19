@@ -37,6 +37,6 @@ branches:
         contexts:
           - Check dist/
           - TypeScript Tests
-      enforce_admins: true
+      enforce_admins: false
       required_linear_history: true
       restrictions: null
