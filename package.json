@@ -80,7 +80,7 @@
     "@typescript-eslint/parser": "^7.18.0",
     "@vercel/ncc": "^0.38.3",
     "eslint": "^8.57.0",
-    "eslint-plugin-github": "^5.1.4",
+    "eslint-plugin-github": "^5.1.5",
     "eslint-plugin-jest": "^28.9.0",
     "eslint-plugin-jsonc": "^2.18.2",
     "eslint-plugin-prettier": "^5.2.1",
@@ -89,6 +89,6 @@
     "prettier": "^3.4.2",
     "prettier-eslint": "^16.3.0",
     "ts-jest": "^29.2.5",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.3"
   }
 }
