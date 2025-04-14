@@ -68,7 +68,7 @@
   "dependencies": {
     "@actions/core": "^1.11.1",
     "@actions/github": "^6.0.0",
-    "@octokit/types": "^13.9.0",
+    "@octokit/types": "^14.0.0",
     "@types/js-yaml": "^4.0.9",
     "js-yaml": "^4.1.0"
   },
